@@ -7,21 +7,18 @@
 
 <script lang="ts">
 	import { CanvasSizeRectangle } from 'components-layout';
-	import { stateUrlDerived } from 'state-shared';
 	import { FadeContainer } from 'components-pixi';
 	import { waitForResolve } from 'utils-shared/wait';
-	import { BitmapText, SpineProvider, SpineSlot, SpineTrack, Sprite } from 'pixi-svelte';
+	import { BitmapText } from 'pixi-svelte';
 
 	import { getContext } from '../game/context';
 	import PressToContinue from './PressToContinue.svelte';
-	import FreeSpinAnimation from './FreeSpinAnimation.svelte';
-
-	type AnimationName = 'intro' | 'idle';
+	import FreeSpinAnimation from './FreeSpinAnimationSprite.svelte';
+	import NumberPopSprite from './NumberPopSprite.svelte';
 
 	const context = getContext();
 
 	let show = $state(false);
-	let animationName = $state<AnimationName>('intro');
 	let freeSpinsFromEvent = $state(0);
 	let oncomplete = $state(() => {});
 
@@ -44,36 +41,24 @@
 
 	<FreeSpinAnimation>
 		{#snippet children({ sizes })}
-			<Sprite
-				anchor={{ x: 0.5, y: 1.2 }}
-				width={500 * 2.2}
-				height={156 * 2.2}
-				key="freespins_{stateUrlDerived.lang()}.png"
+			<BitmapText
+				anchor={{ x: 0.5, y: 1 }}
+				y={-sizes.width * 0.18}
+				text="FREE SPINS"
+				style={{ fontFamily: 'gold', fontSize: sizes.width * 0.09, fontWeight: 'bold', align: 'center' }}
 			/>
 
-			<SpineProvider key="fsIntroNumber" width={sizes.width * 0.3}>
-				<SpineTrack
-					trackIndex={0}
-					{animationName}
-					loop={animationName === 'idle'}
-					listener={{
-						complete: () => (animationName = 'idle'),
+			<NumberPopSprite>
+				<BitmapText
+					anchor={{ x: 0.5, y: 0.5 }}
+					text={freeSpinsFromEvent}
+					style={{
+						fontFamily: 'gold',
+						fontSize: sizes.width * 0.1,
+						fontWeight: 'bold',
 					}}
 				/>
-				<SpineSlot slotName="slot_number">
-					<BitmapText
-						anchor={{ x: 0.5, y: 0.5 }}
-						text={freeSpinsFromEvent}
-						style={{
-							fontFamily: 'gold',
-							fontSize: sizes.width * 0.1,
-							fontWeight: 'bold',
-						}}
-					/>
-				</SpineSlot>
-			</SpineProvider>
-
-			<Sprite anchor={{ x: 0.5, y: -3 }} width={183 * 2.2} height={42 * 2.2} key="freespins.png" />
+			</NumberPopSprite>
 		{/snippet}
 	</FreeSpinAnimation>
 

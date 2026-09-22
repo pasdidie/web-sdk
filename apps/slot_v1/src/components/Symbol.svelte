@@ -3,10 +3,12 @@
 	import SymbolSprite from './SymbolSprite.svelte';
 	import SymbolWinSprite from './SymbolWinSprite.svelte';
 	import SymbolAuraSprite from './SymbolAuraSprite.svelte';
+	import NumberPopSprite from './NumberPopSprite.svelte';
 	import { getSymbolInfo } from '../game/utils';
 	import type { SymbolState, RawSymbol } from '../game/types';
 	import { getContext } from '../game/context';
-	import { BitmapText } from 'pixi-svelte';
+	import { BitmapText, Sprite } from 'pixi-svelte';
+	import { SYMBOL_SIZE } from '../game/constants';
 
 	type Props = {
 		x?: number;
@@ -63,14 +65,15 @@
 {/if}
 
 {#if props.rawSymbol.multiplier}
-	<BitmapText
-		anchor={0.5}
-		x={props.x}
-		y={props.y}
-		text={`${props.rawSymbol.multiplier}X`}
-		style={{
-			fontFamily: 'gold',
-			fontSize: 50,
-		}}
-	/>
+	<NumberPopSprite x={props.x} y={props.y}>
+		<Sprite anchor={0.5} key="badge_mult" width={SYMBOL_SIZE * 0.55} height={SYMBOL_SIZE * 0.55} />
+		<BitmapText
+			anchor={0.5}
+			text={`${props.rawSymbol.multiplier}X`}
+			style={{
+				fontFamily: 'gold',
+				fontSize: 50,
+			}}
+		/>
+	</NumberPopSprite>
 {/if}

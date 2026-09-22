@@ -3,7 +3,7 @@
 	import { SECOND } from 'constants-shared/time';
 
 	import { getContext } from '../game/context';
-	import Anticipation from './Anticipation.svelte';
+	import Anticipation from './AnticipationSprite.svelte';
 
 	const context = getContext();
 	const hasAnticipation = $derived(

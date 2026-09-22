@@ -16,7 +16,7 @@
 	import { OnMount } from 'components-shared';
 
 	import WinCoins from './WinCoins.svelte';
-	import WinAnimation from './WinAnimation.svelte';
+	import WinAnimation from './WinAnimationSprite.svelte';
 	import PressToContinue from './PressToContinue.svelte';
 	import { SYMBOL_SIZE } from '../game/constants';
 	import { getContext } from '../game/context';
