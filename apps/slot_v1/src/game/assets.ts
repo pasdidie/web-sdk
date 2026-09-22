@@ -273,4 +273,74 @@ export default {
 		src: new URL('../../assets/audio/sounds.json', import.meta.url).href,
 		preload: true,
 	},
+
+	// Real Gemini-generated + chroma-keyed assets (see stake-slot/docs/ASSETS.md).
+	// Each is its own standalone sprite for now - packing into a real
+	// spritesheet is a later pipeline step (docs/ASSETS.md "reste a faire").
+	sym_H1: { type: 'sprite', src: new URL('../../assets/sprites/gemini/sym_H1.png', import.meta.url).href },
+	sym_H2: { type: 'sprite', src: new URL('../../assets/sprites/gemini/sym_H2.png', import.meta.url).href },
+	sym_H3: { type: 'sprite', src: new URL('../../assets/sprites/gemini/sym_H3.png', import.meta.url).href },
+	sym_H4: { type: 'sprite', src: new URL('../../assets/sprites/gemini/sym_H4.png', import.meta.url).href },
+	sym_L1: { type: 'sprite', src: new URL('../../assets/sprites/gemini/sym_L1.png', import.meta.url).href },
+	sym_L2: { type: 'sprite', src: new URL('../../assets/sprites/gemini/sym_L2.png', import.meta.url).href },
+	sym_L3: { type: 'sprite', src: new URL('../../assets/sprites/gemini/sym_L3.png', import.meta.url).href },
+	sym_L4: { type: 'sprite', src: new URL('../../assets/sprites/gemini/sym_L4.png', import.meta.url).href },
+	sym_L5: { type: 'sprite', src: new URL('../../assets/sprites/gemini/sym_L5.png', import.meta.url).href },
+	sym_W_body: {
+		type: 'sprite',
+		src: new URL('../../assets/sprites/gemini/sym_W_body.png', import.meta.url).href,
+	},
+	sym_W_aura: {
+		type: 'sprite',
+		src: new URL('../../assets/sprites/gemini/sym_W_aura.png', import.meta.url).href,
+	},
+	sym_S_body: {
+		type: 'sprite',
+		src: new URL('../../assets/sprites/gemini/sym_S_body.png', import.meta.url).href,
+	},
+	sym_S_aura: {
+		type: 'sprite',
+		src: new URL('../../assets/sprites/gemini/sym_S_aura.png', import.meta.url).href,
+	},
+	badge_mult: {
+		type: 'sprite',
+		src: new URL('../../assets/sprites/gemini/badge_mult.png', import.meta.url).href,
+	},
+	banner_frame: {
+		type: 'sprite',
+		src: new URL('../../assets/sprites/gemini/banner_frame.png', import.meta.url).href,
+	},
+	frame_reels: {
+		type: 'sprite',
+		src: new URL('../../assets/sprites/gemini/frame_reels.png', import.meta.url).href,
+	},
+	logo: { type: 'sprite', src: new URL('../../assets/sprites/gemini/logo.png', import.meta.url).href },
+	fx_particle: {
+		type: 'sprite',
+		src: new URL('../../assets/sprites/gemini/fx_particle.png', import.meta.url).href,
+	},
+	bg_base_far: {
+		type: 'sprite',
+		src: new URL('../../assets/sprites/gemini/bg_base_far.png', import.meta.url).href,
+	},
+	bg_base_mid: {
+		type: 'sprite',
+		src: new URL('../../assets/sprites/gemini/bg_base_mid.png', import.meta.url).href,
+	},
+	bg_base_near: {
+		type: 'sprite',
+		src: new URL('../../assets/sprites/gemini/bg_base_near.png', import.meta.url).href,
+	},
+	bg_free_far: {
+		type: 'sprite',
+		src: new URL('../../assets/sprites/gemini/bg_free_far.png', import.meta.url).href,
+	},
+	bg_free_mid: {
+		type: 'sprite',
+		src: new URL('../../assets/sprites/gemini/bg_free_mid.png', import.meta.url).href,
+	},
+	bg_free_near: {
+		type: 'sprite',
+		src: new URL('../../assets/sprites/gemini/bg_free_near.png', import.meta.url).href,
+	},
 } as const;

@@ -18,7 +18,7 @@
 <SymbolWrap
 	x={getSymbolX(props.reelIndex)}
 	y={props.reelSymbol.symbolY()}
-	animating={symbolInfo.type === 'spine' &&
+	animating={['spine', 'sprite-win', 'sprite-aura'].includes(symbolInfo.type) &&
 		(props.reelSymbol.symbolState === 'land' || props.reelSymbol.symbolState === 'win')}
 >
 	<Symbol

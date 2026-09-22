@@ -1,6 +1,8 @@
 <script lang="ts">
 	import SymbolSpine from './SymbolSpine.svelte';
 	import SymbolSprite from './SymbolSprite.svelte';
+	import SymbolWinSprite from './SymbolWinSprite.svelte';
+	import SymbolAuraSprite from './SymbolAuraSprite.svelte';
 	import { getSymbolInfo } from '../game/utils';
 	import type { SymbolState, RawSymbol } from '../game/types';
 	import { getContext } from '../game/context';
@@ -18,11 +20,30 @@
 	const props: Props = $props();
 	const context = getContext();
 	const symbolInfo = $derived(getSymbolInfo({ rawSymbol: props.rawSymbol, state: props.state }));
-	const isSprite = $derived(symbolInfo.type === 'sprite');
 </script>
 
-{#if isSprite}
+{#if symbolInfo.type === 'sprite'}
 	<SymbolSprite {symbolInfo} x={props.x} y={props.y} oncomplete={props.oncomplete} />
+{:else if symbolInfo.type === 'sprite-win'}
+	<SymbolWinSprite
+		x={props.x}
+		y={props.y}
+		assetKey={symbolInfo.assetKey}
+		sizeRatios={symbolInfo.sizeRatios}
+		loop={props.loop}
+		oncomplete={props.oncomplete}
+	/>
+{:else if symbolInfo.type === 'sprite-aura'}
+	<SymbolAuraSprite
+		x={props.x}
+		y={props.y}
+		bodyKey={symbolInfo.bodyKey}
+		auraKey={symbolInfo.auraKey}
+		sizeRatios={symbolInfo.sizeRatios}
+		mode={symbolInfo.mode}
+		loop={props.loop}
+		oncomplete={props.oncomplete}
+	/>
 {:else}
 	<SymbolSpine
 		loop={props.loop}
