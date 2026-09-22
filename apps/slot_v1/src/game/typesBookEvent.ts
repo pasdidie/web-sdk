@@ -31,6 +31,24 @@ type BookEventFreeSpinTrigger = {
 	positions: Position[];
 };
 
+// 3+ scatters landing during free spins (CLAUDE.md: flat +5, same shape as
+// the initial trigger but totalFs is the new running total, not a delta).
+type BookEventFreeSpinRetrigger = {
+	index: number;
+	type: 'freeSpinRetrigger';
+	totalFs: number;
+	positions: Position[];
+};
+
+// Emitted once running_bet_win first reaches config.wincap (src/events/events.py);
+// purely informational - the max-win visual/audio treatment itself is
+// already driven by winLevelMap's 'max' tier via the normal setWin event.
+type BookEventWincap = {
+	index: number;
+	type: 'wincap';
+	amount: number;
+};
+
 type BookEventUpdateFreeSpin = {
 	index: number;
 	type: 'updateFreeSpin';
@@ -83,6 +101,8 @@ export type BookEvent =
 	| BookEventWinInfo
 	| BookEventSetTotalWin
 	| BookEventFreeSpinTrigger
+	| BookEventFreeSpinRetrigger
+	| BookEventWincap
 	| BookEventUpdateFreeSpin
 	| BookEventCreateBonusSnapshot
 	| BookEventFinalWin
