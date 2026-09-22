@@ -13,6 +13,8 @@
 
 	type Props = {
 		version: Snippet;
+		payTable?: Snippet;
+		gameRules?: Snippet;
 	};
 
 	const props: Props = $props();
@@ -25,10 +27,18 @@
 <ModalAutoSpin />
 <ModalAutoSpinMessage />
 <ModalPayTable>
-	{@render props.version()}
+	{#if props.payTable}
+		{@render props.payTable()}
+	{:else}
+		{@render props.version()}
+	{/if}
 </ModalPayTable>
 <ModalGameRules>
-	{@render props.version()}
+	{#if props.gameRules}
+		{@render props.gameRules()}
+	{:else}
+		{@render props.version()}
+	{/if}
 </ModalGameRules>
 <ModalSettings />
 
