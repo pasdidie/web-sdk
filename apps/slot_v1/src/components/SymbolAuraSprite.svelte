@@ -46,7 +46,9 @@
 	let auraRotation = $state(0);
 	let running = true;
 	let rafId: number | null = null;
+	let pulseRafId: number | null = null;
 	let lastTs = 0;
+	let pulseStartTs = 0;
 
 	const runAuraRotation = (ts: number) => {
 		if (!running) return;
@@ -55,12 +57,17 @@
 		rafId = requestAnimationFrame(runAuraRotation);
 	};
 
-	const runWinPulse = async () => {
-		while (running) {
-			await bodyScale.set(winCfg.scaleTo, { duration: winCfg.loopDurationMs / 2 });
-			if (!running) break;
-			await bodyScale.set(winCfg.scaleFrom, { duration: winCfg.loopDurationMs / 2 });
-		}
+	// Continuous sine wave instead of two chained eased Tweens ping-ponging
+	// (see SymbolWinSprite.svelte for why -- same pattern, same fix).
+	const runWinPulse = (ts: number) => {
+		if (!running) return;
+		if (!pulseStartTs) pulseStartTs = ts;
+		const elapsed = ts - pulseStartTs;
+		const phase = (elapsed / winCfg.loopDurationMs) * Math.PI * 2;
+		const amplitude = (winCfg.scaleTo - winCfg.scaleFrom) / 2;
+		const mid = (winCfg.scaleTo + winCfg.scaleFrom) / 2;
+		bodyScale.set(mid - amplitude * Math.cos(phase), { duration: 0 });
+		pulseRafId = requestAnimationFrame(runWinPulse);
 	};
 
 	const runLandSquash = async () => {
@@ -73,6 +80,7 @@
 	$effect(() => {
 		running = true;
 		lastTs = 0;
+		pulseStartTs = 0;
 
 		if (prefersReducedMotion()) {
 			props.oncomplete?.();
@@ -85,8 +93,9 @@
 			rafId = requestAnimationFrame(runAuraRotation);
 		}
 		if (props.mode === 'win') {
-			runWinPulse();
-			if (!props.loop) {
+			if (props.loop) {
+				pulseRafId = requestAnimationFrame(runWinPulse);
+			} else {
 				bodyScale
 					.set(winCfg.scaleTo, { duration: winCfg.loopDurationMs / 2 })
 					.then(() => bodyScale.set(winCfg.scaleFrom, { duration: winCfg.loopDurationMs / 2 }))
@@ -99,6 +108,7 @@
 		return () => {
 			running = false;
 			if (rafId !== null) cancelAnimationFrame(rafId);
+			if (pulseRafId !== null) cancelAnimationFrame(pulseRafId);
 		};
 	});
 </script>

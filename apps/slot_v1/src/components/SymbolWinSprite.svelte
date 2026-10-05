@@ -39,13 +39,23 @@
 	const sweepX = new Tween(0, { easing: sineInOut, duration: cfg.sweepDurationMs });
 
 	let running = true;
+	let pulseRafId: number | null = null;
+	let pulseStartTs = 0;
 
-	const runPulseLoop = async () => {
-		while (running) {
-			await scale.set(cfg.scaleTo);
-			if (!running) break;
-			await scale.set(cfg.scaleFrom);
-		}
+	// Continuous sine wave instead of two chained eased Tweens ping-ponging
+	// between scaleFrom/scaleTo: chaining introduces a resync/microtask gap
+	// at every turnaround (visible as a tiny stutter), where a single sine
+	// has a continuous derivative throughout the loop -- same raf-driven
+	// approach already used for the aura idle rotation in SymbolAuraSprite.
+	const runPulseLoop = (ts: number) => {
+		if (!running) return;
+		if (!pulseStartTs) pulseStartTs = ts;
+		const elapsed = ts - pulseStartTs;
+		const phase = (elapsed / cfg.loopDurationMs) * Math.PI * 2;
+		const amplitude = (cfg.scaleTo - cfg.scaleFrom) / 2;
+		const mid = (cfg.scaleTo + cfg.scaleFrom) / 2;
+		scale.set(mid - amplitude * Math.cos(phase), { duration: 0 });
+		pulseRafId = requestAnimationFrame(runPulseLoop);
 	};
 
 	const runSweepLoop = async () => {
@@ -57,6 +67,7 @@
 
 	$effect(() => {
 		running = true;
+		pulseStartTs = 0;
 		if (prefersReducedMotion()) {
 			props.oncomplete?.();
 			return () => {
@@ -64,15 +75,22 @@
 			};
 		}
 
-		runPulseLoop();
 		runSweepLoop();
 
-		if (!props.loop) {
+		// Sustained display (part of an active win line): continuous raf pulse.
+		// Single flash (e.g. a one-off highlight): the original one-shot Tween,
+		// which previously ran *concurrently* with the loop below and fought
+		// it for control of `scale` -- that double-write was part of why this
+		// read as not-smooth.
+		if (props.loop) {
+			pulseRafId = requestAnimationFrame(runPulseLoop);
+		} else {
 			scale.set(cfg.scaleTo).then(() => scale.set(cfg.scaleFrom)).then(() => props.oncomplete?.());
 		}
 
 		return () => {
 			running = false;
+			if (pulseRafId !== null) cancelAnimationFrame(pulseRafId);
 		};
 	});
 </script>
