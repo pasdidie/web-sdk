@@ -30,7 +30,15 @@
 
 	const context = getContext();
 
-	onMount(() => (context.stateLayout.showLoadingScreen = true));
+	onMount(() => {
+		context.stateLayout.showLoadingScreen = true;
+		// Kick off the Cinzel fetch in parallel with asset loading so it's
+		// warm by the time any PixiJS Text actually draws (canvas text has no
+		// FOUT/swap of its own -- if the font isn't loaded yet at draw time it
+		// silently falls back and stays that way until the Text re-renders).
+		document.fonts?.load('700 32px Cinzel');
+		document.fonts?.load('600 24px Cinzel');
+	});
 
 	context.eventEmitter.subscribeOnMount({
 		buyBonusConfirm: () => {

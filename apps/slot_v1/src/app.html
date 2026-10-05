@@ -3,7 +3,20 @@
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" href="%sveltekit.assets%/favicon.svg" />
-		<link rel="stylesheet" href="https://use.typekit.net/aba0ebl.css" />
+		<!--
+			The upstream `use.typekit.net/aba0ebl.css` link is Stake's own Typekit
+			kit, domain-locked to their account -- it never actually serves the
+			font from our domain, so 'proxima-nova' silently fell back to the
+			browser's default serif everywhere (UI labels, buttons, game name).
+			Replaced with our own Google Fonts load of Cinzel, matching the
+			Azure Anvil dwarven-forge theme. See docs/DECISIONS.md.
+		-->
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+		<link
+			rel="stylesheet"
+			href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&display=block"
+		/>
 		<meta name="viewport" content="width=device-width" />
 		%sveltekit.head%
 	</head>
