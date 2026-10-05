@@ -29,6 +29,7 @@
 	{#snippet children({ center, hovered, pressed })}
 		<UiSprite
 			{...center}
+			key="ui_button"
 			anchor={0.5}
 			width={buttonProps.sizes.width}
 			height={buttonProps.sizes.height}

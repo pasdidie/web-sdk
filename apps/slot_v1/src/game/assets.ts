@@ -343,4 +343,20 @@ export default {
 		type: 'sprite',
 		src: new URL('../../assets/sprites/gemini/bg_free_near.png', import.meta.url).href,
 	},
+	ui_button: {
+		type: 'sprite',
+		src: new URL('../../assets/sprites/gemini/ui_button.png', import.meta.url).href,
+	},
+	bet: {
+		type: 'sprite',
+		src: new URL('../../assets/sprites/gemini/ui_button_bet.png', import.meta.url).href,
+	},
+	buyBonus: {
+		type: 'sprite',
+		src: new URL('../../assets/sprites/gemini/ui_button_buybonus.png', import.meta.url).href,
+	},
+	base_ticker: {
+		type: 'sprite',
+		src: new URL('../../assets/sprites/gemini/ui_ticker_panel.png', import.meta.url).href,
+	},
 } as const;
