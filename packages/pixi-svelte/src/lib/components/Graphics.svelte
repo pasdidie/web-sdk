@@ -23,6 +23,14 @@
 		if (props.isMask !== undefined) {
 			parentContext.parent.mask = props.isMask ? graphics : null;
 		}
+		// If this component (or just its isMask flag) goes away, clear the
+		// mask instead of leaving the parent pointed at a graphics object
+		// that's about to be destroyed/cleared.
+		return () => {
+			if (props.isMask && parentContext.parent.mask === graphics) {
+				parentContext.parent.mask = null;
+			}
+		};
 	});
 
 	$effect(() => {

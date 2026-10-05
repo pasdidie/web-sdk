@@ -17,7 +17,7 @@
 	import EnableGameActor from './EnableGameActor.svelte';
 	import ResumeBet from './ResumeBet.svelte';
 	import Sound from './Sound.svelte';
-	import Background from './Background.svelte';
+	import Background from './BackgroundSprite.svelte';
 	import LoadingScreen from './LoadingScreen.svelte';
 	import BoardFrame from './BoardFrame.svelte';
 	import Board from './Board.svelte';
@@ -27,7 +27,6 @@
 	import FreeSpinCounter from './FreeSpinCounter.svelte';
 	import FreeSpinOutro from './FreeSpinOutro.svelte';
 	import Transition from './Transition.svelte';
-	import I18nTest from './I18nTest.svelte';
 
 	const context = getContext();
 
@@ -70,7 +69,7 @@
 
 		<UI>
 			{#snippet gameName()}
-				<UiGameName name="SLOT V1" />
+				<UiGameName name="AZURE ANVIL" />
 			{/snippet}
 			{#snippet logo()}
 				<Sprite anchor={{ x: 1, y: 0 }} key="logo" width={REM * 6} height={REM * 3} />
@@ -83,8 +82,6 @@
 		{/if}
 		<FreeSpinOutro />
 		<Transition />
-
-		<I18nTest />
 	{/if}
 </App>
 

@@ -8,8 +8,8 @@
 </script>
 
 <script lang="ts">
-	import { BitmapText, ResponsiveBitmapText } from 'pixi-svelte';
-	import { FadeContainer, WinCountUpProvider } from 'components-pixi';
+	import { BitmapText } from 'pixi-svelte';
+	import { FadeContainer, WinCountUpProvider, ResponsiveBitmapText } from 'components-pixi';
 	import { bookEventAmountToCurrencyString } from 'utils-shared/amount';
 	import { waitForResolve } from 'utils-shared/wait';
 	import { CanvasSizeRectangle } from 'components-layout';

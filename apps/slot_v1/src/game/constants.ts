@@ -185,8 +185,13 @@ const l4Static = { type: 'sprite', assetKey: 'sym_L4', sizeRatios: { width: 1, h
 // example game), unlike the upstream example's Spine-driven 'M' symbol.
 const l5Static = { type: 'sprite', assetKey: 'sym_L5', sizeRatios: { width: 1, height: 1 } };
 
-const wSizeRatios = { width: 1.5 * 0.9, height: SPECIAL_SYMBOL_SIZE * 1.15 };
-const sSizeRatios = { width: 2.5, height: SPECIAL_SYMBOL_SIZE * 2.3 };
+// The upstream example's ratios (width 1.35, height ~2.6 for S) were tuned
+// for its own Spine rigs' canvas/pivot and made our square Gemini art render
+// 2+ cells oversized, overlapping the board frame. Our body+aura art is a
+// single square canvas per symbol, like H/L, just slightly larger to still
+// read as "special".
+const wSizeRatios = { width: 1.15, height: 1.15 };
+const sSizeRatios = { width: 1.15, height: 1.15 };
 
 export const SYMBOL_INFO_MAP = {
 	H1: {
