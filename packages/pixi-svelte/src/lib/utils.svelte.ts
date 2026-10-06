@@ -1,5 +1,3 @@
-import WebFont from 'webfontloader';
-
 import type { PixiPoint, Sizes } from './types';
 
 export const REM = 16;
@@ -58,25 +56,27 @@ export function detectWebGL() {
 	return -1;
 }
 
+/**
+ * Waits for whatever fonts the app declared via CSS @font-face to finish
+ * loading, so PixiJS Text doesn't draw its first frame against a fallback
+ * font. Used to hit Stake's own Typekit kit via WebFontLoader
+ * (`typekit: { id: 'aba0ebl' }`) -- a hardcoded call to a third-party font
+ * host, every single launch, which Engine's approval guidelines disallow
+ * (static files only, no calls but the RGS) and which never actually served
+ * anything to a game outside Stake's own account anyway. `document.fonts`
+ * is the standard, font-agnostic replacement: it already knows about every
+ * @font-face declared in the page, self-hosted or not.
+ */
 export const preloadFont = () =>
 	new Promise<void>((resolve) => {
-		try {
-			WebFont.load({
-				typekit: {
-					id: 'aba0ebl',
-				},
-				active: () => {
-					resolve();
-				},
-				inactive: () => {
-					console.error('Web font load inactive');
-					resolve();
-				},
-			});
-		} catch (error) {
+		if (typeof document === 'undefined' || !document.fonts) {
+			resolve();
+			return;
+		}
+		document.fonts.ready.then(() => resolve()).catch((error) => {
 			console.error(error);
 			resolve();
-		}
+		});
 	});
 
 export function propsSyncEffect<TProps extends object, TTarget>({
