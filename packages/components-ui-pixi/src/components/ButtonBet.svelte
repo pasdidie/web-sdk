@@ -40,8 +40,8 @@
 						style={{
 							align: 'center',
 							wordWrap: true,
-							wordWrapWidth: 200,
-							...metalTextStyle(UI_BASE_FONT_SIZE * 0.9, { fontWeight: '600' }),
+							wordWrapWidth: sizes.width * 0.74,
+							...metalTextStyle(UI_BASE_FONT_SIZE * 0.7, { fontWeight: '600' }),
 						}}
 					/>
 				</Container>

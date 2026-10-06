@@ -14,8 +14,13 @@
 
 	const props: Props = $props();
 
-	const labelStyle = metalTextStyle(UI_BASE_FONT_SIZE * 0.8, { fontWeight: '600' });
-	const valueStyle = metalTextStyle(UI_BASE_FONT_SIZE);
+	// The panel art has a gem bump + thicker border at the top than the
+	// bottom, so the actual safe interior isn't vertically centered in the
+	// sprite's bounding box -- nudged down and sized down a bit from the
+	// flat-rectangle-era values to keep clear of it. Needs eyeballing against
+	// a live render to fine-tune further.
+	const labelStyle = metalTextStyle(UI_BASE_FONT_SIZE * 0.7, { fontWeight: '600' });
+	const valueStyle = metalTextStyle(UI_BASE_FONT_SIZE * 0.92);
 </script>
 
 {#if props.stacked}
@@ -29,8 +34,13 @@
 			borderRadius={35}
 		/>
 	{/if}
-	<Text anchor={{ x: 0.5, y: 0 }} text={props.label} style={labelStyle} />
-	<Text anchor={{ x: 0.5, y: 0 }} text={props.value} style={valueStyle} y={UI_BASE_FONT_SIZE} />
+	<Text anchor={{ x: 0.5, y: 0 }} text={props.label} style={labelStyle} y={8} />
+	<Text
+		anchor={{ x: 0.5, y: 0 }}
+		text={props.value}
+		style={valueStyle}
+		y={UI_BASE_FONT_SIZE * 0.8}
+	/>
 {:else}
 	{#if props.tiled}
 		<UiSprite
