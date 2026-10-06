@@ -4,8 +4,14 @@
 	 * math, valeurs generees depuis la config, pas codees a la main").
 	 * Reads directly from game/config.ts, which is a straight copy of the
 	 * math-generated config_fe_slot_v1.json - no numbers are hand-typed here.
+	 * Static strings go through stateI18nDerived.translate(), same convention
+	 * as GameRulesContent.svelte -- see the comment there for why.
 	 */
+	import { stateI18nDerived, stateUrlDerived } from 'state-shared';
 	import config from '../game/config';
+
+	const t = stateI18nDerived.translate;
+	const social = stateUrlDerived.social;
 
 	type SymbolEntry = { name: string; paytable: { [count: string]: number }[] | null; special: string[] };
 
@@ -27,10 +33,15 @@
 	};
 
 	const formatMult = (n: number) => `${n}×`;
+
+	const baseRtp = (config.betModes.base.rtp * 100).toFixed(2);
+	const bonusRtp = (config.betModes.bonus.rtp * 100).toFixed(2);
+	const maxWin = config.betModes.base.max_win;
+	const bonusCost = config.betModes.bonus.cost;
 </script>
 
 <div class="pay-table">
-	<h2>High symbols</h2>
+	<h2>{t('High symbols')}</h2>
 	<div class="grid">
 		{#each highSymbols as sym (sym.name)}
 			<div class="cell">
@@ -46,7 +57,7 @@
 		{/each}
 	</div>
 
-	<h2>Low symbols</h2>
+	<h2>{t('Low symbols')}</h2>
 	<div class="grid">
 		{#each lowSymbols as sym (sym.name)}
 			<div class="cell">
@@ -63,43 +74,55 @@
 	</div>
 
 	{#if wild}
-		<h2>Wild</h2>
+		<h2>{t('Wild')}</h2>
 		<div class="grid">
 			<div class="cell">
 				<img src={iconSrc(wild.name)} alt="Wild" />
 				<div class="rows">
-					<span>Substitutes for all symbols except Scatter.</span>
+					<span>{t('Substitutes for all symbols except Scatter.')}</span>
 					{#each wild.paytable ?? [] as row}
 						{#each Object.entries(row) as [count, mult]}
-							<span>{count}× (wild line) : {formatMult(mult)}</span>
+							<span>{count}× ({t('wild line')}) : {formatMult(mult)}</span>
 						{/each}
 					{/each}
-					<span>Free spins multiplier: adds up when multiple wilds land on the same line.</span>
+					<span>{t('Free spins multiplier: adds up when multiple wilds land on the same line.')}</span>
 				</div>
 			</div>
 		</div>
 	{/if}
 
 	{#if scatter}
-		<h2>Scatter</h2>
+		<h2>{t('Scatter')}</h2>
 		<div class="grid">
 			<div class="cell">
 				<img src={iconSrc(scatter.name)} alt="Scatter" />
 				<div class="rows">
-					<span>Pays anywhere on the grid, does not pay on a line.</span>
-					<span>3 / 4 / 5 Scatters trigger the free spins.</span>
-					<span>3+ Scatters during free spins: +5 spins (retrigger).</span>
+					<span>
+						{social()
+							? t('Wins anywhere on the grid, not part of a line.')
+							: t('Pays anywhere on the grid, does not pay on a line.')}
+					</span>
+					<span>{t('3 / 4 / 5 Scatters trigger the free spins.')}</span>
+					<span>{t('3+ Scatters during free spins: +5 spins (retrigger).')}</span>
 				</div>
 			</div>
 		</div>
 	{/if}
 
-	<h2>Info</h2>
+	<h2>{t('Info')}</h2>
 	<div class="info">
-		<span>Base mode RTP: {(config.betModes.base.rtp * 100).toFixed(2)}%</span>
-		<span>Bonus mode RTP (direct buy): {(config.betModes.bonus.rtp * 100).toFixed(2)}%</span>
-		<span>Bonus buy cost: {config.betModes.bonus.cost}×</span>
-		<span>Max win: {config.betModes.base.max_win}×</span>
+		<span>{t('Base mode RTP:')} {baseRtp}%</span>
+		<span>
+			{social()
+				? t('Bonus mode RTP (instant access):')
+				: t('Bonus mode RTP (direct buy):')}
+			{bonusRtp}%
+		</span>
+		<span>
+			{social() ? t('Bonus cost:') : t('Bonus buy cost:')}
+			{bonusCost}×
+		</span>
+		<span>{t('Max win:')} {maxWin}×</span>
 	</div>
 </div>
 

@@ -6,7 +6,14 @@ import { stateBet } from 'state-shared';
 const NO_LOCALISATION_CURRENCY_MAP: Record<string, string> = {
 	XGC: 'GC',
 	XSC: 'SC',
+	XEC: 'EC',
 };
+
+// JPY has no minor unit (¥10, never ¥10.00) -- Intl.NumberFormat already
+// knows this per-currency, but the generic path below used to force
+// minimumFractionDigits/maximumFractionDigits: 2 on every currency,
+// overriding that and producing "¥10.00".
+const ZERO_DECIMAL_CURRENCIES = new Set(['JPY']);
 
 // bookEventAmount: is the amount or win numbers in the events of books, e.g. the amount in setTotalWin bookEvent
 // {
@@ -34,9 +41,11 @@ export const numberToCurrencyString = (value: number) => {
 		return `${NO_LOCALISATION_CURRENCY_MAP[stateBet.currency]} ${numberToFloat(value).toFixed(2)}`;
 	}
 
+	const decimals = ZERO_DECIMAL_CURRENCIES.has(stateBet.currency) ? 0 : 2;
+
 	return stateI18n.i18n.number(value, {
-		minimumFractionDigits: 2,
-		maximumFractionDigits: 2,
+		minimumFractionDigits: decimals,
+		maximumFractionDigits: decimals,
 		style: 'currency',
 		currency: stateBet.currency,
 		// numberingSystem: 'latn',
