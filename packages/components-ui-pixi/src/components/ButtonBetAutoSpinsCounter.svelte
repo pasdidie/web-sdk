@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { Text, Rectangle } from 'pixi-svelte';
 	import { stateBet } from 'state-shared';
-	import { WHITE } from 'constants-shared/colors';
 
 	import { UI_BASE_SIZE } from '../constants';
+	import { metalTextStyle } from '../metalTextStyle';
 
 	const fontSizeMultiplier = $derived.by(() => {
 		if (stateBet.autoSpinsCounter === Infinity) return 3;
@@ -23,11 +23,6 @@
 	<Text
 		anchor={0.5}
 		text={stateBet.autoSpinsCounter === Infinity ? '∞' : stateBet.autoSpinsCounter}
-		style={{
-			fontFamily: 'Cinzel',
-			fill: WHITE,
-			fontWeight: 'bold',
-			fontSize: fontSizeMultiplier * UI_BASE_SIZE * 0.2,
-		}}
+		style={metalTextStyle(fontSizeMultiplier * UI_BASE_SIZE * 0.2, { fontWeight: 'bold' })}
 	/>
 {/if}

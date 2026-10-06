@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { Text } from 'pixi-svelte';
-	import { WHITE } from 'constants-shared/colors';
 
 	import UiSprite from './UiSprite.svelte';
 	import { UI_BASE_FONT_SIZE } from '../constants';
+	import { metalTextStyle } from '../metalTextStyle';
 
 	type Props = {
 		label: string;
@@ -14,17 +14,8 @@
 
 	const props: Props = $props();
 
-	const labelStyle = {
-		fontFamily: 'Cinzel',
-		fontSize: UI_BASE_FONT_SIZE,
-		fill: WHITE,
-	} as const;
-
-	const valueStyle = {
-		fontFamily: 'Cinzel',
-		fontSize: UI_BASE_FONT_SIZE,
-		fill: WHITE,
-	} as const;
+	const labelStyle = metalTextStyle(UI_BASE_FONT_SIZE * 0.8, { fontWeight: '600' });
+	const valueStyle = metalTextStyle(UI_BASE_FONT_SIZE);
 </script>
 
 {#if props.stacked}

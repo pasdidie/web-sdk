@@ -7,7 +7,8 @@
 	import { SvelteDate } from 'svelte/reactivity';
 
 	import { Text, Sprite, REM } from 'pixi-svelte';
-	import { WHITE } from 'constants-shared/colors';
+
+	import { metalTextStyle } from '../metalTextStyle';
 
 	type Props = {
 		name: string;
@@ -25,13 +26,7 @@
 		}),
 	);
 	const textProps = {
-		style: {
-			fontFamily: 'Cinzel',
-			fontSize: REM * 1.5,
-			fontWeight: '600',
-			lineHeight: REM * 2,
-			fill: WHITE,
-		},
+		style: { ...metalTextStyle(REM * 1.5, { fontWeight: '600' }), lineHeight: REM * 2 },
 	} as const;
 
 	let clockSizes = $state({ width: 0, height: 0 });

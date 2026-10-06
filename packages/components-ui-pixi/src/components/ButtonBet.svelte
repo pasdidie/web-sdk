@@ -8,6 +8,7 @@
 	import ButtonBetProvider from './ButtonBetProvider.svelte';
 	import { UI_BASE_FONT_SIZE, UI_BASE_SIZE } from '../constants';
 	import { i18nDerived } from '../i18n/i18nDerived';
+	import { metalTextStyle } from '../metalTextStyle';
 
 	const props: Partial<Omit<ButtonProps, 'children'>> = $props();
 	const disabled = $derived(!stateBetDerived.isBetCostAvailable());
@@ -40,10 +41,7 @@
 							align: 'center',
 							wordWrap: true,
 							wordWrapWidth: 200,
-							fontFamily: 'Cinzel',
-							fontWeight: '600',
-							fontSize: UI_BASE_FONT_SIZE * 0.9,
-							fill: 0xffffff,
+							...metalTextStyle(UI_BASE_FONT_SIZE * 0.9, { fontWeight: '600' }),
 						}}
 					/>
 				</Container>

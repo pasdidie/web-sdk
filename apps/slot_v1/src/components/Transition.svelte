@@ -5,7 +5,7 @@
 <script lang="ts">
 	import { waitForResolve } from 'utils-shared/wait';
 
-	import TransitionAnimation from './TransitionAnimation.svelte';
+	import TransitionAnimation from './TransitionAnimationSprite.svelte';
 	import { getContext } from '../game/context';
 
 	const context = getContext();

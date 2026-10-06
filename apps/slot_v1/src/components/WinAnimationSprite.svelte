@@ -6,6 +6,11 @@
 	 * named Spine animations) so Win.svelte only needed an import swap.
 	 * Intro zoom-in -> idle pulse+glow loop, per ANIMATION_SPEC.md "Big win".
 	 * banner_frame.png stands in until a dedicated big-win frame asset exists.
+	 *
+	 * No x/y here: Win.svelte already wraps this in a Container translated to
+	 * boardLayout().x/y (the board's on-screen center) -- adding boardLayout
+	 * again here doubled the offset and would push the banner far off-screen
+	 * the first time a win actually triggers it. Position relative to (0,0).
 	 */
 	import type { Snippet } from 'svelte';
 	import { Tween } from 'svelte/motion';
@@ -62,11 +67,7 @@
 	});
 </script>
 
-<Container
-	x={context.stateGameDerived.boardLayout().x + context.stateGameDerived.boardLayout().width / 2}
-	y={context.stateGameDerived.boardLayout().y + context.stateGameDerived.boardLayout().height / 2}
-	scale={scale.current}
->
+<Container scale={scale.current}>
 	<Sprite anchor={0.5} key="banner_frame" width={bannerWidth} height={bannerHeight} filters={[glow]} />
 	{@render props.children()}
 </Container>

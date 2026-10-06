@@ -58,7 +58,7 @@
 	x={context.stateGameDerived.boardLayout().x -
 		context.stateGameDerived.boardLayout().width * 0.5 +
 		(props.reel.reelIndex + REEL_PADDING) * SYMBOL_SIZE}
-	y={context.stateGameDerived.boardLayout().y + (SYMBOL_SIZE * BOARD_DIMENSIONS.y) / 2}
+	y={context.stateGameDerived.boardLayout().y - SYMBOL_SIZE * 0.06}
 	width={SYMBOL_SIZE * 0.95}
 	height={SYMBOL_SIZE * BOARD_DIMENSIONS.y}
 	borderColor={0xffcc00}

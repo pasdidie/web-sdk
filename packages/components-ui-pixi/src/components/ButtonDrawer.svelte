@@ -9,6 +9,7 @@
 	import { UI_BASE_FONT_SIZE, UI_BASE_SIZE } from '../constants';
 	import { getContext } from '../context';
 	import { Tween } from 'svelte/motion';
+	import { metalTextStyle } from '../metalTextStyle';
 
 	const props: Partial<Omit<ButtonProps, 'children'>> = $props();
 	const context = getContext();
@@ -73,10 +74,7 @@
 				align: 'center',
 				wordWrap: true,
 				wordWrapWidth: 200,
-				fontFamily: 'Cinzel',
-				fontWeight: '600',
-				fontSize: UI_BASE_FONT_SIZE * 0.9,
-				fill: 0xffffff,
+				...metalTextStyle(UI_BASE_FONT_SIZE * 0.9, { fontWeight: '600' }),
 			}}
 			rotation={rotationTween.current}
 		/>

@@ -125,8 +125,7 @@ export const HIGH_SYMBOLS = ['H1', 'H2', 'H3', 'H4', 'H5'];
 
 export const INITIAL_SYMBOL_STATE: SymbolState = 'static';
 
-const HIGH_SYMBOL_SIZE = 0.9;
-const LOW_SYMBOL_SIZE = 0.9;
+const HIGH_SYMBOL_SIZE = 0.9; // only H5's win state still uses this (Spine rig, not our flat PNGs)
 const SPECIAL_SYMBOL_SIZE = 1;
 
 const SPIN_OPTIONS_SHARED = {
@@ -199,7 +198,7 @@ export const SYMBOL_INFO_MAP = {
 		win: {
 			type: 'sprite-win',
 			assetKey: 'sym_H1',
-			sizeRatios: { width: 0.5 * 1.15, height: HIGH_SYMBOL_SIZE * 0.57 },
+			sizeRatios: h1Static.sizeRatios,
 		},
 		postWinStatic: h1Static,
 		static: h1Static,
@@ -211,7 +210,7 @@ export const SYMBOL_INFO_MAP = {
 		win: {
 			type: 'sprite-win',
 			assetKey: 'sym_H2',
-			sizeRatios: { width: 0.5, height: HIGH_SYMBOL_SIZE * 0.57 },
+			sizeRatios: h2Static.sizeRatios,
 		},
 		postWinStatic: h2Static,
 		static: h2Static,
@@ -223,7 +222,7 @@ export const SYMBOL_INFO_MAP = {
 		win: {
 			type: 'sprite-win',
 			assetKey: 'sym_H3',
-			sizeRatios: { width: 0.5 * 0.9, height: HIGH_SYMBOL_SIZE * 0.53 },
+			sizeRatios: h3Static.sizeRatios,
 		},
 		postWinStatic: h3Static,
 		static: h3Static,
@@ -235,7 +234,7 @@ export const SYMBOL_INFO_MAP = {
 		win: {
 			type: 'sprite-win',
 			assetKey: 'sym_H4',
-			sizeRatios: { width: 0.5 * 0.9, height: HIGH_SYMBOL_SIZE * 0.53 },
+			sizeRatios: h4Static.sizeRatios,
 		},
 		postWinStatic: h4Static,
 		static: h4Static,
@@ -260,7 +259,7 @@ export const SYMBOL_INFO_MAP = {
 		win: {
 			type: 'sprite-win',
 			assetKey: 'sym_L1',
-			sizeRatios: { width: 0.5 * 0.75, height: LOW_SYMBOL_SIZE * 0.65 },
+			sizeRatios: l1Static.sizeRatios,
 		},
 		postWinStatic: l1Static,
 		static: l1Static,
@@ -272,7 +271,7 @@ export const SYMBOL_INFO_MAP = {
 		win: {
 			type: 'sprite-win',
 			assetKey: 'sym_L2',
-			sizeRatios: { width: 0.5 * 0.75, height: LOW_SYMBOL_SIZE * 0.65 },
+			sizeRatios: l2Static.sizeRatios,
 		},
 		postWinStatic: l2Static,
 		static: l2Static,
@@ -284,7 +283,7 @@ export const SYMBOL_INFO_MAP = {
 		win: {
 			type: 'sprite-win',
 			assetKey: 'sym_L3',
-			sizeRatios: { width: 0.5 * 0.75, height: LOW_SYMBOL_SIZE * 0.63 },
+			sizeRatios: l3Static.sizeRatios,
 		},
 		postWinStatic: l3Static,
 		static: l3Static,
@@ -296,7 +295,7 @@ export const SYMBOL_INFO_MAP = {
 		win: {
 			type: 'sprite-win',
 			assetKey: 'sym_L4',
-			sizeRatios: { width: 0.5 * 0.75, height: LOW_SYMBOL_SIZE * 0.63 },
+			sizeRatios: l4Static.sizeRatios,
 		},
 		postWinStatic: l4Static,
 		static: l4Static,
