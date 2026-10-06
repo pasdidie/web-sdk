@@ -1,7 +1,12 @@
 <script lang="ts">
+	/**
+	 * `props.name` is kept only as a fallback/accessibility label (and so
+	 * callers don't need to change) -- the visible wordmark is the real
+	 * `title_logo` asset (game-specific, baked-in typography), not code text.
+	 */
 	import { SvelteDate } from 'svelte/reactivity';
 
-	import { Text, REM } from 'pixi-svelte';
+	import { Text, Sprite, REM } from 'pixi-svelte';
 	import { WHITE } from 'constants-shared/colors';
 
 	type Props = {
@@ -9,6 +14,8 @@
 	};
 
 	const props: Props = $props();
+	const LOGO_ASPECT_RATIO = 3584 / 1184;
+	const LOGO_HEIGHT = REM * 2.5;
 	const reactiveDate = new SvelteDate();
 	const clock = $derived(
 		reactiveDate.toLocaleTimeString('en-US', {
@@ -41,4 +48,10 @@
 </script>
 
 <Text text={clock} onresize={(value) => (clockSizes = value)} {...textProps} />
-<Text text={props.name} x={clockSizes.width + 5} {...textProps} />
+<Sprite
+	key="title_logo"
+	x={clockSizes.width + 12}
+	y={(textProps.style.lineHeight - LOGO_HEIGHT) / 2}
+	width={LOGO_HEIGHT * LOGO_ASPECT_RATIO}
+	height={LOGO_HEIGHT}
+/>

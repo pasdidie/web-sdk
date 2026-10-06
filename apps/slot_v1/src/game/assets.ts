@@ -359,4 +359,12 @@ export default {
 		type: 'sprite',
 		src: new URL('../../assets/sprites/gemini/ui_ticker_panel.png', import.meta.url).href,
 	},
+	title_logo: {
+		type: 'sprite',
+		src: new URL('../../assets/sprites/gemini/title_logo.png', import.meta.url).href,
+	},
+	title_hero: {
+		type: 'sprite',
+		src: new URL('../../assets/sprites/gemini/title_hero.png', import.meta.url).href,
+	},
 } as const;
