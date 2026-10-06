@@ -113,15 +113,20 @@
 
 <style>
 	.rules {
-		color: #fff;
+		color: #f3e6c8;
 		padding: 1rem;
-		font-family: sans-serif;
+		font-family: 'Cinzel', serif;
 		max-width: 600px;
 	}
 	h2 {
 		margin-top: 1.25rem;
-		border-bottom: 1px solid #555;
-		padding-bottom: 0.25rem;
+		color: #d9a63f;
+		font-weight: 700;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		font-size: 1rem;
+		border-bottom: 1px solid rgba(217, 166, 63, 0.4);
+		padding-bottom: 0.4rem;
 	}
 	p {
 		font-size: 0.9rem;

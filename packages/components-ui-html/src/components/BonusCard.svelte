@@ -28,7 +28,8 @@
 		justify-content: space-between;
 
 		border-radius: 10px;
-		background: rgba(0, 0, 0, 0.5);
+		border: 1px solid rgba(217, 166, 63, 0.45);
+		background: linear-gradient(180deg, rgba(60, 40, 20, 0.55) 0%, rgba(10, 6, 3, 0.65) 100%);
 		text-align: left;
 		min-width: 155px;
 		max-width: 180px;

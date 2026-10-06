@@ -51,7 +51,7 @@
 					disabled={stateBet.betAmount <= 0 ||
 						stateBet.balanceAmount < stateBet.betAmount * betModeData.costMultiplier}
 				>
-					<BaseIcon width="100%" height="2rem" border="2px solid white;" />
+					<BaseIcon width="100%" height="2rem" border="2px solid #d9a63f;" />
 					<BaseButtonContent>
 						<span style="font-size: 1rem;">{betModeData.text.button}</span>
 					</BaseButtonContent>

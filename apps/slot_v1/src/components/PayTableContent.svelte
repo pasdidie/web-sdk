@@ -9,6 +9,7 @@
 	 */
 	import { stateI18nDerived, stateUrlDerived } from 'state-shared';
 	import config from '../game/config';
+	import assets from '../game/assets';
 
 	const t = stateI18nDerived.translate;
 	const social = stateUrlDerived.social;
@@ -26,10 +27,16 @@
 	const wild = allSymbols.find((s) => s.special.includes('wild'));
 	const scatter = allSymbols.find((s) => s.special.includes('scatter'));
 
+	// Reuses the exact same resolved URLs the Pixi board uses, rather than
+	// rebuilding a path by hand -- a hardcoded absolute path like
+	// `/assets/sprites/gemini/...` silently breaks the moment the game is
+	// hosted under a sub-path (e.g. Stake Engine's own game folder, not
+	// domain root), which this plain <img> (unlike Pixi's `new
+	// URL(..., import.meta.url)` sprites) was doing.
 	const iconSrc = (name: string) => {
-		if (name === 'W') return '/assets/sprites/gemini/sym_W_body.png';
-		if (name === 'S') return '/assets/sprites/gemini/sym_S_body.png';
-		return `/assets/sprites/gemini/sym_${name}.png`;
+		if (name === 'W') return (assets as any).sym_W_body.src;
+		if (name === 'S') return (assets as any).sym_S_body.src;
+		return (assets as any)[`sym_${name}`].src;
 	};
 
 	const formatMult = (n: number) => `${n}×`;
@@ -128,14 +135,19 @@
 
 <style>
 	.pay-table {
-		color: #fff;
+		color: #f3e6c8;
 		padding: 1rem;
-		font-family: sans-serif;
+		font-family: 'Cinzel', serif;
 	}
 	h2 {
 		margin-top: 1.5rem;
-		border-bottom: 1px solid #555;
-		padding-bottom: 0.25rem;
+		color: #d9a63f;
+		font-weight: 700;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		font-size: 1rem;
+		border-bottom: 1px solid rgba(217, 166, 63, 0.4);
+		padding-bottom: 0.4rem;
 	}
 	.grid {
 		display: flex;
@@ -146,7 +158,8 @@
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
-		background: rgba(255, 255, 255, 0.06);
+		background: linear-gradient(180deg, rgba(60, 40, 20, 0.5) 0%, rgba(10, 6, 3, 0.6) 100%);
+		border: 1px solid rgba(217, 166, 63, 0.3);
 		border-radius: 8px;
 		padding: 0.5rem 0.75rem;
 	}
