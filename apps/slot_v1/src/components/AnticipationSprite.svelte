@@ -6,6 +6,7 @@
 	 * rouleaux restants + cadre du rouleau qui pulse". Calls oncomplete once
 	 * the reel actually stops (same contract as the Spine version).
 	 */
+	import { onDestroy } from 'svelte';
 	import { Tween } from 'svelte/motion';
 	import { sineInOut } from 'svelte/easing';
 	import { GlowFilter } from 'pixi-filters';
@@ -26,6 +27,10 @@
 
 	const pulse = new Tween(0.35, { easing: sineInOut, duration: 500 });
 	const glow = new GlowFilter({ color: 0xffcc00, outerStrength: 2.5 });
+
+	// See SymbolWinSprite.svelte -- Container.destroy() doesn't free attached
+	// filters, so every anticipation pulse leaks a GlowFilter without this.
+	onDestroy(() => glow.destroy());
 
 	let running = true;
 

@@ -27,8 +27,16 @@ export const ANIMATION_CONFIG = {
 		// rectangle rather than a soft halo. Raised quality (more samples,
 		// smoother falloff) and shortened distance so the glow stays a soft
 		// bloom hugging the card edge instead of a thick stepped outline.
-		glowQuality: 0.55,
-		glowDistance: 6,
+		// Dialed back from an earlier 0.55/6 (~126 fragment-shader samples per
+		// glowing pixel) after a reported crash on win lines: every symbol in
+		// a connection gets its own GlowFilter instance (SymbolWinSprite /
+		// SymbolAuraSprite), so a multi-line win can mean a dozen+ of these
+		// rendering at once -- cost is roughly 1/(quality*distance) passes
+		// per symbol. This setting (~45 samples/px) stays cheaper than
+		// PixiJS's own default (quality 0.1/distance 10, ~70 samples/px)
+		// while still smoother-looking than that default.
+		glowQuality: 0.28,
+		glowDistance: 5,
 		sweepDurationMs: 600,
 		sweepWidthRatio: 0.35, // sweep highlight width as a fraction of symbol width
 	},

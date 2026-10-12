@@ -1,6 +1,7 @@
 import { stateUrlDerived, type BetModeMeta } from 'state-shared';
 
 import config from './config';
+import assets from './assets';
 
 const social = stateUrlDerived.social();
 
@@ -44,15 +45,15 @@ export const betModeMeta: BetModeMeta = {
 		type: 'buy',
 		parent: '',
 		children: '',
-		assets: EMPTY_ASSETS,
+		assets: { ...EMPTY_ASSETS, dialogImage: (assets as any).bonus_illustration?.src ?? '' },
 		text: {
 			title: social ? 'Bonus' : 'Bonus Buy',
 			dialog: social
-				? 'Skip straight to the free spins. Bonus mode has the same return as the base game.'
-				: 'Skip straight to the free spins by buying it directly. Bonus mode has the same return to player as the base game.',
+				? 'Skip straight to the free spins: 10, 12 or 15 spins depending on how many Scatters would have landed. Wild multipliers (×2 to ×10) still apply. Same return as regular play.'
+				: 'Skip straight to the free spins by buying it directly: 10, 12 or 15 spins depending on how many Scatters would have landed. Wild multipliers (×2 to ×10) still apply during the bonus. Bonus mode has the same return to player as the base game.',
 			description: social
-				? 'Skip straight to the free spins.'
-				: 'Skip straight to the free spins by buying it directly.',
+				? 'Jump straight into the free spins, wild multipliers included.'
+				: 'Jump straight into the free spins, wild multipliers included.',
 			button: social ? 'GET BONUS' : 'BUY',
 			tickerIdle: '',
 			tickerSpin: 'GOOD LUCK',

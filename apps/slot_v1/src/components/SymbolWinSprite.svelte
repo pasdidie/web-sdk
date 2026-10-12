@@ -7,6 +7,7 @@
 	 * this was adapted from (same tween/mask approach, real Sprite instead of
 	 * a colored Rectangle).
 	 */
+	import { onDestroy } from 'svelte';
 	import { Tween } from 'svelte/motion';
 	import { sineInOut } from 'svelte/easing';
 	import { GlowFilter } from 'pixi-filters';
@@ -36,6 +37,13 @@
 		quality: cfg.glowQuality,
 		distance: cfg.glowDistance,
 	});
+
+	// Container.destroy() (called by pixi-svelte on unmount) does not destroy
+	// attached filters -- each winning symbol creates its own GlowFilter
+	// instance (GPU program + render texture), so without this every win
+	// leaks one per symbol instead of freeing it when the symbol goes back
+	// to idle.
+	onDestroy(() => glow.destroy());
 
 	const scale = new Tween(1, { easing: sineInOut, duration: cfg.loopDurationMs / 2 });
 	const sweepX = new Tween(0, { easing: sineInOut, duration: cfg.sweepDurationMs });

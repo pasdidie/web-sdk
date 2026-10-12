@@ -367,4 +367,8 @@ export default {
 		type: 'sprite',
 		src: new URL('../../assets/sprites/gemini/title_hero.png', import.meta.url).href,
 	},
+	bonus_illustration: {
+		type: 'sprite',
+		src: new URL('../../assets/sprites/gemini/bonus_illustration.png', import.meta.url).href,
+	},
 } as const;

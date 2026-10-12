@@ -8,6 +8,7 @@
 	 *   - mode "land":  quick squash 1.1 -> 0.95 -> 1, then oncomplete.
 	 *   - mode "win":   scale pulse + glow on top of the idle aura rotation.
 	 */
+	import { onDestroy } from 'svelte';
 	import { Tween } from 'svelte/motion';
 	import { sineInOut } from 'svelte/easing';
 	import { GlowFilter } from 'pixi-filters';
@@ -43,6 +44,10 @@
 		quality: winCfg.glowQuality,
 		distance: winCfg.glowDistance,
 	});
+
+	// See SymbolWinSprite.svelte -- Container.destroy() doesn't free attached
+	// filters, so each Wild/Scatter win leaks a GlowFilter without this.
+	onDestroy(() => glow.destroy());
 
 	const bodyScale = new Tween(1, { easing: sineInOut });
 	let auraRotation = $state(0);

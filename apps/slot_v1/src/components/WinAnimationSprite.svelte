@@ -13,6 +13,7 @@
 	 * the first time a win actually triggers it. Position relative to (0,0).
 	 */
 	import type { Snippet } from 'svelte';
+	import { onDestroy } from 'svelte';
 	import { Tween } from 'svelte/motion';
 	import { backOut, sineInOut } from 'svelte/easing';
 	import { GlowFilter } from 'pixi-filters';
@@ -37,6 +38,10 @@
 	const glowStrength = new Tween(1, { easing: sineInOut, duration: 900 });
 
 	const glow = new GlowFilter({ color: 0xffd700, outerStrength: glowStrength.current, innerStrength: 0.5 });
+
+	// See SymbolWinSprite.svelte -- Container.destroy() doesn't free attached
+	// filters, so every big win leaks a GlowFilter without this.
+	onDestroy(() => glow.destroy());
 
 	let running = true;
 
