@@ -33,6 +33,8 @@
 		color: cfg.glowColor,
 		outerStrength: cfg.glowOuterStrength,
 		innerStrength: cfg.glowInnerStrength,
+		quality: cfg.glowQuality,
+		distance: cfg.glowDistance,
 	});
 
 	const scale = new Tween(1, { easing: sineInOut, duration: cfg.loopDurationMs / 2 });

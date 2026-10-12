@@ -18,8 +18,17 @@ export const ANIMATION_CONFIG = {
 		scaleTo: 1.12,
 		loopDurationMs: 600,
 		glowColor: 0xffd700,
-		glowOuterStrength: 3,
+		glowOuterStrength: 2.2,
 		glowInnerStrength: 1,
+		// PixiJS GlowFilter defaults to quality 0.1 (few gradient samples) --
+		// fine for a thin glow on a mostly-transparent sprite, but our symbol
+		// art is a fully opaque square card, so the glow traces that square's
+		// edge: at low quality that reads as a hard, slightly banded yellow
+		// rectangle rather than a soft halo. Raised quality (more samples,
+		// smoother falloff) and shortened distance so the glow stays a soft
+		// bloom hugging the card edge instead of a thick stepped outline.
+		glowQuality: 0.55,
+		glowDistance: 6,
 		sweepDurationMs: 600,
 		sweepWidthRatio: 0.35, // sweep highlight width as a fraction of symbol width
 	},

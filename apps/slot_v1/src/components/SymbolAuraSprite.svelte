@@ -40,6 +40,8 @@
 		color: winCfg.glowColor,
 		outerStrength: winCfg.glowOuterStrength,
 		innerStrength: winCfg.glowInnerStrength,
+		quality: winCfg.glowQuality,
+		distance: winCfg.glowDistance,
 	});
 
 	const bodyScale = new Tween(1, { easing: sineInOut });
