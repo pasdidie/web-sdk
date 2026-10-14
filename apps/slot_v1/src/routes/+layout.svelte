@@ -17,7 +17,6 @@
 	let showYourLoader = $state(false);
 
 	const loaderUrlStakeEngine = new URL('../../stake-engine-loader.gif', import.meta.url).href;
-	const loaderUrl = new URL('../../assets/sprites/gemini/logo.png', import.meta.url).href;
 
 	// Replaces state-shared's template Buy Bonus content (5 fake modes --
 	// DOUBLE BOOST/SAMURAI SPIN/etc, see docs/DECISIONS.md) with our real,
@@ -38,7 +37,7 @@
 <LoaderStakeEngine src={loaderUrlStakeEngine} oncomplete={() => (showYourLoader = true)} />
 
 {#if showYourLoader}
-	<LoaderAzureAnvil src={loaderUrl} />
+	<LoaderAzureAnvil />
 {/if}
 
 {@render props.children()}

@@ -3,23 +3,27 @@
 	 * Replaces components-shared/LoaderExample.svelte (the SDK's literal
 	 * placeholder -- "Add Your Loader" text over a generic spinner GIF).
 	 * Shown before Game.svelte/Pixi even mount, so this is plain HTML/CSS,
-	 * not a Pixi component. Reuses the existing logo.png emblem (no new
-	 * asset) with a CSS pulse + rotate for motion -- a real animated GIF
-	 * would mean an AI-generated frame sequence, which flickers frame to
-	 * frame (see ANIMATION_SPEC.md "Pas d'animation image par image
-	 * générée par IA"); CSS keyframes give smooth motion from a single
-	 * static image instead, consistent with how every other animation in
-	 * this project is code-driven rather than baked into the asset.
+	 * not a Pixi component -- reuses the same raw PNG files as the Pixi
+	 * board (via game/assets.ts's .src, same trick as BonusCard.svelte)
+	 * instead of a second Pixi-only loading stage, since this screen
+	 * previously showed nothing but a small spinning corner-badge icon on
+	 * a flat color (see DECISIONS.md, "ça c'est nul" feedback) -- it now
+	 * shows the same dungeon background + hero art as LoadingScreen.svelte
+	 * so there's no jarring empty-looking screen between the mandatory
+	 * Stake Engine loader and the real title screen.
 	 */
 	import { fade } from 'svelte/transition';
 	import { waitForTimeout } from 'utils-shared/wait';
+	import assets from '../game/assets';
 
 	type Props = {
-		src: string;
 		oncomplete?: () => void;
 	};
 
 	const props: Props = $props();
+
+	const bgSrc = (assets as any).bg_base_near?.src ?? '';
+	const heroSrc = (assets as any).title_hero?.src ?? '';
 
 	// Mirrors LoaderBase.svelte's contract: stay mounted (covering the Game
 	// underneath, z-index 999) until `timeout` ms after the image loads, then
@@ -30,12 +34,12 @@
 </script>
 
 {#if loading}
-	<div class="wrap" transition:fade>
+	<div class="wrap" style="background-image: url({bgSrc})" transition:fade>
 		<div class="glow"></div>
 		<img
-			src={props.src}
+			src={heroSrc}
 			alt=""
-			class="emblem"
+			class="hero"
 			draggable="false"
 			onload={async () => {
 				await waitForTimeout(MIN_VISIBLE_MS);
@@ -52,6 +56,8 @@
 		inset: 0;
 		z-index: 999;
 		background-color: #140b06;
+		background-size: cover;
+		background-position: center;
 		display: flex;
 		justify-content: center;
 		align-items: center;
@@ -60,38 +66,28 @@
 
 	.glow {
 		position: absolute;
-		width: 40vmin;
-		height: 40vmin;
+		width: 55vmin;
+		height: 55vmin;
 		border-radius: 50%;
-		background: radial-gradient(circle, rgba(255, 170, 60, 0.35) 0%, rgba(255, 170, 60, 0) 70%);
+		background: radial-gradient(circle, rgba(90, 170, 255, 0.3) 0%, rgba(90, 170, 255, 0) 70%);
 		animation: pulse 2.4s ease-in-out infinite;
 	}
 
-	.emblem {
+	.hero {
 		position: relative;
-		width: 18vmin;
-		max-width: 220px;
-		animation:
-			spin 3.5s linear infinite,
-			bob 2.4s ease-in-out infinite;
-	}
-
-	@keyframes spin {
-		from {
-			transform: rotate(0deg);
-		}
-		to {
-			transform: rotate(360deg);
-		}
+		height: 60vmin;
+		max-height: 640px;
+		filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.6));
+		animation: bob 2.4s ease-in-out infinite;
 	}
 
 	@keyframes bob {
 		0%,
 		100% {
-			scale: 1;
+			transform: translateY(0);
 		}
 		50% {
-			scale: 1.08;
+			transform: translateY(-1.5%);
 		}
 	}
 
@@ -109,7 +105,7 @@
 
 	@media (prefers-reduced-motion: reduce) {
 		.glow,
-		.emblem {
+		.hero {
 			animation: none;
 		}
 	}
