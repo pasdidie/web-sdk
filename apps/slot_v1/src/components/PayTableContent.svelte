@@ -42,9 +42,12 @@
 	const formatMult = (n: number) => `${n}×`;
 
 	const baseRtp = (config.betModes.base.rtp * 100).toFixed(2);
-	const bonusRtp = (config.betModes.bonus.rtp * 100).toFixed(2);
 	const maxWin = config.betModes.base.max_win;
-	const bonusCost = config.betModes.bonus.cost;
+	const bonusTiers = [
+		{ spins: 10, cost: config.betModes.bonus10.cost, rtp: (config.betModes.bonus10.rtp * 100).toFixed(2) },
+		{ spins: 12, cost: config.betModes.bonus12.cost, rtp: (config.betModes.bonus12.rtp * 100).toFixed(2) },
+		{ spins: 15, cost: config.betModes.bonus15.cost, rtp: (config.betModes.bonus15.rtp * 100).toFixed(2) },
+	];
 </script>
 
 <div class="pay-table">
@@ -119,16 +122,13 @@
 	<h2>{t('Info')}</h2>
 	<div class="info">
 		<span>{t('Base mode RTP:')} {baseRtp}%</span>
-		<span>
-			{social()
-				? t('Bonus mode RTP (instant access):')
-				: t('Bonus mode RTP (direct buy):')}
-			{bonusRtp}%
-		</span>
-		<span>
-			{social() ? t('Bonus cost:') : t('Bonus buy cost:')}
-			{bonusCost}×
-		</span>
+		{#each bonusTiers as tier}
+			<span>
+				{tier.spins} {t('free spins')} —
+				{social() ? t('instant access:') : t('direct buy:')}
+				{tier.cost}× · {t('RTP:')} {tier.rtp}%
+			</span>
+		{/each}
 		<span>{t('Max win:')} {maxWin}×</span>
 	</div>
 </div>

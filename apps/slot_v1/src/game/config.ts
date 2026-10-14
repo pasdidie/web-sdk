@@ -13,8 +13,28 @@ export default {
 			rtp: 0.965,
 			max_win: 5000,
 		},
-		bonus: {
-			cost: 100.0,
+		// 3 buy-bonus tiers, one per organic scatter-trigger tier (3/4/5
+		// scatters -> 10/12/15 free spins) instead of 1 blended mode -- see
+		// docs/DECISIONS.md. Values below are a straight copy of
+		// library/configs/config_fe_slot_v1.json after the 1M-sim/mode
+		// optimized run (math-v1.1 tag) -- all 4 modes land exactly 96.50%
+		// RTP with 0.0000pt gaps, see docs/PAR_SHEET.md.
+		bonus10: {
+			cost: 90.0,
+			feature: false,
+			buyBonus: true,
+			rtp: 0.965,
+			max_win: 5000,
+		},
+		bonus12: {
+			cost: 110.0,
+			feature: false,
+			buyBonus: true,
+			rtp: 0.965,
+			max_win: 5000,
+		},
+		bonus15: {
+			cost: 140.0,
 			feature: false,
 			buyBonus: true,
 			rtp: 0.965,

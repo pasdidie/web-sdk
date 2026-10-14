@@ -19,9 +19,12 @@
 
 	const numPaylines = Object.keys(config.paylines).length;
 	const baseRtp = (config.betModes.base.rtp * 100).toFixed(2);
-	const bonusRtp = (config.betModes.bonus.rtp * 100).toFixed(2);
 	const maxWin = config.betModes.base.max_win;
-	const bonusCost = config.betModes.bonus.cost;
+	const bonusTiers = [
+		{ spins: 10, cost: config.betModes.bonus10.cost, rtp: (config.betModes.bonus10.rtp * 100).toFixed(2) },
+		{ spins: 12, cost: config.betModes.bonus12.cost, rtp: (config.betModes.bonus12.rtp * 100).toFixed(2) },
+		{ spins: 15, cost: config.betModes.bonus15.cost, rtp: (config.betModes.bonus15.rtp * 100).toFixed(2) },
+	];
 </script>
 
 <div class="rules">
@@ -53,20 +56,24 @@
 
 	<h2>{social() ? t('Bonus') : t('Bonus buy')}</h2>
 	<p>
-		{#if social()}
-			{t('Bonus mode gets you instant access to the free spins for')} {bonusCost}{t(
-				'× your spin.',
-			)}
-		{:else}
-			{t('Bonus mode lets you buy direct access to the free spins for')} {bonusCost}{t(
-				'× the bet.',
-			)}
-		{/if}
+		{social()
+			? t('Three options skip straight to the free spins, each a guaranteed number of spins:')
+			: t('Three options buy direct access to the free spins, each a guaranteed number of spins:')}
 	</p>
+	<ul>
+		{#each bonusTiers as tier}
+			<li>
+				<strong>{tier.spins} {t('free spins')}</strong> — {tier.cost}{social()
+					? t('× your spin.')
+					: t('× the bet.')}
+				{t('RTP:')} {tier.rtp}%.
+			</li>
+		{/each}
+	</ul>
 
 	<h2>{t('RTP and max win')}</h2>
 	<p>
-		{t('Base mode RTP:')} {baseRtp}%. {t('Bonus mode RTP:')} {bonusRtp}%.
+		{t('Base mode RTP:')} {baseRtp}%.
 		{t('Max win:')} {maxWin}{social() ? t('× your spin.') : t('× the bet.')}
 	</p>
 

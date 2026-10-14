@@ -1,7 +1,7 @@
 import { fromPromise } from 'xstate';
 
 import { API_AMOUNT_MULTIPLIER } from 'constants-shared/bet';
-import { stateBet, stateUrlDerived, stateModal } from 'state-shared';
+import { stateBet, stateBetDerived, stateUrlDerived, stateModal } from 'state-shared';
 import { requestBet, requestEndRound } from 'rgs-requests';
 
 import type { BaseBet } from './types';
@@ -12,7 +12,17 @@ const handleRequestBet = async ({ onError }: { onError: () => void }) => {
 			rgsUrl: stateUrlDerived.rgsUrl(),
 			sessionID: stateUrlDerived.sessionID(),
 			currency: stateBet.currency,
-			mode: stateBet.activeBetModeKey,
+			// stateBet.activeBetModeKey is the UI-side lookup key into
+			// stateMeta.betModeMeta (e.g. 'BONUS10', matching this SDK's own
+			// default-key convention, see ButtonBuyBonus.svelte/stateBet
+			// resets) -- NOT necessarily the identifier the RGS/math backend
+			// expects as its bet-mode name. Each BetModeData's own `.mode`
+			// field is what game/betModeMeta.ts sets to the exact math-side
+			// name (see game_config.py's BetMode `name=`), so send that to
+			// the RGS instead of the raw internal key. Falls back to the key
+			// itself if a mode has no `.mode` set, so this is a no-op for
+			// any game where key === mode already.
+			mode: stateBetDerived.activeBetMode()?.mode || stateBet.activeBetModeKey,
 			amount: stateBet.betAmount,
 		});
 
