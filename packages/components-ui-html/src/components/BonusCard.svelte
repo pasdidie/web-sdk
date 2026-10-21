@@ -3,6 +3,12 @@
 
 	type Props = {
 		image?: Snippet;
+		// A snippet prop is always truthy once declared, even when it renders
+		// nothing, so the card can't tell "no artwork" from "artwork here"
+		// on its own -- the caller passes this explicitly. Without it a game
+		// whose illustration hasn't been produced yet (or whose file 404s)
+		// renders a broken-image icon, or an empty framed box.
+		hasImage?: boolean;
 		title: Snippet;
 		description: Snippet;
 		price: Snippet;
@@ -13,7 +19,7 @@
 </script>
 
 <div class="bonus-card-wrap">
-	{#if props.image}
+	{#if props.image && props.hasImage}
 		<div class="image">
 			{@render props.image()}
 		</div>

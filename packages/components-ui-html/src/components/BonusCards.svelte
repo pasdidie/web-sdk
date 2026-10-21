@@ -16,14 +16,23 @@
 
 	const props: Props = $props();
 	const { eventEmitter } = getContextEventEmitter<EmitterEventModal>();
+
+	// A bet mode can name an illustration that isn't shipped (or that 404s on
+	// a given deploy). Drop the whole image block rather than leaving a broken
+	// image icon in the purchase dialog.
+	let brokenImages = $state<Record<string, boolean>>({});
 </script>
 
 {#each props.list as betModeData}
 	{#if betModeData.type !== 'default'}
-		<BonusCard>
+		<BonusCard hasImage={Boolean(betModeData.assets?.dialogImage) && !brokenImages[betModeData.mode]}>
 			{#snippet image()}
 				{#if betModeData.assets?.dialogImage}
-					<img src={betModeData.assets.dialogImage} alt="" />
+					<img
+						src={betModeData.assets.dialogImage}
+						alt=""
+						onerror={() => (brokenImages[betModeData.mode] = true)}
+					/>
 				{/if}
 			{/snippet}
 
