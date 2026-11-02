@@ -21,30 +21,37 @@ const social = stateUrlDerived.social();
  * components-ui-pixi/i18nDerived.ts for the same pattern on the button that
  * opens this modal.
  *
- * Object keys here (BASE/BONUS10/...) are the UI-side lookup key into
- * stateMeta.betModeMeta, matching this SDK's own default/reset convention
- * (stateBet.svelte.ts defaults activeBetModeKey to the literal 'BASE', and
- * several components reset it to 'BASE' after a buy-bonus round ends) --
- * NOT what gets sent to the RGS. Each entry's `mode` field is the exact
- * bet-mode name the math side declares (game_config.py's BetMode `name=`,
- * lowercase), which createPrimaryMachines.ts's requestBet call now reads
- * instead of the raw key (see that file for why: the two were silently
- * mismatched in casing before this round of changes, never actually
- * exercised against a live RGS purchase).
+ * Object keys here MUST equal each entry's own `mode` field exactly
+ * (lowercase, matching game_config.py's BetMode `name=` on the math side).
+ * stateBonus.svelte.ts's selectedBetModeData() (components-ui-html) does a
+ * *direct* `stateMeta.betModeMeta[key]` lookup with no case fallback, and
+ * BonusCard.svelte sets that key from `betModeData.mode` on click -- an
+ * earlier version of this file used uppercase object keys (matching the
+ * SDK's own 'BASE' default/reset convention elsewhere) while `mode` stayed
+ * lowercase for the RGS; that mismatch made selectedBetModeData() return
+ * undefined the instant a Buy Bonus card was clicked, crashing
+ * ModalBuyBonusConfirm.svelte on `.text.title` before any purchase request
+ * was ever sent -- caught by actually clicking Buy in the portal, not by
+ * the build or static review (see docs/DECISIONS.md). stateBetDerived's
+ * OWN activeBetMode() (state-shared, used by the base-mode reset
+ * call-sites and by createPrimaryMachines.ts's requestBet) has a dual-case
+ * fallback and tolerates either casing, so this rename doesn't break that
+ * path -- it's specifically the bonus-selection path that required exact
+ * key===mode equality.
  */
 const EMPTY_ASSETS = { icon: '', volatility: '', button: '', dialogImage: '', dialogVolatility: '' };
 const bonusIllustration = (assets as any).bonus_illustration?.src ?? '';
 
-type BonusTier = { key: string; mode: string; cost: number; maxWin: number; spins: number };
+type BonusTier = { mode: string; cost: number; maxWin: number; spins: number };
 
 const bonusTiers: BonusTier[] = [
-	{ key: 'BONUS10', mode: 'bonus10', cost: config.betModes.bonus10.cost, maxWin: config.betModes.bonus10.max_win, spins: 10 },
-	{ key: 'BONUS12', mode: 'bonus12', cost: config.betModes.bonus12.cost, maxWin: config.betModes.bonus12.max_win, spins: 12 },
-	{ key: 'BONUS15', mode: 'bonus15', cost: config.betModes.bonus15.cost, maxWin: config.betModes.bonus15.max_win, spins: 15 },
+	{ mode: 'bonus10', cost: config.betModes.bonus10.cost, maxWin: config.betModes.bonus10.max_win, spins: 10 },
+	{ mode: 'bonus12', cost: config.betModes.bonus12.cost, maxWin: config.betModes.bonus12.max_win, spins: 12 },
+	{ mode: 'bonus15', cost: config.betModes.bonus15.cost, maxWin: config.betModes.bonus15.max_win, spins: 15 },
 ];
 
 export const betModeMeta: BetModeMeta = {
-	BASE: {
+	base: {
 		mode: 'base',
 		costMultiplier: config.betModes.base.cost,
 		type: 'default',
@@ -63,7 +70,7 @@ export const betModeMeta: BetModeMeta = {
 	},
 	...Object.fromEntries(
 		bonusTiers.map((tier) => [
-			tier.key,
+			tier.mode,
 			{
 				mode: tier.mode,
 				costMultiplier: tier.cost,
