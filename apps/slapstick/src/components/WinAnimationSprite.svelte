@@ -31,8 +31,9 @@
 	const context = getContext();
 	const cfg = ANIMATION_CONFIG.bigWin;
 
-	const bannerWidth = $derived(context.stateGameDerived.boardLayout().width * 0.85);
-	const bannerHeight = $derived(bannerWidth * 0.4);
+	// Silent-film intertitle card (1376x768) framing the amount, wider than the 3x3 board.
+	const bannerWidth = $derived(context.stateGameDerived.boardLayout().width * 2.1);
+	const bannerHeight = $derived(bannerWidth / (1376 / 768));
 
 	const scale = new Tween(0, { easing: backOut, duration: cfg.introDurationMs });
 	const glowStrength = new Tween(1, { easing: sineInOut, duration: 900 });

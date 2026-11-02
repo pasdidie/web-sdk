@@ -67,11 +67,11 @@
 							<WinAnimation animationMap={winLevelData.animation}>
 								<ResponsiveBitmapText
 									anchor={0.5}
-									maxWidth={2130}
+									maxWidth={context.stateGameDerived.boardLayout().width * 1.7}
 									text={bookEventAmountToCurrencyString(countUpAmount)}
 									style={{
 										fontFamily: 'silver',
-										fontSize: SYMBOL_SIZE * 3.6,
+										fontSize: SYMBOL_SIZE * 1.3,
 										align: 'center',
 										fontWeight: 'bold',
 										letterSpacing: 0,
@@ -86,7 +86,7 @@
 								text={bookEventAmountToCurrencyString(countUpAmount)}
 								style={{
 									fontFamily: 'silver',
-									fontSize: SYMBOL_SIZE,
+									fontSize: SYMBOL_SIZE * 0.6,
 									align: 'center',
 									fontWeight: 'bold',
 									letterSpacing: 0,

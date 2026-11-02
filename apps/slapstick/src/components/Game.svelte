@@ -39,7 +39,8 @@
 		if (context.stateLayoutDerived.layoutType() === 'portrait') {
 			return { x: board.x - board.width * 0.38, y: board.y + board.height / 2 + 330, height: 360 };
 		}
-		return { x: board.x - board.width / 2 - 270, y: board.y + board.height / 2 + 70, height: 560 };
+		// Just left of the screen frame (frame is ~2.15x the board width), feet above the UI bar.
+		return { x: board.x - board.width * 1.07 - 110, y: board.y + board.height / 2 + 88, height: 430 };
 	});
 
 	onMount(() => {

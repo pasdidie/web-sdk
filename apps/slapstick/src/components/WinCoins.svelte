@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
+	import { ColorMatrixFilter } from 'pixi.js';
 	import { Container, ParticleEmitter } from 'pixi-svelte';
 	import { MainContainer } from 'components-layout';
 	import { fountain as baseConfig } from 'constants-shared/particleConfig';
@@ -18,6 +20,12 @@
 		props?.levelAlias ? LEVEL_PARTICLE_COIN_MAP[props.levelAlias] : null,
 	);
 	const config = $derived({ ...baseConfig, ...extraConfig });
+
+	// The SDK's coin sprites are gold; desaturated they read as silver coins
+	// in the black-and-white print.
+	const silver = new ColorMatrixFilter();
+	silver.desaturate();
+	onDestroy(() => silver.destroy());
 </script>
 
 {#if config}
@@ -25,6 +33,7 @@
 		<Container
 			x={context.stateGameDerived.boardLayout().x}
 			y={context.stateGameDerived.boardLayout().y}
+			filters={[silver]}
 		>
 			<ParticleEmitter {config} key="coins" emit={props.emit} />
 		</Container>

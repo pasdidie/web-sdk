@@ -43,18 +43,19 @@
 		{#snippet children({ sizes })}
 			<BitmapText
 				anchor={{ x: 0.5, y: 1 }}
-				y={-sizes.width * 0.18}
+				y={-sizes.width * 0.06}
 				text="FREE SPINS"
-				style={{ fontFamily: 'silver', fontSize: sizes.width * 0.09, fontWeight: 'bold', align: 'center' }}
+				style={{ fontFamily: 'silver', fontSize: sizes.width * 0.07, fontWeight: 'bold', align: 'center' }}
 			/>
 
 			<NumberPopSprite>
 				<BitmapText
 					anchor={{ x: 0.5, y: 0.5 }}
 					text={freeSpinsFromEvent}
+					y={sizes.width * 0.06}
 					style={{
 						fontFamily: 'silver',
-						fontSize: sizes.width * 0.1,
+						fontSize: sizes.width * 0.09,
 						fontWeight: 'bold',
 					}}
 				/>

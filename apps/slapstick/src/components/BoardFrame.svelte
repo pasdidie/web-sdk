@@ -22,11 +22,14 @@
 	const context = getContext();
 	const board = $derived(context.stateGameDerived.boardLayout());
 
-	// frame_screen.png: 1200x896 canvas, inner opening ~ 74% x 66% of it.
+	// frame_screen.png: 1200x896, transparent opening = 68.4% x 57.5% of it
+	// (measured on the alpha). The frame is scaled uniformly so its opening
+	// is just taller than the 3 rows; the screen is wider than the square
+	// board, like a real cinema screen.
 	const FRAME_RATIO = 1200 / 896;
-	const OPENING = { width: 0.74, height: 0.66 };
-	const frameWidth = $derived((board.width * 1.06) / OPENING.width);
-	const frameHeight = $derived(frameWidth / FRAME_RATIO);
+	const OPENING = { width: 0.684, height: 0.575 };
+	const frameHeight = $derived((board.height * 1.08) / OPENING.height);
+	const frameWidth = $derived(frameHeight * FRAME_RATIO);
 
 	const glowStrength = new Tween(0, { easing: sineInOut, duration: 600 });
 	const glow = new GlowFilter({ color: 0xf2eee4, outerStrength: 0, innerStrength: 0, distance: 18 });
@@ -45,8 +48,8 @@
 	anchor={0.5}
 	x={board.x}
 	y={board.y}
-	width={board.width * 1.08}
-	height={board.height * 1.08}
+	width={frameWidth * OPENING.width + 4}
+	height={frameHeight * OPENING.height + 4}
 	backgroundColor={0x111111}
 	alpha={0.92}
 />

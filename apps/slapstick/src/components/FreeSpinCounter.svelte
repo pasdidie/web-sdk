@@ -14,27 +14,25 @@
 	import { anchorToPivot, BitmapText, Container, Sprite, type Sizes } from 'pixi-svelte';
 
 	const context = getContext();
-	const PANEL_KEY_DESKTOP = 'Frame_FSCounter.png';
-	const PANEL_RATIO_DESKTOP = 824 / 622;
-	const panelKey = PANEL_KEY_DESKTOP;
-	const panelWidth = $derived(SYMBOL_SIZE * 2);
+	// Small intertitle card just right of the screen frame (frame = board
+	// height x 1.08 / 0.575 tall, 1200/896 ratio -- see BoardFrame.svelte).
+	const panelKey = 'intertitle_frame';
+	const PANEL_RATIO_DESKTOP = 1376 / 768;
+	const panelWidth = $derived(SYMBOL_SIZE * 1.9);
+	const frameHalfWidth = $derived(
+		(((context.stateGameDerived.boardLayout().height * 1.08) / 0.575) * (1200 / 896)) / 2,
+	);
 	const panelSizes = $derived({
 		width: panelWidth,
 		height: panelWidth / PANEL_RATIO_DESKTOP,
 	});
 	const scale = 1;
 	const position = $derived({
-		x:
-			context.stateGameDerived.boardLayout().x -
-			context.stateGameDerived.boardLayout().width * 0.5 -
-			panelSizes.width -
-			SYMBOL_SIZE * 0.7,
-		y:
-			context.stateGameDerived.boardLayout().y -
-			context.stateGameDerived.boardLayout().height * 0.5,
+		x: context.stateGameDerived.boardLayout().x + frameHalfWidth - SYMBOL_SIZE * 0.45,
+		y: context.stateGameDerived.boardLayout().y - context.stateGameDerived.boardLayout().height * 0.5,
 	});
 
-	const fontSize = SYMBOL_SIZE * 0.275;
+	const fontSize = SYMBOL_SIZE * 0.14;
 
 	let show = $state(false);
 	let current = $state(0);

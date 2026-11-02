@@ -24,15 +24,14 @@
 	const cfg = ANIMATION_CONFIG.freeSpins;
 
 	const BACKGROUND_RATIO = 920 / 720;
-	const BACKGROUND_WIDTH = SYMBOL_SIZE * BOARD_DIMENSIONS.x;
+	// The 3x3 board is narrow: the intertitle card spans about twice its width.
+	const BACKGROUND_WIDTH = SYMBOL_SIZE * BOARD_DIMENSIONS.x * 2;
 	const BACKGROUND_SIZES = {
 		width: BACKGROUND_WIDTH,
 		height: BACKGROUND_WIDTH / BACKGROUND_RATIO,
 	};
-	const PANEL_SIZES = {
-		width: SYMBOL_SIZE * BOARD_DIMENSIONS.x,
-		height: SYMBOL_SIZE * BOARD_DIMENSIONS.x,
-	};
+	const PANEL_SIZES = { width: BACKGROUND_WIDTH, height: BACKGROUND_WIDTH };
+	const INTERTITLE_RATIO = 1376 / 768;
 
 	const scale = new Tween(0, { easing: backOut, duration: cfg.introDurationMs });
 
@@ -48,7 +47,12 @@
 		pivot={anchorToPivot({ anchor: 0.5, sizes: BACKGROUND_SIZES })}
 	>
 		<Container x={PANEL_SIZES.width * 0.5} y={PANEL_SIZES.height * 0.4} scale={scale.current}>
-			<Sprite anchor={0.5} key="banner_frame" width={PANEL_SIZES.width * 0.9} height={PANEL_SIZES.width * 0.55} />
+			<Sprite
+				anchor={0.5}
+				key="banner_frame"
+				width={PANEL_SIZES.width * 0.9}
+				height={(PANEL_SIZES.width * 0.9) / INTERTITLE_RATIO}
+			/>
 			{@render props.children({ sizes: BACKGROUND_SIZES })}
 		</Container>
 	</Container>

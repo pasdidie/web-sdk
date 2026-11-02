@@ -79,9 +79,11 @@ export const stateGame = $state({
 	scatterCounter: 0,
 });
 
+// Landscape: the screen sits a little right of centre and above the UI bar,
+// leaving stage-left room for Monsieur Pip and his camera.
 const boardLayout = () => ({
-	x: stateLayoutDerived.mainLayout().width * 0.5,
-	y: stateLayoutDerived.mainLayout().height * 0.5,
+	x: stateLayoutDerived.mainLayout().width * (stateLayoutDerived.layoutType() === 'portrait' ? 0.5 : 0.56),
+	y: stateLayoutDerived.mainLayout().height * (stateLayoutDerived.layoutType() === 'portrait' ? 0.4 : 0.44),
 	anchor: { x: 0.5, y: 0.5 },
 	pivot: { x: BOARD_SIZES.width / 2, y: BOARD_SIZES.height / 2 },
 	...BOARD_SIZES,

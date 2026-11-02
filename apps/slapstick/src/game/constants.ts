@@ -2,8 +2,8 @@ import _ from 'lodash';
 
 import type { RawSymbol, SymbolState } from './types';
 
-// 3x3 board: bigger cells than the 5x3 parent game so the board fills the screen area.
-export const SYMBOL_SIZE = 180;
+// 3x3 board: same cell size as the 5x3 parent game keeps the board clear of the bottom UI bar.
+export const SYMBOL_SIZE = 120;
 
 export const REEL_PADDING = 0.53;
 
@@ -86,21 +86,23 @@ const explosion = {
 };
 
 // Gemini assets processed by tools/assets (film-toned, keyed). 3 high + 3 low symbols.
-const h1Static = { type: 'sprite', assetKey: 'sym_H1', sizeRatios: { width: 1, height: 1 } };
-const h2Static = { type: 'sprite', assetKey: 'sym_H2', sizeRatios: { width: 1, height: 1 } };
-const h3Static = { type: 'sprite', assetKey: 'sym_H3', sizeRatios: { width: 1, height: 1 } };
+// The art keeps a margin inside its square canvas, so it is drawn slightly larger than a cell.
+const SYMBOL_ART_RATIOS = { width: 1.2, height: 1.2 };
+const h1Static = { type: 'sprite', assetKey: 'sym_H1', sizeRatios: SYMBOL_ART_RATIOS };
+const h2Static = { type: 'sprite', assetKey: 'sym_H2', sizeRatios: SYMBOL_ART_RATIOS };
+const h3Static = { type: 'sprite', assetKey: 'sym_H3', sizeRatios: SYMBOL_ART_RATIOS };
 
-const l1Static = { type: 'sprite', assetKey: 'sym_L1', sizeRatios: { width: 1, height: 1 } };
-const l2Static = { type: 'sprite', assetKey: 'sym_L2', sizeRatios: { width: 1, height: 1 } };
-const l3Static = { type: 'sprite', assetKey: 'sym_L3', sizeRatios: { width: 1, height: 1 } };
+const l1Static = { type: 'sprite', assetKey: 'sym_L1', sizeRatios: SYMBOL_ART_RATIOS };
+const l2Static = { type: 'sprite', assetKey: 'sym_L2', sizeRatios: SYMBOL_ART_RATIOS };
+const l3Static = { type: 'sprite', assetKey: 'sym_L3', sizeRatios: SYMBOL_ART_RATIOS };
 
 // The upstream example's ratios (width 1.35, height ~2.6 for S) were tuned
 // for its own Spine rigs' canvas/pivot and made our square Gemini art render
 // 2+ cells oversized, overlapping the board frame. Our body+aura art is a
 // single square canvas per symbol, like H/L, just slightly larger to still
 // read as "special".
-const wSizeRatios = { width: 1.15, height: 1.15 };
-const sSizeRatios = { width: 1.15, height: 1.15 };
+const wSizeRatios = { width: 1.2, height: 1.2 };
+const sSizeRatios = { width: 1.2, height: 1.2 };
 
 export const SYMBOL_INFO_MAP = {
 	H1: {
@@ -177,10 +179,13 @@ export const SYMBOL_INFO_MAP = {
 	},
 	W: {
 		explosion,
+		// The SDK's 'explodedW.png' is a yellow demo sprite; keep our hat after a win.
 		postWinStatic: {
-			type: 'sprite',
-			assetKey: 'explodedW.png',
-			sizeRatios: { width: 0.85, height: 0.85 },
+			type: 'sprite-aura',
+			bodyKey: 'sym_W_body',
+			auraKey: 'sym_W_aura',
+			mode: 'idle',
+			sizeRatios: wSizeRatios,
 		},
 		static: {
 			type: 'sprite-aura',
