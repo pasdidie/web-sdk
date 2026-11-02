@@ -1,0 +1,121 @@
+<script lang="ts">
+	import { onMount } from 'svelte';
+
+	import { EnablePixiExtension } from 'components-pixi';
+	import { EnableHotkey } from 'components-shared';
+	import { MainContainer } from 'components-layout';
+	import { App, Sprite, REM } from 'pixi-svelte';
+	import { stateModal } from 'state-shared';
+
+	import { UI, UiGameName } from 'components-ui-pixi';
+	import { GameVersion, Modals } from 'components-ui-html';
+	import PayTableContent from './PayTableContent.svelte';
+	import GameRulesContent from './GameRulesContent.svelte';
+
+	import { getContext } from '../game/context';
+	import EnableSound from './EnableSound.svelte';
+	import EnableGameActor from './EnableGameActor.svelte';
+	import ResumeBet from './ResumeBet.svelte';
+	import Sound from './Sound.svelte';
+	import Background from './BackgroundSprite.svelte';
+	import LoadingScreen from './LoadingScreen.svelte';
+	import BoardFrame from './BoardFrame.svelte';
+	import Board from './Board.svelte';
+	import Anticipations from './Anticipations.svelte';
+	import Win from './Win.svelte';
+	import FreeSpinIntro from './FreeSpinIntro.svelte';
+	import FreeSpinCounter from './FreeSpinCounter.svelte';
+	import FreeSpinOutro from './FreeSpinOutro.svelte';
+	import Transition from './Transition.svelte';
+	import FilmOverlay from './FilmOverlay.svelte';
+	import PipPuppet from './PipPuppet.svelte';
+
+	const context = getContext();
+
+	// Monsieur Pip stands on the stage left of the screen (landscape), or
+	// below it on the left in portrait. Main-container coordinates.
+	const pipPlacement = $derived.by(() => {
+		const board = context.stateGameDerived.boardLayout();
+		if (context.stateLayoutDerived.layoutType() === 'portrait') {
+			return { x: board.x - board.width * 0.38, y: board.y + board.height / 2 + 330, height: 360 };
+		}
+		return { x: board.x - board.width / 2 - 270, y: board.y + board.height / 2 + 70, height: 560 };
+	});
+
+	onMount(() => {
+		context.stateLayout.showLoadingScreen = true;
+		// Warm the title font before any PixiJS Text draws (canvas text has no
+		// font swap: if it isn't loaded at draw time it stays on the fallback).
+		document.fonts?.load('400 32px Limelight');
+	});
+
+	context.eventEmitter.subscribeOnMount({
+		buyBonusConfirm: () => {
+			stateModal.modal = { name: 'buyBonusConfirm' };
+		},
+	});
+</script>
+
+<App>
+	<EnableSound />
+	<EnableHotkey />
+	<EnableGameActor />
+	<EnablePixiExtension />
+
+	<Background />
+
+	{#if context.stateLayout.showLoadingScreen}
+		<LoadingScreen onloaded={() => (context.stateLayout.showLoadingScreen = false)} />
+	{:else}
+		<ResumeBet />
+		<!--
+			The reason why <Sound /> is rendered after clicking the loading screen:
+			"Autoplay with sound is allowed if: The user has interacted with the domain (click, tap, etc.)."
+			Ref: https://developer.chrome.com/blog/autoplay
+		-->
+		<Sound />
+
+		<MainContainer>
+			<BoardFrame />
+		</MainContainer>
+
+		<MainContainer>
+			<Board />
+			<Anticipations />
+		</MainContainer>
+
+		<MainContainer>
+			<PipPuppet {...pipPlacement} />
+		</MainContainer>
+
+		<UI>
+			{#snippet gameName()}
+				<UiGameName name="SLAPSTICK" />
+			{/snippet}
+			{#snippet logo()}
+				<Sprite anchor={{ x: 1, y: 0 }} key="logo" width={REM * 6} height={REM * 3} />
+			{/snippet}
+		</UI>
+		<Win />
+		<FreeSpinIntro />
+		{#if ['desktop', 'landscape'].includes(context.stateLayoutDerived.layoutType())}
+			<FreeSpinCounter />
+		{/if}
+		<FreeSpinOutro />
+		<Transition />
+	{/if}
+
+	<FilmOverlay />
+</App>
+
+<Modals>
+	{#snippet version()}
+		<GameVersion version="0.0.0" />
+	{/snippet}
+	{#snippet payTable()}
+		<PayTableContent />
+	{/snippet}
+	{#snippet gameRules()}
+		<GameRulesContent />
+	{/snippet}
+</Modals>
