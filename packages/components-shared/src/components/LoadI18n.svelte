@@ -20,9 +20,16 @@
 
 	let loaded = $state(false);
 
+	// Engine guideline [240]: an unsupported lang code must fall back to
+	// English, not break the display. props.messagesMap[lang] simply returns
+	// undefined for a code with no catalog (e.g. lang=zz) -- it never throws
+	// -- so the try/catch fallback below, which only reacts to a thrown
+	// error, never actually triggered for this case. Checking the lookup
+	// explicitly closes that gap.
 	const loadMessages = (lang: Language) => {
 		const messages = props.messagesMap[lang];
 		if (props.debug) console.log({ messages });
+		if (!messages) throw new Error(`No message catalog for lang "${lang}"`);
 		return messages;
 	};
 

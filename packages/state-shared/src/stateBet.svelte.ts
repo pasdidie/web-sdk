@@ -54,10 +54,18 @@ const activeBetMode = () => stateMeta.betModeMeta?.[stateBet.activeBetModeKey.to
 	?? null;
 const isContinuousBet = () => stateBet.autoSpinsCounter > 1 || stateBet.isSpaceHold;
 const timeScale = () => (stateBet.isTurbo ? 2 : 1);
+// Engine guideline [174]: a replay for a mode costing more than 1x the base
+// bet must show the real cost (amount x costMultiplier), and LabelBet.svelte
+// (the HUD's bet ticker, reused by the replay UI) reads this. Previously only
+// 'activate' modes (toggle-on, persist across future bets) applied their
+// multiplier here -- 'buy' modes (one-off purchases, e.g. our 3 bonus tiers)
+// fell through to 1, so a replayed bonus round showed the base bet instead of
+// its real cost. Both types genuinely cost costMultiplier x the base bet;
+// only 'default' (the base game itself) should stay at 1.
 const betCostMultiplier = () =>
-	stateBetDerived.activeBetMode().type === 'activate'
-		? stateBetDerived.activeBetMode().costMultiplier
-		: 1;
+	stateBetDerived.activeBetMode().type === 'default'
+		? 1
+		: stateBetDerived.activeBetMode().costMultiplier;
 const betCost = () => stateBet.betAmount * betCostMultiplier();
 const isBetCostAvailable = () => betCost() > 0 && betCost() <= stateBet.balanceAmount;
 const hasAutoBetCounter = () => stateBet.autoSpinsCounter !== 0;
