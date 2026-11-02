@@ -54,13 +54,6 @@ export default {
 		]
 	},
 	"symbols": {
-		"H1": {
-			"paytable": [
-				{
-					"3": 20
-				}
-			]
-		},
 		"H2": {
 			"paytable": [
 				{
@@ -68,21 +61,18 @@ export default {
 				}
 			]
 		},
-		"W": {
+		"H1": {
 			"paytable": [
 				{
-					"3": 50
+					"3": 20
 				}
-			],
-			"special_properties": [
-				"wild",
-				"multiplier"
 			]
 		},
-		"S": {
-			"paytable": null,
-			"special_properties": [
-				"scatter"
+		"L1": {
+			"paytable": [
+				{
+					"3": 2
+				}
 			]
 		},
 		"H3": {
@@ -99,18 +89,28 @@ export default {
 				}
 			]
 		},
-		"L1": {
-			"paytable": [
-				{
-					"3": 2
-				}
-			]
-		},
 		"L2": {
 			"paytable": [
 				{
 					"3": 1
 				}
+			]
+		},
+		"S": {
+			"paytable": null,
+			"special_properties": [
+				"scatter"
+			]
+		},
+		"W": {
+			"paytable": [
+				{
+					"3": 50
+				}
+			],
+			"special_properties": [
+				"wild",
+				"multiplier"
 			]
 		}
 	},
