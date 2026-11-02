@@ -8,7 +8,8 @@
 </script>
 
 <script lang="ts">
-	import { Container } from 'pixi-svelte';
+	import { Container, Text } from 'pixi-svelte';
+	import { stateI18nDerived } from 'state-shared';
 	import { FadeContainer, WinCountUpProvider, ResponsiveBitmapText } from 'components-pixi';
 	import { waitForResolve, waitForTimeout } from 'utils-shared/wait';
 	import { bookEventAmountToCurrencyString } from 'utils-shared/amount';
@@ -22,6 +23,16 @@
 	import { getContext } from '../game/context';
 
 	const context = getContext();
+	const t = stateI18nDerived.translate;
+
+	// Silent-film intertitle line shown above the amount on big wins.
+	const INTERTITLES: Partial<Record<string, string>> = {
+		big: 'BRAVO!',
+		superwin: 'WHAT LUCK!',
+		mega: 'MARVELLOUS!',
+		epic: 'SENSATIONAL!',
+		max: 'THE GRAND FINALE!',
+	};
 
 	let show = $state(false);
 	let amount = $state(0);
@@ -65,13 +76,27 @@
 					>
 						{#if winLevelData?.animation}
 							<WinAnimation animationMap={winLevelData.animation}>
+								{#if INTERTITLES[winLevelData.alias]}
+									<Text
+										anchor={0.5}
+										y={-SYMBOL_SIZE * 1.15}
+										text={t(INTERTITLES[winLevelData.alias] ?? '')}
+										style={{
+											fontFamily: 'Limelight, serif',
+											fontSize: SYMBOL_SIZE * 0.42,
+											fill: 0xf2eee4,
+											letterSpacing: 4,
+										}}
+									/>
+								{/if}
 								<ResponsiveBitmapText
 									anchor={0.5}
+									y={SYMBOL_SIZE * 0.2}
 									maxWidth={context.stateGameDerived.boardLayout().width * 1.7}
 									text={bookEventAmountToCurrencyString(countUpAmount)}
 									style={{
 										fontFamily: 'silver',
-										fontSize: SYMBOL_SIZE * 1.3,
+										fontSize: SYMBOL_SIZE * 1.05,
 										align: 'center',
 										fontWeight: 'bold',
 										letterSpacing: 0,

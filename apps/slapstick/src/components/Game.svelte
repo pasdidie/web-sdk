@@ -7,7 +7,7 @@
 	import { App, Sprite, REM } from 'pixi-svelte';
 	import { stateModal } from 'state-shared';
 
-	import { UI, UiGameName } from 'components-ui-pixi';
+	import { UI, UiGameName, setMetalTextTheme } from 'components-ui-pixi';
 	import { GameVersion, Modals } from 'components-ui-html';
 	import PayTableContent from './PayTableContent.svelte';
 	import GameRulesContent from './GameRulesContent.svelte';
@@ -31,6 +31,13 @@
 	import PipPuppet from './PipPuppet.svelte';
 
 	const context = getContext();
+
+	// Silver + Art Deco titles for the shared UI labels (default is Azure Anvil's gold).
+	setMetalTextTheme({
+		fontFamily: 'Limelight, Cinzel, serif',
+		colorStops: [0xffffff, 0xd8d4ca, 0x8f8b82],
+		strokeColor: 0x0d0d0d,
+	});
 
 	// Monsieur Pip stands on the stage left of the screen (landscape), or
 	// below it on the left in portrait. Main-container coordinates.
