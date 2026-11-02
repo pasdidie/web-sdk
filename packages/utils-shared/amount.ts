@@ -15,6 +15,18 @@ const NO_LOCALISATION_CURRENCY_MAP: Record<string, string> = {
 // overriding that and producing "¥10.00".
 const ZERO_DECIMAL_CURRENCIES = new Set(['JPY']);
 
+// Engine guideline [273]: a payout under the currency's normal smallest unit
+// (e.g. 0.001 on a currency that normally shows 2 decimals) must still show
+// as a real nonzero number, not round away to "0.00" or round up to "0.01".
+// Extends the decimal count just enough to show it, capped so it never gets
+// absurd; leaves ordinary amounts (>= the normal unit) at the normal count.
+const decimalsNeededToShow = (value: number, normalDecimals: number): number => {
+	if (value === 0) return normalDecimals;
+	const smallestNormalUnit = 10 ** -normalDecimals;
+	if (Math.abs(value) >= smallestNormalUnit) return normalDecimals;
+	return Math.min(6, Math.ceil(-Math.log10(Math.abs(value))) + 1);
+};
+
 // bookEventAmount: is the amount or win numbers in the events of books, e.g. the amount in setTotalWin bookEvent
 // {
 // 	"index": 3,
@@ -38,13 +50,15 @@ export const numberToFloat = (value: number) => Number.parseFloat(`${value}`);
 
 export const numberToCurrencyString = (value: number) => {
 	if (stateBet.currency in NO_LOCALISATION_CURRENCY_MAP) {
-		return `${NO_LOCALISATION_CURRENCY_MAP[stateBet.currency]} ${numberToFloat(value).toFixed(2)}`;
+		const decimals = decimalsNeededToShow(numberToFloat(value), 2);
+		return `${NO_LOCALISATION_CURRENCY_MAP[stateBet.currency]} ${numberToFloat(value).toFixed(decimals)}`;
 	}
 
-	const decimals = ZERO_DECIMAL_CURRENCIES.has(stateBet.currency) ? 0 : 2;
+	const normalDecimals = ZERO_DECIMAL_CURRENCIES.has(stateBet.currency) ? 0 : 2;
+	const decimals = decimalsNeededToShow(value, normalDecimals);
 
 	return stateI18n.i18n.number(value, {
-		minimumFractionDigits: decimals,
+		minimumFractionDigits: normalDecimals,
 		maximumFractionDigits: decimals,
 		style: 'currency',
 		currency: stateBet.currency,

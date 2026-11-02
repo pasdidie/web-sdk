@@ -66,6 +66,17 @@
 				stateConfig.betMenuOptions = stateConfig.betAmountOptions.filter((_, index) =>
 					MOST_USED_BET_INDEXES.includes(index),
 				);
+
+				// Engine guideline [242]: open on the RGS's defaultBetLevel, not a
+				// hand-picked default (stateBet.betAmount was otherwise only ever
+				// the state-shared module's hardcoded `1`). Set here, before the
+				// `round` block below, so an active round's own amount still wins
+				// when present -- that block runs after this one.
+				if (authenticateData.config?.defaultBetLevel) {
+					const defaultBetAmount = authenticateData.config.defaultBetLevel / API_AMOUNT_MULTIPLIER;
+					stateBet.betAmount = defaultBetAmount;
+					stateBet.wageredBetAmount = defaultBetAmount;
+				}
 			}
 
 			// round

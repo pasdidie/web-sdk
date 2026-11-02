@@ -105,9 +105,17 @@
 		</li>
 		<li><strong>{t('Sound')}</strong> — {t('mutes or restores all audio, including bonus and big-win screens.')}</li>
 		<li><strong>{t('Settings')}</strong> — {t('opens display and audio options.')}</li>
-		<li><strong>{t('Info')}</strong> — {t('opens this rules screen and the paytable.')}</li>
+		<li>
+			<strong>{t('Info')}</strong> — {social()
+				? t('opens this rules screen and the win table.')
+				: t('opens this rules screen and the paytable.')}
+		</li>
 		<li><strong>{t('Fullscreen')}</strong> — {t('toggles fullscreen display.')}</li>
-		<li><strong>{t('Menu')}</strong> — {t('opens the side menu (rules, paytable, settings, sound).')}</li>
+		<li>
+			<strong>{t('Menu')}</strong> — {social()
+				? t('opens the side menu (rules, win table, settings, sound).')
+				: t('opens the side menu (rules, paytable, settings, sound).')}
+		</li>
 	</ul>
 
 	<h2>{t('Disclaimer')}</h2>
