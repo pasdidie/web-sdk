@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { type Snippet } from 'svelte';
 	import { GlobalStyle } from 'components-ui-html';
-	import { Authenticate, LoaderStakeEngine, LoadI18n } from 'components-shared';
+	import { Authenticate, LoadI18n } from 'components-shared';
 	import { stateMeta } from 'state-shared';
 	import Game from '../components/Game.svelte';
 	import LoaderAzureAnvil from '../components/LoaderAzureAnvil.svelte';
@@ -14,13 +14,9 @@
 
 	const props: Props = $props();
 
-	let showYourLoader = $state(false);
-
-	const loaderUrlStakeEngine = new URL('../../stake-engine-loader.gif', import.meta.url).href;
-
 	// Replaces state-shared's template Buy Bonus content (5 fake modes --
-	// DOUBLE BOOST/SAMURAI SPIN/etc, see docs/DECISIONS.md) with our real,
-	// single bonus-buy mode.
+	// DOUBLE BOOST/SAMURAI SPIN/etc, see docs/DECISIONS.md) with our real
+	// bet modes (base + 3 buy-bonus tiers).
 	stateMeta.betModeMeta = betModeMeta;
 
 	setContext();
@@ -34,10 +30,12 @@
 	</Authenticate>
 </GlobalStyle>
 
-<LoaderStakeEngine src={loaderUrlStakeEngine} oncomplete={() => (showYourLoader = true)} />
-
-{#if showYourLoader}
-	<LoaderAzureAnvil />
-{/if}
+<!--
+	No LoaderStakeEngine ("Powered By [Stake logo]" splash) here -- the
+	Engine approval checklist's PreChecks explicitly says the submitted
+	game should not contain it (see docs/DECISIONS.md). Straight to our
+	own loader.
+-->
+<LoaderAzureAnvil />
 
 {@render props.children()}

@@ -1,6 +1,6 @@
 export default {
-	providerName: 'sample_provider',
-	gameName: 'sample_lines',
+	providerName: 'GAMBDIDIE',
+	gameName: 'Azure Anvil',
 	gameID: 'slot_v1',
 	rtp: 0.965,
 	numReels: 5,
