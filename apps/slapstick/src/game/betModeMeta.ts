@@ -21,29 +21,25 @@ const social = stateUrlDerived.social();
  * components-ui-pixi/i18nDerived.ts for the same pattern on the button that
  * opens this modal.
  *
- * Object keys here (BASE/BONUS10/...) are the UI-side lookup key into
- * stateMeta.betModeMeta, matching this SDK's own default/reset convention
- * (stateBet.svelte.ts defaults activeBetModeKey to the literal 'BASE', and
- * several components reset it to 'BASE' after a buy-bonus round ends) --
- * NOT what gets sent to the RGS. Each entry's `mode` field is the exact
- * bet-mode name the math side declares (game_config.py's BetMode `name=`,
- * lowercase), which createPrimaryMachines.ts's requestBet call now reads
- * instead of the raw key (see that file for why: the two were silently
- * mismatched in casing before this round of changes, never actually
- * exercised against a live RGS purchase).
+ * Object keys here MUST equal each entry's own `mode` field exactly
+ * (lowercase, game_config.py's BetMode `name=`): stateBonus.svelte.ts's
+ * selectedBetModeData() (components-ui-html) does a direct
+ * `stateMeta.betModeMeta[key]` lookup with the key BonusCard.svelte takes
+ * from `betModeData.mode`; an uppercase key made the Buy Bonus confirm
+ * modal crash on open (found live on Azure Anvil, web-sdk 1881adb).
  */
 const EMPTY_ASSETS = { icon: '', volatility: '', button: '', dialogImage: '', dialogVolatility: '' };
 const bonusIllustration = (assets as any).bonus_illustration?.src ?? '';
 
-type BonusTier = { key: string; mode: string; cost: number; maxWin: number; spins: number };
+type BonusTier = { mode: string; cost: number; maxWin: number; spins: number };
 
 // Slapstick has a single buy mode: the 8-spin "Special Screening".
 const bonusTiers: BonusTier[] = [
-	{ key: 'BONUS', mode: 'bonus', cost: config.betModes.bonus.cost, maxWin: config.betModes.bonus.max_win, spins: 8 },
+	{ mode: 'bonus', cost: config.betModes.bonus.cost, maxWin: config.betModes.bonus.max_win, spins: 8 },
 ];
 
 export const betModeMeta: BetModeMeta = {
-	BASE: {
+	base: {
 		mode: 'base',
 		costMultiplier: config.betModes.base.cost,
 		type: 'default',
@@ -62,7 +58,7 @@ export const betModeMeta: BetModeMeta = {
 	},
 	...Object.fromEntries(
 		bonusTiers.map((tier) => [
-			tier.key,
+			tier.mode,
 			{
 				mode: tier.mode,
 				costMultiplier: tier.cost,
