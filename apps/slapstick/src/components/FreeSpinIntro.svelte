@@ -9,7 +9,8 @@
 	import { CanvasSizeRectangle } from 'components-layout';
 	import { FadeContainer } from 'components-pixi';
 	import { waitForResolve } from 'utils-shared/wait';
-	import { BitmapText } from 'pixi-svelte';
+	import { Text } from 'pixi-svelte';
+	import { silverText } from '../game/textStyles';
 
 	import { getContext } from '../game/context';
 	import PressToContinue from './PressToContinue.svelte';
@@ -41,23 +42,19 @@
 
 	<FreeSpinAnimation>
 		{#snippet children({ sizes })}
-			<BitmapText
+			<Text
 				anchor={{ x: 0.5, y: 1 }}
 				y={-sizes.width * 0.06}
 				text="FREE SPINS"
-				style={{ fontFamily: 'silver', fontSize: sizes.width * 0.07, fontWeight: 'bold', align: 'center' }}
+				style={silverText(sizes.width * 0.07)}
 			/>
 
 			<NumberPopSprite>
-				<BitmapText
+				<Text
 					anchor={{ x: 0.5, y: 0.5 }}
 					text={freeSpinsFromEvent}
 					y={sizes.width * 0.06}
-					style={{
-						fontFamily: 'silver',
-						fontSize: sizes.width * 0.09,
-						fontWeight: 'bold',
-					}}
+					style={silverText(sizes.width * 0.1)}
 				/>
 			</NumberPopSprite>
 		{/snippet}

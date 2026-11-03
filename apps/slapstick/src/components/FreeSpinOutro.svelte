@@ -8,8 +8,9 @@
 </script>
 
 <script lang="ts">
-	import { BitmapText } from 'pixi-svelte';
-	import { FadeContainer, WinCountUpProvider, ResponsiveBitmapText } from 'components-pixi';
+	import { Text } from 'pixi-svelte';
+	import { silverText } from '../game/textStyles';
+	import { FadeContainer, WinCountUpProvider, ResponsiveText } from 'components-pixi';
 	import { bookEventAmountToCurrencyString } from 'utils-shared/amount';
 	import { waitForResolve } from 'utils-shared/wait';
 	import { CanvasSizeRectangle } from 'components-layout';
@@ -52,30 +53,27 @@
 
 				<FreeSpinAnimation>
 					{#snippet children({ sizes })}
-						<BitmapText
+						<Text
 							anchor={{ x: 0.5, y: 1 }}
 							y={-sizes.width * (isBigWin ? 0.18 : 0.12)}
 							text={isBigWin ? 'FREE SPINS COMPLETE' : 'WIN'}
-							style={{ fontFamily: 'silver', fontSize: sizes.width * 0.07, fontWeight: 'bold', align: 'center' }}
+							style={silverText(sizes.width * 0.065)}
 						/>
 
 						<NumberPopSprite>
-							<ResponsiveBitmapText
+							<ResponsiveText
 								anchor={0.5}
-								style={{
-									fontFamily: 'silver',
-									fontSize: sizes.width * 0.08,
-								}}
+								style={silverText(sizes.width * 0.1)}
 								text={bookEventAmountToCurrencyString(countUpAmount)}
 								maxWidth={sizes.width}
 							/>
 						</NumberPopSprite>
 
-						<BitmapText
+						<Text
 							anchor={{ x: 0.5, y: 0 }}
 							y={sizes.width * 0.14}
 							text="TOTAL WIN"
-							style={{ fontFamily: 'silver', fontSize: sizes.width * 0.05, fontWeight: 'bold', align: 'center' }}
+							style={silverText(sizes.width * 0.045)}
 						/>
 					{/snippet}
 				</FreeSpinAnimation>

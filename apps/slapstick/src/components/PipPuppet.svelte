@@ -46,8 +46,12 @@
 	const HEAD_SCALE = 145 / 253;
 	const CAMERA_SCALE = 0.62 * (938 / 700); // camera_body was exported at 700px max side
 	const CAMERA_X = -340; // camera stands at Pip's screen-left, lens towards the screen
-	// Crank hub on the side of the camera box (camera body anchored at its feet).
-	const CRANK_HUB = { x: 60, y: -420 };
+	// Crank hub on the wooden side panel of the camera box (camera_body.png
+	// 366x700 anchored at its feet: panel centre ~(145, 225) px -> rig units),
+	// and the hub point of camera_crank.png (249x415, hub ~(80, 60) px).
+	const CRANK_HUB = { x: (145 - 183) * CAMERA_SCALE, y: (225 - 700) * CAMERA_SCALE };
+	const CRANK_PIVOT = { x: 80 / 249, y: 60 / 415 };
+	const CRANK_SCALE = 0.28;
 	// Inside the curled fist of arm_R_grip (96x351, anchored at its shoulder),
 	// and the matching handle points of the two umbrella sprites.
 	const GRIP = { x: 4, y: 316 };
@@ -204,10 +208,10 @@
 			<Sprite key="pip_camera_body" anchor={{ x: 0.5, y: 1 }} scale={CAMERA_SCALE} />
 			<Sprite
 				key="pip_camera_crank"
-				anchor={{ x: 0.3, y: 0.08 }}
+				anchor={CRANK_PIVOT}
 				x={CRANK_HUB.x}
 				y={CRANK_HUB.y}
-				scale={0.55}
+				scale={CRANK_SCALE}
 				rotation={crankAngle}
 			/>
 		</Container>

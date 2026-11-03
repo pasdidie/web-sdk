@@ -10,7 +10,8 @@
 <script lang="ts">
 	import { Container, Text } from 'pixi-svelte';
 	import { stateI18nDerived } from 'state-shared';
-	import { FadeContainer, WinCountUpProvider, ResponsiveBitmapText } from 'components-pixi';
+	import { FadeContainer, WinCountUpProvider, ResponsiveText } from 'components-pixi';
+	import { silverText } from '../game/textStyles';
 	import { waitForResolve, waitForTimeout } from 'utils-shared/wait';
 	import { bookEventAmountToCurrencyString } from 'utils-shared/amount';
 	import { CanvasSizeRectangle, MainContainer } from 'components-layout';
@@ -89,33 +90,21 @@
 										}}
 									/>
 								{/if}
-								<ResponsiveBitmapText
+								<ResponsiveText
 									anchor={0.5}
 									y={SYMBOL_SIZE * 0.2}
 									maxWidth={context.stateGameDerived.boardLayout().height * 1.7}
 									text={bookEventAmountToCurrencyString(countUpAmount)}
-									style={{
-										fontFamily: 'silver',
-										fontSize: SYMBOL_SIZE * 1.05,
-										align: 'center',
-										fontWeight: 'bold',
-										letterSpacing: 0,
-									}}
+									style={silverText(SYMBOL_SIZE * 1.05)}
 								/>
 							</WinAnimation>
 						{:else}
-							<ResponsiveBitmapText
+							<ResponsiveText
 								anchor={0.5}
 								maxWidth={context.stateLayoutDerived.canvasSizes().width /
 									context.stateLayoutDerived.mainLayout().scale}
 								text={bookEventAmountToCurrencyString(countUpAmount)}
-								style={{
-									fontFamily: 'silver',
-									fontSize: SYMBOL_SIZE * 0.6,
-									align: 'center',
-									fontWeight: 'bold',
-									letterSpacing: 0,
-								}}
+								style={silverText(SYMBOL_SIZE * 0.6)}
 							/>
 						{/if}
 					</Container>

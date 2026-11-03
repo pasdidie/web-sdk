@@ -56,11 +56,15 @@
 		return { x: board.x - board.height * 1.07 - 110, y: board.y + board.height / 2 + 88, height: 430, showCamera: true };
 	});
 
+	// Pixi draws canvas text once and never re-renders it when a web font
+	// arrives later: if Limelight/Cinzel aren't loaded when the first Text is
+	// created, the UI stays in the browser's fallback serif. Mount the Pixi app
+	// only once both faces are ready (or after 3s, never block the game).
+	let fontsReady = $state(false);
 	onMount(() => {
 		context.stateLayout.showLoadingScreen = true;
-		// Warm the title font before any PixiJS Text draws (canvas text has no
-		// font swap: if it isn't loaded at draw time it stays on the fallback).
-		document.fonts?.load('400 32px Limelight');
+		const faces = ['400 32px Limelight', '400 32px Cinzel', '700 32px Cinzel'].map((f) => document.fonts?.load(f));
+		Promise.race([Promise.allSettled(faces), new Promise((r) => setTimeout(r, 3000))]).then(() => (fontsReady = true));
 	});
 
 	context.eventEmitter.subscribeOnMount({
@@ -70,6 +74,7 @@
 	});
 </script>
 
+{#if fontsReady}
 <App>
 	<EnableSound />
 	<EnableHotkey />
@@ -121,6 +126,7 @@
 
 	<FilmOverlay />
 </App>
+{/if}
 
 <Modals>
 	{#snippet version()}
