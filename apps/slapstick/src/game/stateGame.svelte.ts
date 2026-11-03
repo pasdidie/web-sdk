@@ -77,6 +77,8 @@ export const stateGame = $state({
 	gameType: 'basegame' as GameType,
 	multiplierBoard: [] as (MultiplierSymbol | undefined)[][],
 	scatterCounter: 0,
+	// true while winning symbols are shown: the others dim (ReelSymbol.svelte)
+	winSpotlight: false,
 });
 
 // Landscape: the screen sits a little right of centre and above the UI bar,

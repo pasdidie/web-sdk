@@ -69,9 +69,11 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 	winInfo: async (bookEvent: BookEventOfType<'winInfo'>) => {
 		eventEmitter.broadcast({ type: 'soundOnce', name: 'sfx_winlevel_small' });
 		eventEmitter.broadcast({ type: 'pipMood', mood: 'winSmall' });
+		stateGame.winSpotlight = true;
 		await sequence(bookEvent.wins, async (win) => {
 			await animateSymbols({ positions: win.positions });
 		});
+		stateGame.winSpotlight = false;
 	},
 	setTotalWin: async (bookEvent: BookEventOfType<'setTotalWin'>) => {
 		stateBet.winBookEventAmount = bookEvent.amount;
@@ -80,7 +82,9 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 		// animate scatters
 		eventEmitter.broadcast({ type: 'pipMood', mood: 'freeSpins' });
 		eventEmitter.broadcast({ type: 'soundOnce', name: 'sfx_scatter_win_v2' });
+		stateGame.winSpotlight = true;
 		await animateSymbols({ positions: bookEvent.positions });
+		stateGame.winSpotlight = false;
 		// show free spin intro
 		eventEmitter.broadcast({ type: 'soundOnce', name: 'sfx_superfreespin' });
 		await eventEmitter.broadcastAsync({ type: 'uiHide' });

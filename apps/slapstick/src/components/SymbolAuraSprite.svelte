@@ -5,12 +5,11 @@
 	 *   - mode "idle": halo breathes; the projector lamp flickers, the hat sways.
 	 *   - mode "land": quick squash 1.1 -> 0.95 -> 1, then oncomplete.
 	 *   - mode "win":  projector rattles and throws its beam; the hat hops and
-	 *                  tips; halo brightens. One cycle, or looped.
+	 *                  tips; halo brightens (no glow outline: same
+	 *                  spotlight language as SymbolWinSprite). One cycle, or looped.
 	 */
-	import { onDestroy } from 'svelte';
 	import { Tween } from 'svelte/motion';
 	import { sineInOut } from 'svelte/easing';
-	import { GlowFilter } from 'pixi-filters';
 	import { BaseSprite, Container, Sprite } from 'pixi-svelte';
 
 	import { SYMBOL_SIZE } from '../game/constants';
@@ -41,17 +40,6 @@
 
 	const halo = getHaloTexture();
 	const beam = getBeamTexture();
-
-	const glow = new GlowFilter({
-		color: winCfg.glowColor,
-		outerStrength: winCfg.glowOuterStrength,
-		innerStrength: winCfg.glowInnerStrength,
-		quality: winCfg.glowQuality,
-		distance: winCfg.glowDistance,
-	});
-	// See SymbolWinSprite.svelte -- Container.destroy() doesn't free attached
-	// filters, so each Wild/Scatter win leaks a GlowFilter without this.
-	onDestroy(() => glow.destroy());
 
 	const landScale = new Tween(1, { easing: sineInOut });
 	let t = $state(0); // seconds since the mode started
@@ -140,6 +128,6 @@
 		/>
 	{/if}
 	<Container y={hatY + rattleY} rotation={hatRotation + rattle} scale={bodyScale}>
-		<Sprite anchor={0.5} key={props.bodyKey} {width} {height} filters={winning ? [glow] : []} />
+		<Sprite anchor={0.5} key={props.bodyKey} {width} {height} />
 	</Container>
 </Container>
