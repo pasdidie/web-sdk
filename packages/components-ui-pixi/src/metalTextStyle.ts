@@ -13,6 +13,14 @@ type MetalTextTheme = {
 	fontFamily: string;
 	colorStops: [number, number, number]; // top, middle, bottom of the gradient
 	strokeColor: number;
+	// Forces one weight for every UI text (a single-weight display face such
+	// as Limelight looks smeared when the browser fakes bold). Unset = each
+	// caller's own weight.
+	fontWeight?: TextStyleOptions['fontWeight'];
+	// UiButton: label wrap width as a fraction of the button (keep it inside
+	// the button art's plain centre), and size boost for one-glyph labels (+/-).
+	buttonTextWidth: number;
+	buttonGlyphScale: number;
 };
 
 // Default = Azure Anvil's forged gold. A game can swap the palette (e.g. a
@@ -21,7 +29,11 @@ const metalTextTheme: MetalTextTheme = {
 	fontFamily: 'Cinzel',
 	colorStops: [0xfbe9a8, 0xd9a63f, 0x8a5a1e],
 	strokeColor: 0x2b1708,
+	buttonTextWidth: 0.74,
+	buttonGlyphScale: 1,
 };
+
+export const getMetalTextTheme = (): Readonly<MetalTextTheme> => metalTextTheme;
 
 export const setMetalTextTheme = (theme: Partial<MetalTextTheme>) => Object.assign(metalTextTheme, theme);
 
@@ -31,7 +43,7 @@ export const metalTextStyle = (
 ): TextStyleOptions => ({
 	fontFamily: metalTextTheme.fontFamily,
 	fontSize,
-	fontWeight: options?.fontWeight ?? '700',
+	fontWeight: metalTextTheme.fontWeight ?? options?.fontWeight ?? '700',
 	fill: new FillGradient({
 		type: 'linear',
 		start: { x: 0, y: 0 },

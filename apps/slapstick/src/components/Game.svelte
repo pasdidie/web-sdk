@@ -38,10 +38,16 @@
 	Filter.defaultOptions.resolution = 'inherit';
 
 	// Silver + Art Deco titles for the shared UI labels (default is Azure Anvil's gold).
+	// Near-flat cream (a strong silver gradient on silver button rims was
+	// unreadable), Limelight's single real weight, labels kept inside the
+	// buttons' black centre, bigger +/- glyphs.
 	setMetalTextTheme({
 		fontFamily: 'Limelight, Cinzel, serif',
-		colorStops: [0xffffff, 0xd8d4ca, 0x8f8b82],
+		colorStops: [0xffffff, 0xf2eee4, 0xd2cdc2],
 		strokeColor: 0x0d0d0d,
+		fontWeight: '400',
+		buttonTextWidth: 0.6,
+		buttonGlyphScale: 3,
 	});
 
 	// Monsieur Pip stands on the stage left of the screen (landscape), or

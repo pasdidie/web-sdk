@@ -8,7 +8,7 @@
 	import ButtonBetProvider from './ButtonBetProvider.svelte';
 	import { UI_BASE_FONT_SIZE, UI_BASE_SIZE } from '../constants';
 	import { i18nDerived } from '../i18n/i18nDerived';
-	import { metalTextStyle } from '../metalTextStyle';
+	import { getMetalTextTheme, metalTextStyle } from '../metalTextStyle';
 
 	const props: Partial<Omit<ButtonProps, 'children'>> = $props();
 	const disabled = $derived(!stateBetDerived.isBetCostAvailable());
@@ -40,7 +40,7 @@
 						style={{
 							align: 'center',
 							wordWrap: true,
-							wordWrapWidth: sizes.width * 0.74,
+							wordWrapWidth: sizes.width * getMetalTextTheme().buttonTextWidth,
 							...metalTextStyle(UI_BASE_FONT_SIZE * 0.7, { fontWeight: '600' }),
 						}}
 					/>

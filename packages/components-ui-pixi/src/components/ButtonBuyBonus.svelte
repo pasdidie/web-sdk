@@ -7,7 +7,7 @@
 	import { UI_BASE_FONT_SIZE, UI_BASE_SIZE } from '../constants';
 	import { getContext } from '../context';
 	import { i18nDerived } from '../i18n/i18nDerived';
-	import { metalTextStyle } from '../metalTextStyle';
+	import { getMetalTextTheme, metalTextStyle } from '../metalTextStyle';
 
 	const props: Partial<Omit<ButtonProps, 'children'>> = $props();
 	const { stateXstateDerived, eventEmitter } = getContext();
@@ -76,7 +76,7 @@
 			style={{
 				align: 'center',
 				wordWrap: true,
-				wordWrapWidth: sizes.width * 0.74,
+				wordWrapWidth: sizes.width * getMetalTextTheme().buttonTextWidth,
 				...metalTextStyle(UI_BASE_FONT_SIZE * 0.55, { fontWeight: '600' }),
 			}}
 		/>

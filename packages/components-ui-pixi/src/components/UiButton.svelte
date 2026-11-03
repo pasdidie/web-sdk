@@ -7,7 +7,7 @@
 	import type { Snippet } from 'svelte';
 	import { i18nDerived } from '../i18n/i18nDerived';
 	import { UI_BASE_FONT_SIZE } from '../constants';
-	import { metalTextStyle } from '../metalTextStyle';
+	import { getMetalTextTheme, metalTextStyle } from '../metalTextStyle';
 
 	type Props = Omit<ButtonProps, 'children'> & {
 		icon: ButtonIcon;
@@ -24,6 +24,10 @@
 		children: childrenFromParent,
 		...buttonProps
 	}: Props = $props();
+
+	const theme = getMetalTextTheme();
+	const label = $derived(i18nDerived[icon]());
+	const fontScale = $derived(label.length <= 1 ? theme.buttonGlyphScale : 1);
 </script>
 
 <Button {...buttonProps}>
@@ -51,12 +55,12 @@
 		<Text
 			{...center}
 			anchor={0.5}
-			text={i18nDerived[icon]()}
+			text={label}
 			style={{
 				align: 'center',
 				wordWrap: true,
-				wordWrapWidth: buttonProps.sizes.width * 0.74,
-				...metalTextStyle(UI_BASE_FONT_SIZE * 0.6, { fontWeight: '600' }),
+				wordWrapWidth: buttonProps.sizes.width * theme.buttonTextWidth,
+				...metalTextStyle(UI_BASE_FONT_SIZE * 0.6 * fontScale, { fontWeight: '600' }),
 			}}
 		/>
 
