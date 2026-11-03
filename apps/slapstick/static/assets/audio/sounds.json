@@ -1,223 +1,4 @@
 {
-	"sprite": {
-		"sfx_btn_general": [
-			0,
-			1000.0
-		],
-		"sfx_btn_spin": [
-			3000,
-			2000.0
-		],
-		"sfx_reel_stop_1": [
-			7000,
-			2000.0
-		],
-		"sfx_scatter_reveal": [
-			11000,
-			1000.0
-		],
-		"sfx_scatter_win": [
-			14000,
-			1000.0
-		],
-		"sfx_wild_explode": [
-			17000,
-			2000.0
-		],
-		"sfx_anticipation": [
-			21000,
-			2000.0,
-			true
-		],
-		"sfx_anticipation_start": [
-			25000,
-			1000.0
-		],
-		"sfx_winlevel_small": [
-			28000,
-			2000.0
-		],
-		"sfx_winlevel_nice": [
-			32000,
-			1000.0
-		],
-		"sfx_winlevel_standard": [
-			35000,
-			1000.0
-		],
-		"sfx_winlevel_substantial": [
-			38000,
-			1000.0
-		],
-		"sfx_winlevel_end": [
-			41000,
-			2000.0
-		],
-		"bgm_freespin": [
-			45000,
-			69120.0,
-			true
-		],
-		"bgm_main": [
-			116120,
-			132452.834,
-			true
-		],
-		"bgm_winlevel_big": [
-			250573,
-			8000.0,
-			true
-		],
-		"bgm_winlevel_epic": [
-			260573,
-			8000.0,
-			true
-		],
-		"bgm_winlevel_max": [
-			270573,
-			8000.0,
-			true
-		],
-		"bgm_winlevel_mega": [
-			280573,
-			8000.0,
-			true
-		],
-		"bgm_winlevel_superwin": [
-			290573,
-			8000.0,
-			true
-		],
-		"jng_intro_fs": [
-			300573,
-			2002.5849999999998
-		],
-		"sfx_bigwin_coinloop": [
-			304575,
-			17125.011000000002,
-			true
-		],
-		"sfx_fs_respins": [
-			323700,
-			4062.494
-		],
-		"sfx_multiplier_combine_a": [
-			329763,
-			1208.844
-		],
-		"sfx_multiplier_combine_b": [
-			332972,
-			1045.85
-		],
-		"sfx_multiplier_explosion_a": [
-			336018,
-			769.274
-		],
-		"sfx_multiplier_explosion_b": [
-			338787,
-			2046.6440000000002
-		],
-		"sfx_multiplier_explosion_c": [
-			342834,
-			1202.2679999999998
-		],
-		"sfx_multiplier_landing": [
-			346036,
-			999.478
-		],
-		"sfx_multiplier_reset": [
-			349035,
-			584.422
-		],
-		"sfx_multiplier_up": [
-			351620,
-			1499.252
-		],
-		"sfx_multiplier_update": [
-			355119,
-			1607.823
-		],
-		"sfx_multiplier_win": [
-			358727,
-			3791.678
-		],
-		"sfx_reel_stop_2": [
-			364518,
-			246.667
-		],
-		"sfx_reel_stop_3": [
-			366765,
-			240.998
-		],
-		"sfx_reel_stop_4": [
-			369006,
-			241.97299999999998
-		],
-		"sfx_reel_stop_5": [
-			371248,
-			239.887
-		],
-		"sfx_royals_landing": [
-			373488,
-			1199.229
-		],
-		"sfx_scatter_stop_1": [
-			376687,
-			994.853
-		],
-		"sfx_scatter_stop_2": [
-			379682,
-			1344.7849999999999
-		],
-		"sfx_scatter_stop_3": [
-			383027,
-			1060.522
-		],
-		"sfx_scatter_stop_4": [
-			386087,
-			996.145
-		],
-		"sfx_scatter_stop_5": [
-			389084,
-			997.528
-		],
-		"sfx_scatter_win_v2": [
-			392081,
-			3670.34
-		],
-		"sfx_superfreespin": [
-			397751,
-			6000.0
-		],
-		"sfx_symbols_landing": [
-			405751,
-			1202.585
-		],
-		"sfx_youwon_panel": [
-			408954,
-			2996.689
-		],
-		"tumble_win_1": [
-			413951,
-			996.236
-		],
-		"tumble_win_2": [
-			416947,
-			1134.671
-		],
-		"tumble_win_3": [
-			420082,
-			1134.83
-		],
-		"tumble_win_4": [
-			423216,
-			998.8209999999999
-		],
-		"tumble_win_5": [
-			426215,
-			989.615
-		]
-	},
 	"src": [
 		"./assets/audio/sounds.ogg",
 		"./assets/audio/sounds.m4a",
@@ -381,5 +162,224 @@
 		"tumble_win_5": {
 			"volume": 1
 		}
+	},
+	"sprite": {
+		"bgm_freespin": [
+			0,
+			15000.0,
+			true
+		],
+		"bgm_main": [
+			16000,
+			20000.0,
+			true
+		],
+		"bgm_winlevel_big": [
+			37000,
+			8000.0,
+			true
+		],
+		"bgm_winlevel_epic": [
+			46000,
+			8000.0,
+			true
+		],
+		"bgm_winlevel_max": [
+			46000,
+			8000.0,
+			true
+		],
+		"bgm_winlevel_mega": [
+			46000,
+			8000.0,
+			true
+		],
+		"bgm_winlevel_superwin": [
+			37000,
+			8000.0,
+			true
+		],
+		"jng_intro_fs": [
+			55000,
+			3000.0
+		],
+		"sfx_anticipation": [
+			59000,
+			4000.0,
+			true
+		],
+		"sfx_anticipation_start": [
+			64000,
+			1000.0
+		],
+		"sfx_bigwin_coinloop": [
+			66000,
+			6000.0,
+			true
+		],
+		"sfx_btn_general": [
+			73000,
+			480.0
+		],
+		"sfx_btn_spin": [
+			74480,
+			1000.0
+		],
+		"sfx_fs_respins": [
+			76480,
+			2000.0
+		],
+		"sfx_multiplier_combine_a": [
+			79480,
+			1000.0
+		],
+		"sfx_multiplier_combine_b": [
+			79480,
+			1000.0
+		],
+		"sfx_multiplier_explosion_a": [
+			96160,
+			1480.0
+		],
+		"sfx_multiplier_explosion_b": [
+			96160,
+			1480.0
+		],
+		"sfx_multiplier_explosion_c": [
+			96160,
+			1480.0
+		],
+		"sfx_multiplier_landing": [
+			79480,
+			1000.0
+		],
+		"sfx_multiplier_reset": [
+			81480,
+			600.0
+		],
+		"sfx_multiplier_up": [
+			79480,
+			1000.0
+		],
+		"sfx_multiplier_update": [
+			79480,
+			1000.0
+		],
+		"sfx_multiplier_win": [
+			79480,
+			1000.0
+		],
+		"sfx_reel_stop_1": [
+			83080,
+			600.0
+		],
+		"sfx_reel_stop_2": [
+			83080,
+			600.0
+		],
+		"sfx_reel_stop_3": [
+			83080,
+			600.0
+		],
+		"sfx_reel_stop_4": [
+			83080,
+			600.0
+		],
+		"sfx_reel_stop_5": [
+			83080,
+			600.0
+		],
+		"sfx_royals_landing": [
+			83080,
+			600.0
+		],
+		"sfx_scatter_reveal": [
+			87160,
+			3000.0
+		],
+		"sfx_scatter_stop_1": [
+			84680,
+			1480.0
+		],
+		"sfx_scatter_stop_2": [
+			84680,
+			1480.0
+		],
+		"sfx_scatter_stop_3": [
+			84680,
+			1480.0
+		],
+		"sfx_scatter_stop_4": [
+			84680,
+			1480.0
+		],
+		"sfx_scatter_stop_5": [
+			84680,
+			1480.0
+		],
+		"sfx_scatter_win": [
+			87160,
+			3000.0
+		],
+		"sfx_scatter_win_v2": [
+			87160,
+			3000.0
+		],
+		"sfx_superfreespin": [
+			91160,
+			4000.0
+		],
+		"sfx_symbols_landing": [
+			83080,
+			600.0
+		],
+		"sfx_wild_explode": [
+			96160,
+			1480.0
+		],
+		"sfx_winlevel_end": [
+			98640,
+			2000.0
+		],
+		"sfx_winlevel_nice": [
+			101640,
+			1480.0
+		],
+		"sfx_winlevel_small": [
+			101640,
+			1480.0
+		],
+		"sfx_winlevel_standard": [
+			101640,
+			1480.0
+		],
+		"sfx_winlevel_substantial": [
+			104120,
+			3000.0
+		],
+		"sfx_youwon_panel": [
+			104120,
+			3000.0
+		],
+		"tumble_win_1": [
+			101640,
+			1480.0
+		],
+		"tumble_win_2": [
+			101640,
+			1480.0
+		],
+		"tumble_win_3": [
+			101640,
+			1480.0
+		],
+		"tumble_win_4": [
+			101640,
+			1480.0
+		],
+		"tumble_win_5": [
+			101640,
+			1480.0
+		]
 	}
 }
