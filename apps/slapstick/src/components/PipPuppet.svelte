@@ -23,6 +23,10 @@
 	 * changes blend smoothly) + continuous oscillations from one rAF clock.
 	 * The articulated arm pieces of the parts sheet are not used (the
 	 * upper-arm piece reads as a loose sausage); both arms swing at the shoulder.
+	 * The umbrella arm is arm_R_grip (tools/assets/compose_rig.py: arm_R with the
+	 * curled hand of arm_R_lower): the umbrella is drawn behind it, its crook in
+	 * the fist, and hangs from the grip on a damped spring so it swings behind
+	 * every arm move instead of being glued to the arm.
 	 * Expression heads come from a different sheet (bigger scale) and are
 	 * scaled down by HEAD_SCALE to match the body.
 	 */
@@ -44,6 +48,16 @@
 	const CAMERA_X = -340; // camera stands at Pip's screen-left, lens towards the screen
 	// Crank hub on the side of the camera box (camera body anchored at its feet).
 	const CRANK_HUB = { x: 60, y: -420 };
+	// Inside the curled fist of arm_R_grip (96x351, anchored at its shoulder),
+	// and the matching handle points of the two umbrella sprites.
+	const GRIP = { x: 4, y: 316 };
+	const UMBRELLA_HANDLE = { x: 49 / 77, y: 65 / 368 };
+	const UMBRELLA_OPEN_HANDLE = { x: 0.5, y: 570 / 700 };
+	// Umbrella pendulum: how much it hangs towards gravity vs follows the
+	// wrist, spring stiffness and damping (critically damped ~ 2*sqrt(K)).
+	const SWING_GRAVITY = 0.6;
+	const SWING_K = 48;
+	const SWING_DAMPING = 5.5;
 
 	const HEADS = {
 		neutral: 'pip_head_neutral',
@@ -100,6 +114,9 @@
 	let umbrellaOpen = $state(false);
 	let time = $state(0);
 	let crankAngle = $state(0);
+	let swing = $state(0); // closed umbrella angle relative to the arm
+	let swingVelocity = 0;
+	let lastFlourish = 0;
 	let revertTimer: ReturnType<typeof setTimeout> | undefined;
 
 	const setMood = (next: PipMood) => {
@@ -129,6 +146,18 @@
 			last = now;
 			if (!still) time += dt;
 			if (mood === 'crank') crankAngle += dt * 9;
+			if (!still) {
+				// keep the umbrella hanging (partly) plumb whatever the arm does
+				const armWorld = armUmbrella.current + lean.current + sway;
+				const target = -armWorld * SWING_GRAVITY;
+				swingVelocity += (SWING_K * (target - swing) - SWING_DAMPING * swingVelocity) * dt;
+				swing += swingVelocity * dt;
+				// idle flourish every ~8s: a flick of the wrist sends it swinging
+				if (mood === 'idle' && time - lastFlourish > 8) {
+					lastFlourish = time;
+					swingVelocity += 5;
+				}
+			}
 			frame = requestAnimationFrame(tick);
 		};
 		frame = requestAnimationFrame(tick);
@@ -161,9 +190,6 @@
 				? Math.sin(twitchPhase * 60) * 0.1
 				: 0,
 	);
-	// Idle umbrella twirl every ~8s (a full spin of the closed umbrella).
-	const twirlPhase = $derived(time % 8);
-	const umbrellaSpin = $derived(mood === 'idle' && twirlPhase > 7 ? (twirlPhase - 7) * Math.PI * 2 : 0);
 	// The crank arm follows the crank wheel while cranking.
 	const crankSwing = $derived(mood === 'crank' ? Math.sin(crankAngle) * 0.25 : 0);
 
@@ -220,16 +246,22 @@
 
 		<Sprite key="pip_torso" anchor={{ x: 0.5, y: 0 }} y={-700} scale={{ x: 1, y: 1 + breathe }} />
 
-		<!-- umbrella arm (screen right) -->
+		<!-- umbrella arm (screen right): umbrella behind the fist, crook in the hand -->
 		<Container x={82} y={shoulderY} rotation={armUmbrella.current}>
 			{#if umbrellaOpen}
-				<Sprite key="pip_umbrella_open" anchor={{ x: 0.5, y: 0.95 }} y={380} scale={0.55} rotation={Math.PI} />
+				<!-- held aloft: canopy kept upright whatever the arm angle -->
+				<Sprite
+					key="pip_umbrella_open"
+					anchor={UMBRELLA_OPEN_HANDLE}
+					x={GRIP.x}
+					y={GRIP.y}
+					scale={0.55}
+					rotation={-armUmbrella.current - lean.current + 0.15 + Math.sin(time * 4.5) * 0.08}
+				/>
 			{:else}
-				<Container x={6} y={360} rotation={-0.08}>
-					<Sprite key="pip_umbrella" anchor={{ x: 0.5, y: 0.02 }} rotation={umbrellaSpin} />
-				</Container>
+				<Sprite key="pip_umbrella" anchor={UMBRELLA_HANDLE} x={GRIP.x} y={GRIP.y} rotation={swing} />
 			{/if}
-			<Sprite key="pip_arm_R" anchor={{ x: 0.5, y: 0.04 }} />
+			<Sprite key="pip_arm_R_grip" anchor={{ x: 0.5, y: 0.04 }} />
 		</Container>
 	</Container>
 </Container>

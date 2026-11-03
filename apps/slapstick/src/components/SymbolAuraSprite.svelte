@@ -1,21 +1,21 @@
 <script lang="ts">
 	/**
-	 * Real-asset replacement for SymbolSpine's wild/scatter states
-	 * (previously wild_dynamite/scatter_spin/scatter_win Spine animations).
-	 * Two layered sprites (body + aura) animated in code per
-	 * ANIMATION_SPEC.md section 3:
-	 *   - mode "idle"  (static/spin state): aura rotates slowly, loops.
-	 *   - mode "land":  quick squash 1.1 -> 0.95 -> 1, then oncomplete.
-	 *   - mode "win":   scale pulse + glow on top of the idle aura rotation.
+	 * Wild (top hat) and Scatter (projector): the symbol art over a soft lamp
+	 * halo (lightTextures.ts), all motion driven by one rAF clock.
+	 *   - mode "idle": halo breathes; the projector lamp flickers, the hat sways.
+	 *   - mode "land": quick squash 1.1 -> 0.95 -> 1, then oncomplete.
+	 *   - mode "win":  projector rattles and throws its beam; the hat hops and
+	 *                  tips; halo brightens. One cycle, or looped.
 	 */
 	import { onDestroy } from 'svelte';
 	import { Tween } from 'svelte/motion';
 	import { sineInOut } from 'svelte/easing';
 	import { GlowFilter } from 'pixi-filters';
-	import { Container, Sprite } from 'pixi-svelte';
+	import { BaseSprite, Container, Sprite } from 'pixi-svelte';
 
 	import { SYMBOL_SIZE } from '../game/constants';
 	import { ANIMATION_CONFIG, prefersReducedMotion } from '../game/animationConfig';
+	import { getBeamTexture, getHaloTexture } from '../game/lightTextures';
 
 	type Mode = 'idle' | 'land' | 'win';
 
@@ -23,7 +23,7 @@
 		x?: number;
 		y?: number;
 		bodyKey: string;
-		auraKey: string;
+		motion: 'hat' | 'projector';
 		sizeRatios: { width: number; height: number };
 		mode: Mode;
 		loop?: boolean;
@@ -33,9 +33,14 @@
 	const props: Props = $props();
 	const width = $derived(SYMBOL_SIZE * props.sizeRatios.width);
 	const height = $derived(SYMBOL_SIZE * props.sizeRatios.height);
-	const auraCfg = ANIMATION_CONFIG.symbolIdleAura;
 	const winCfg = ANIMATION_CONFIG.symbolWin;
 	const landCfg = ANIMATION_CONFIG.symbolLand;
+	const WIN_CYCLE_MS = 900;
+	// Projector lens on sym_S_body, relative to the symbol centre (fraction of width).
+	const LENS = { x: 0.2, y: 0.03 };
+
+	const halo = getHaloTexture();
+	const beam = getBeamTexture();
 
 	const glow = new GlowFilter({
 		color: winCfg.glowColor,
@@ -44,85 +49,97 @@
 		quality: winCfg.glowQuality,
 		distance: winCfg.glowDistance,
 	});
-
 	// See SymbolWinSprite.svelte -- Container.destroy() doesn't free attached
 	// filters, so each Wild/Scatter win leaks a GlowFilter without this.
 	onDestroy(() => glow.destroy());
 
-	const bodyScale = new Tween(1, { easing: sineInOut });
-	let auraRotation = $state(0);
-	let running = true;
-	let rafId: number | null = null;
-	let pulseRafId: number | null = null;
-	let lastTs = 0;
-	let pulseStartTs = 0;
-
-	const runAuraRotation = (ts: number) => {
-		if (!running) return;
-		if (lastTs) auraRotation += auraCfg.rotationRadPerSec * ((ts - lastTs) / 1000);
-		lastTs = ts;
-		rafId = requestAnimationFrame(runAuraRotation);
-	};
-
-	// Continuous sine wave instead of two chained eased Tweens ping-ponging
-	// (see SymbolWinSprite.svelte for why -- same pattern, same fix).
-	const runWinPulse = (ts: number) => {
-		if (!running) return;
-		if (!pulseStartTs) pulseStartTs = ts;
-		const elapsed = ts - pulseStartTs;
-		const phase = (elapsed / winCfg.loopDurationMs) * Math.PI * 2;
-		const amplitude = (winCfg.scaleTo - winCfg.scaleFrom) / 2;
-		const mid = (winCfg.scaleTo + winCfg.scaleFrom) / 2;
-		bodyScale.set(mid - amplitude * Math.cos(phase), { duration: 0 });
-		pulseRafId = requestAnimationFrame(runWinPulse);
-	};
+	const landScale = new Tween(1, { easing: sineInOut });
+	let t = $state(0); // seconds since the mode started
+	let flicker = $state(1); // lamp intensity noise, eased random walk
 
 	const runLandSquash = async () => {
-		await bodyScale.set(landCfg.squashFrom, { duration: landCfg.durationMs / 2 });
-		await bodyScale.set(landCfg.squashTo, { duration: landCfg.durationMs / 2 });
-		await bodyScale.set(landCfg.settleTo, { duration: landCfg.durationMs / 2 });
+		await landScale.set(landCfg.squashFrom, { duration: landCfg.durationMs / 2 });
+		await landScale.set(landCfg.squashTo, { duration: landCfg.durationMs / 2 });
+		await landScale.set(landCfg.settleTo, { duration: landCfg.durationMs / 2 });
 		props.oncomplete?.();
 	};
 
 	$effect(() => {
-		running = true;
-		lastTs = 0;
-		pulseStartTs = 0;
+		const mode = props.mode;
+		const loop = props.loop;
+		t = 0;
 
 		if (prefersReducedMotion()) {
 			props.oncomplete?.();
-			return () => {
-				running = false;
-			};
+			return;
 		}
+		if (mode === 'land') runLandSquash();
 
-		if (props.mode === 'idle' || props.mode === 'win') {
-			rafId = requestAnimationFrame(runAuraRotation);
-		}
-		if (props.mode === 'win') {
-			if (props.loop) {
-				pulseRafId = requestAnimationFrame(runWinPulse);
-			} else {
-				bodyScale
-					.set(winCfg.scaleTo, { duration: winCfg.loopDurationMs / 2 })
-					.then(() => bodyScale.set(winCfg.scaleFrom, { duration: winCfg.loopDurationMs / 2 }))
-					.then(() => props.oncomplete?.());
+		let running = true;
+		let done = false;
+		let last = 0;
+		let rafId = requestAnimationFrame(function tick(ts) {
+			if (!running) return;
+			const dt = last ? Math.min((ts - last) / 1000, 0.05) : 0;
+			last = ts;
+			t += dt;
+			flicker += ((0.75 + Math.random() * 0.25) - flicker) * Math.min(1, dt * 18);
+			if (mode === 'win' && !loop && !done && t * 1000 >= WIN_CYCLE_MS) {
+				done = true;
+				props.oncomplete?.();
 			}
-		} else if (props.mode === 'land') {
-			runLandSquash();
-		}
-
+			rafId = requestAnimationFrame(tick);
+		});
 		return () => {
 			running = false;
-			if (rafId !== null) cancelAnimationFrame(rafId);
-			if (pulseRafId !== null) cancelAnimationFrame(pulseRafId);
+			cancelAnimationFrame(rafId);
 		};
 	});
+
+	const winning = $derived(props.mode === 'win' && (props.loop || t * 1000 < WIN_CYCLE_MS));
+	// 0 -> 1 -> 0 over each win cycle
+	const winWave = $derived(winning ? Math.sin(((t * 1000) / WIN_CYCLE_MS) * Math.PI) ** 2 : 0);
+
+	const haloAlpha = $derived(
+		props.motion === 'projector'
+			? (0.38 + winWave * 0.5) * flicker
+			: 0.32 + Math.sin(t * 2) * 0.06 + winWave * 0.45,
+	);
+	const haloScale = $derived(1.25 + winWave * 0.3);
+
+	// Hat: idle sway; win = hop with a tip of the brim.
+	const hatY = $derived(props.motion === 'hat' && winning ? -Math.abs(Math.sin((t * 1000 * Math.PI) / WIN_CYCLE_MS)) * height * 0.14 : 0);
+	const hatRotation = $derived(
+		props.motion !== 'hat' ? 0 : winning ? Math.sin((t * 1000 * Math.PI * 2) / WIN_CYCLE_MS) * 0.14 : Math.sin(t * 1.6) * 0.035,
+	);
+	// Projector: rattles while it runs (win).
+	const rattle = $derived(props.motion === 'projector' && winning ? Math.sin(t * 46) * 0.035 : 0);
+	const rattleY = $derived(props.motion === 'projector' && winning ? Math.sin(t * 61) * height * 0.012 : 0);
+	const bodyScale = $derived(landScale.current * (1 + winWave * (winCfg.scaleTo - 1)));
 </script>
 
-<Container x={props.x} y={props.y} scale={bodyScale.current}>
-	<Container rotation={auraRotation}>
-		<Sprite anchor={0.5} key={props.auraKey} width={width * 1.3} height={height * 1.3} />
+<Container x={props.x} y={props.y}>
+	<BaseSprite
+		texture={halo}
+		anchor={0.5}
+		width={width * haloScale}
+		height={height * haloScale}
+		alpha={haloAlpha}
+		blendMode="add"
+	/>
+	{#if props.motion === 'projector' && winning}
+		<BaseSprite
+			texture={beam}
+			anchor={{ x: 0, y: 0.5 }}
+			x={width * LENS.x}
+			y={height * LENS.y}
+			width={width * 1.4}
+			height={height * 0.9}
+			alpha={winWave * flicker}
+			blendMode="add"
+		/>
+	{/if}
+	<Container y={hatY + rattleY} rotation={hatRotation + rattle} scale={bodyScale}>
+		<Sprite anchor={0.5} key={props.bodyKey} {width} {height} filters={winning ? [glow] : []} />
 	</Container>
-	<Sprite anchor={0.5} key={props.bodyKey} {width} {height} filters={props.mode === 'win' ? [glow] : []} />
 </Container>

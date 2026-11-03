@@ -7,7 +7,7 @@
 	import { getSymbolInfo } from '../game/utils';
 	import type { SymbolState, RawSymbol } from '../game/types';
 	import { getContext } from '../game/context';
-	import { BitmapText, Sprite } from 'pixi-svelte';
+	import { Sprite, Text } from 'pixi-svelte';
 	import { SYMBOL_SIZE } from '../game/constants';
 
 	type Props = {
@@ -40,7 +40,7 @@
 		x={props.x}
 		y={props.y}
 		bodyKey={symbolInfo.bodyKey}
-		auraKey={symbolInfo.auraKey}
+		motion={symbolInfo.motion}
 		sizeRatios={symbolInfo.sizeRatios}
 		mode={symbolInfo.mode}
 		loop={props.loop}
@@ -65,15 +65,14 @@
 {/if}
 
 {#if props.rawSymbol.multiplier}
-	<NumberPopSprite x={props.x} y={props.y}>
-		<Sprite anchor={0.5} key="badge_mult" width={SYMBOL_SIZE * 0.55} height={SYMBOL_SIZE * 0.55} />
-		<BitmapText
+	<!-- small plaque on the hat's brim; badge_mult.png is a square canvas
+	     whose plaque fills ~64% x 35% of it -->
+	<NumberPopSprite x={props.x} y={(props.y ?? 0) + SYMBOL_SIZE * 0.36}>
+		<Sprite anchor={0.5} key="badge_mult" width={SYMBOL_SIZE * 0.9} height={SYMBOL_SIZE * 0.9} />
+		<Text
 			anchor={0.5}
-			text={`${props.rawSymbol.multiplier}X`}
-			style={{
-				fontFamily: 'silver',
-				fontSize: 50,
-			}}
+			text={`×${props.rawSymbol.multiplier}`}
+			style={{ fontFamily: 'Limelight', fontSize: SYMBOL_SIZE * 0.2, fill: 0xf2eee4 }}
 		/>
 	</NumberPopSprite>
 {/if}

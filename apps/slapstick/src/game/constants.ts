@@ -6,6 +6,10 @@ import type { RawSymbol, SymbolState } from './types';
 export const SYMBOL_SIZE = 120;
 
 export const REEL_PADDING = 0.53;
+// Horizontal distance between reel centres. Wider than a cell: the projection
+// screen opening is ~1.6:1, so square 3x3 cells left two empty bands on its
+// sides; spreading the reels fills it and gives each reel its own column.
+export const REEL_PITCH = SYMBOL_SIZE * 1.5;
 
 // initial board (3 reels x 3 rows, padded top and bottom)
 export const INITIAL_BOARD: RawSymbol[][] = [
@@ -17,7 +21,7 @@ export const INITIAL_BOARD: RawSymbol[][] = [
 export const BOARD_DIMENSIONS = { x: INITIAL_BOARD.length, y: INITIAL_BOARD[0].length - 2 };
 
 export const BOARD_SIZES = {
-	width: SYMBOL_SIZE * BOARD_DIMENSIONS.x,
+	width: REEL_PITCH * BOARD_DIMENSIONS.x,
 	height: SYMBOL_SIZE * BOARD_DIMENSIONS.y,
 };
 
@@ -183,35 +187,35 @@ export const SYMBOL_INFO_MAP = {
 		postWinStatic: {
 			type: 'sprite-aura',
 			bodyKey: 'sym_W_body',
-			auraKey: 'sym_W_aura',
+			motion: 'hat',
 			mode: 'idle',
 			sizeRatios: wSizeRatios,
 		},
 		static: {
 			type: 'sprite-aura',
 			bodyKey: 'sym_W_body',
-			auraKey: 'sym_W_aura',
+			motion: 'hat',
 			mode: 'idle',
 			sizeRatios: wSizeRatios,
 		},
 		spin: {
 			type: 'sprite-aura',
 			bodyKey: 'sym_W_body',
-			auraKey: 'sym_W_aura',
+			motion: 'hat',
 			mode: 'idle',
 			sizeRatios: wSizeRatios,
 		},
 		win: {
 			type: 'sprite-aura',
 			bodyKey: 'sym_W_body',
-			auraKey: 'sym_W_aura',
+			motion: 'hat',
 			mode: 'win',
 			sizeRatios: wSizeRatios,
 		},
 		land: {
 			type: 'sprite-aura',
 			bodyKey: 'sym_W_body',
-			auraKey: 'sym_W_aura',
+			motion: 'hat',
 			mode: 'land',
 			sizeRatios: wSizeRatios,
 		},
@@ -221,35 +225,35 @@ export const SYMBOL_INFO_MAP = {
 		postWinStatic: {
 			type: 'sprite-aura',
 			bodyKey: 'sym_S_body',
-			auraKey: 'sym_S_aura',
+			motion: 'projector',
 			mode: 'idle',
 			sizeRatios: sSizeRatios,
 		},
 		static: {
 			type: 'sprite-aura',
 			bodyKey: 'sym_S_body',
-			auraKey: 'sym_S_aura',
+			motion: 'projector',
 			mode: 'idle',
 			sizeRatios: sSizeRatios,
 		},
 		spin: {
 			type: 'sprite-aura',
 			bodyKey: 'sym_S_body',
-			auraKey: 'sym_S_aura',
+			motion: 'projector',
 			mode: 'idle',
 			sizeRatios: sSizeRatios,
 		},
 		win: {
 			type: 'sprite-aura',
 			bodyKey: 'sym_S_body',
-			auraKey: 'sym_S_aura',
+			motion: 'projector',
 			mode: 'win',
 			sizeRatios: sSizeRatios,
 		},
 		land: {
 			type: 'sprite-aura',
 			bodyKey: 'sym_S_body',
-			auraKey: 'sym_S_aura',
+			motion: 'projector',
 			mode: 'land',
 			sizeRatios: sSizeRatios,
 		},

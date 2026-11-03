@@ -18,6 +18,8 @@
 	import { Rectangle, Sprite } from 'pixi-svelte';
 
 	import { getContext } from '../game/context';
+	import { BOARD_DIMENSIONS, REEL_PITCH } from '../game/constants';
+	import { getSymbolX } from '../game/utils';
 
 	const context = getContext();
 	const board = $derived(context.stateGameDerived.boardLayout());
@@ -30,6 +32,11 @@
 	const OPENING = { width: 0.684, height: 0.575 };
 	const frameHeight = $derived((board.height * 1.08) / OPENING.height);
 	const frameWidth = $derived(frameHeight * FRAME_RATIO);
+
+	// One column per reel, separated by darker gaps, so the 3x3 reads as a grid.
+	const columns = $derived(
+		Array.from({ length: BOARD_DIMENSIONS.x }, (_, reelIndex) => board.x - board.width / 2 + getSymbolX(reelIndex)),
+	);
 
 	const glowStrength = new Tween(0, { easing: sineInOut, duration: 600 });
 	const glow = new GlowFilter({ color: 0xf2eee4, outerStrength: 0, innerStrength: 0, distance: 18 });
@@ -50,8 +57,21 @@
 	y={board.y}
 	width={frameWidth * OPENING.width + 4}
 	height={frameHeight * OPENING.height + 4}
-	backgroundColor={0x111111}
-	alpha={0.92}
+	backgroundColor={0x070707}
+	alpha={0.95}
 />
+
+{#each columns as columnX}
+	<Rectangle
+		anchor={0.5}
+		x={columnX}
+		y={board.y}
+		width={REEL_PITCH * 0.9}
+		height={board.height * 1.04}
+		backgroundColor={0x1d1c1a}
+		borderColor={0x3a3834}
+		borderWidth={2}
+	/>
+{/each}
 
 <Sprite key="frame_screen" anchor={0.5} x={board.x} y={board.y} width={frameWidth} height={frameHeight} filters={[glow]} />

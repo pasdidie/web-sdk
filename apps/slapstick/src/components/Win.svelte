@@ -92,7 +92,7 @@
 								<ResponsiveBitmapText
 									anchor={0.5}
 									y={SYMBOL_SIZE * 0.2}
-									maxWidth={context.stateGameDerived.boardLayout().width * 1.7}
+									maxWidth={context.stateGameDerived.boardLayout().height * 1.7}
 									text={bookEventAmountToCurrencyString(countUpAmount)}
 									style={{
 										fontFamily: 'silver',

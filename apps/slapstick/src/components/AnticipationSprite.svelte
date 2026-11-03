@@ -14,7 +14,8 @@
 
 	import { getContext } from '../game/context';
 	import type { Reel } from '../game/stateGame.svelte';
-	import { REEL_PADDING, SYMBOL_SIZE, BOARD_DIMENSIONS } from '../game/constants';
+	import { SYMBOL_SIZE, REEL_PITCH, BOARD_DIMENSIONS } from '../game/constants';
+	import { getSymbolX } from '../game/utils';
 	import { prefersReducedMotion } from '../game/animationConfig';
 
 	type Props = {
@@ -62,9 +63,9 @@
 	anchor={0.5}
 	x={context.stateGameDerived.boardLayout().x -
 		context.stateGameDerived.boardLayout().width * 0.5 +
-		(props.reel.reelIndex + REEL_PADDING) * SYMBOL_SIZE}
+		getSymbolX(props.reel.reelIndex)}
 	y={context.stateGameDerived.boardLayout().y - SYMBOL_SIZE * 0.06}
-	width={SYMBOL_SIZE * 0.95}
+	width={REEL_PITCH * 0.92}
 	height={SYMBOL_SIZE * BOARD_DIMENSIONS.y}
 	borderColor={0xf2eee4}
 	borderWidth={5}

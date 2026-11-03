@@ -307,6 +307,7 @@ export default {
 	base_ticker: { type: 'sprite', src: new URL('../../assets/sprites/slapstick/ui/ui_ticker_panel.png', import.meta.url).href },
 	pip_arm_L: { type: 'sprite', src: new URL('../../assets/sprites/slapstick/rig/arm_L.png', import.meta.url).href },
 	pip_arm_R: { type: 'sprite', src: new URL('../../assets/sprites/slapstick/rig/arm_R.png', import.meta.url).href },
+	pip_arm_R_grip: { type: 'sprite', src: new URL('../../assets/sprites/slapstick/rig/arm_R_grip.png', import.meta.url).href },
 	pip_arm_R_lower: { type: 'sprite', src: new URL('../../assets/sprites/slapstick/rig/arm_R_lower.png', import.meta.url).href },
 	pip_arm_R_upper: { type: 'sprite', src: new URL('../../assets/sprites/slapstick/rig/arm_R_upper.png', import.meta.url).href },
 	pip_boot_L: { type: 'sprite', src: new URL('../../assets/sprites/slapstick/rig/boot_L.png', import.meta.url).href },

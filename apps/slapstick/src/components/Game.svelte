@@ -29,8 +29,13 @@
 	import Transition from './Transition.svelte';
 	import FilmOverlay from './FilmOverlay.svelte';
 	import PipPuppet from './PipPuppet.svelte';
+	import { Filter } from 'pixi.js';
 
 	const context = getContext();
+
+	// Pixi renders filters at resolution 1 by default: on a retina canvas every
+	// glowing symbol went soft/blurry. Follow the render target instead.
+	Filter.defaultOptions.resolution = 'inherit';
 
 	// Silver + Art Deco titles for the shared UI labels (default is Azure Anvil's gold).
 	setMetalTextTheme({
@@ -44,10 +49,10 @@
 	const pipPlacement = $derived.by(() => {
 		const board = context.stateGameDerived.boardLayout();
 		if (context.stateLayoutDerived.layoutType() === 'portrait') {
-			return { x: board.x - board.width * 0.38, y: board.y + board.height / 2 + 330, height: 360 };
+			return { x: board.x - board.height * 0.38, y: board.y + board.height / 2 + 330, height: 360 };
 		}
-		// Just left of the screen frame (frame is ~2.15x the board width), feet above the UI bar.
-		return { x: board.x - board.width * 1.07 - 110, y: board.y + board.height / 2 + 88, height: 430 };
+		// Just left of the screen frame (frame is ~2.5x the board height wide), feet above the UI bar.
+		return { x: board.x - board.height * 1.07 - 110, y: board.y + board.height / 2 + 88, height: 430 };
 	});
 
 	onMount(() => {
