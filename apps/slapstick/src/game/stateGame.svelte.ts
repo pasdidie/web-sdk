@@ -81,9 +81,14 @@ export const stateGame = $state({
 
 // Landscape: the screen sits a little right of centre and above the UI bar,
 // leaving stage-left room for Monsieur Pip and his camera.
+// Portrait: the screen frame (~2.5x the board height wide) is wider than the
+// 800px portrait stage, so the whole screen is drawn at PORTRAIT_BOARD_SCALE
+// and raised to leave Pip a spot on the stage below it.
+const PORTRAIT_BOARD_SCALE = 0.8;
 const boardLayout = () => ({
 	x: stateLayoutDerived.mainLayout().width * (stateLayoutDerived.layoutType() === 'portrait' ? 0.5 : 0.56),
-	y: stateLayoutDerived.mainLayout().height * (stateLayoutDerived.layoutType() === 'portrait' ? 0.4 : 0.44),
+	y: stateLayoutDerived.mainLayout().height * (stateLayoutDerived.layoutType() === 'portrait' ? 0.34 : 0.44),
+	scale: stateLayoutDerived.layoutType() === 'portrait' ? PORTRAIT_BOARD_SCALE : 1,
 	anchor: { x: 0.5, y: 0.5 },
 	pivot: { x: BOARD_SIZES.width / 2, y: BOARD_SIZES.height / 2 },
 	...BOARD_SIZES,

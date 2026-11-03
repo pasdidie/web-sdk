@@ -30,9 +30,10 @@
 	key="anticipation"
 	width={SYMBOL_SIZE * 0.56}
 	height={SYMBOL_SIZE * 1.6}
-	x={context.stateGameDerived.boardLayout().x -
-		context.stateGameDerived.boardLayout().width * 0.5 +
-		getSymbolX(props.reel.reelIndex)}
+	x={context.stateGameDerived.boardLayout().x +
+		(getSymbolX(props.reel.reelIndex) - context.stateGameDerived.boardLayout().width * 0.5) *
+			context.stateGameDerived.boardLayout().scale}
+	scale={context.stateGameDerived.boardLayout().scale}
 	y={context.stateGameDerived.boardLayout().y - SYMBOL_SIZE * 0.06}
 >
 	<SpineTrack

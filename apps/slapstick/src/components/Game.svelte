@@ -49,10 +49,11 @@
 	const pipPlacement = $derived.by(() => {
 		const board = context.stateGameDerived.boardLayout();
 		if (context.stateLayoutDerived.layoutType() === 'portrait') {
-			return { x: board.x - board.height * 0.38, y: board.y + board.height / 2 + 330, height: 360 };
+			// stage-left of the WIN panel, below the screen frame; no camera (no room)
+			return { x: 125, y: board.y + board.height * board.scale * 0.5 + 410, height: 360, showCamera: false };
 		}
 		// Just left of the screen frame (frame is ~2.5x the board height wide), feet above the UI bar.
-		return { x: board.x - board.height * 1.07 - 110, y: board.y + board.height / 2 + 88, height: 430 };
+		return { x: board.x - board.height * 1.07 - 110, y: board.y + board.height / 2 + 88, height: 430, showCamera: true };
 	});
 
 	onMount(() => {

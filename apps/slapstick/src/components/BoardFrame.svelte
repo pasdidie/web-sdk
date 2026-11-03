@@ -30,12 +30,12 @@
 	// board, like a real cinema screen.
 	const FRAME_RATIO = 1200 / 896;
 	const OPENING = { width: 0.684, height: 0.575 };
-	const frameHeight = $derived((board.height * 1.08) / OPENING.height);
+	const frameHeight = $derived((board.height * board.scale * 1.08) / OPENING.height);
 	const frameWidth = $derived(frameHeight * FRAME_RATIO);
 
 	// One column per reel, separated by darker gaps, so the 3x3 reads as a grid.
 	const columns = $derived(
-		Array.from({ length: BOARD_DIMENSIONS.x }, (_, reelIndex) => board.x - board.width / 2 + getSymbolX(reelIndex)),
+		Array.from({ length: BOARD_DIMENSIONS.x }, (_, reelIndex) => board.x + (getSymbolX(reelIndex) - board.width / 2) * board.scale),
 	);
 
 	const glowStrength = new Tween(0, { easing: sineInOut, duration: 600 });
@@ -66,8 +66,8 @@
 		anchor={0.5}
 		x={columnX}
 		y={board.y}
-		width={REEL_PITCH * 0.9}
-		height={board.height * 1.04}
+		width={REEL_PITCH * 0.9 * board.scale}
+		height={board.height * 1.04 * board.scale}
 		backgroundColor={0x1d1c1a}
 		borderColor={0x3a3834}
 		borderWidth={2}

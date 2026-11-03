@@ -20,7 +20,7 @@
 	const PANEL_RATIO_DESKTOP = 1376 / 768;
 	const panelWidth = $derived(SYMBOL_SIZE * 1.9);
 	const frameHalfWidth = $derived(
-		(((context.stateGameDerived.boardLayout().height * 1.08) / 0.575) * (1200 / 896)) / 2,
+		(((context.stateGameDerived.boardLayout().height * context.stateGameDerived.boardLayout().scale * 1.08) / 0.575) * (1200 / 896)) / 2,
 	);
 	const panelSizes = $derived({
 		width: panelWidth,
@@ -28,8 +28,11 @@
 	});
 	const scale = 1;
 	const position = $derived({
-		x: context.stateGameDerived.boardLayout().x + frameHalfWidth - SYMBOL_SIZE * 0.45,
-		y: context.stateGameDerived.boardLayout().y - context.stateGameDerived.boardLayout().height * 0.5,
+		// portrait: centred on the frame top (its corner would leave the 800px stage)
+		x:
+			context.stateGameDerived.boardLayout().x +
+			(context.stateLayoutDerived.layoutType() === 'portrait' ? 0 : frameHalfWidth - SYMBOL_SIZE * 0.45),
+		y: context.stateGameDerived.boardLayout().y - context.stateGameDerived.boardLayout().height * 0.5 * context.stateGameDerived.boardLayout().scale,
 	});
 
 	const fontSize = SYMBOL_SIZE * 0.14;
