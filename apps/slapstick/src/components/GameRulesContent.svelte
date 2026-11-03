@@ -22,8 +22,20 @@
 	const baseRtp = (config.betModes.base.rtp * 100).toFixed(2);
 	const maxWin = config.betModes.base.max_win;
 	const bonusTiers = [
-		{ spins: FREE_SPINS_AWARDED, cost: config.betModes.bonus.cost, rtp: (config.betModes.bonus.rtp * 100).toFixed(2) },
+		{
+			spins: FREE_SPINS_AWARDED,
+			cost: config.betModes.bonus.cost,
+			rtp: (config.betModes.bonus.rtp * 100).toFixed(2),
+			maxWin: config.betModes.bonus.max_win,
+		},
 	];
+	// Row index per reel (0 = top) -> readable name, for the payline list.
+	const ROW_NAMES = ['top', 'middle', 'bottom'];
+	const describeLine = (rows: number[]) =>
+		rows.every((r) => r === rows[0])
+			? `${t(ROW_NAMES[rows[0]])} ${t('row')}`
+			: `${t('diagonal')} (${rows.map((r) => t(ROW_NAMES[r])).join(' → ')})`;
+	const paylines = Object.entries(config.paylines).map(([id, rows]) => ({ id, label: describeLine(rows as number[]) }));
 </script>
 
 <div class="rules">
@@ -34,7 +46,14 @@
 		{social()
 			? t('Wins read left to right, only the best win per line counts.')
 			: t('Wins pay left to right, only the best win per line counts.')}
+		{t('A win needs 3 matching symbols (Wilds included) across the 3 reels of a line, and is a multiple of the total spin amount shown in the tables.')}
+		{t('Wins on different lines are added together.')}
 	</p>
+	<ol class="paylines">
+		{#each paylines as line (line.id)}
+			<li>{t('Line')} {line.id}: {line.label}</li>
+		{/each}
+	</ol>
 
 	<h2>{t('Wild')}</h2>
 	<p>
@@ -61,15 +80,21 @@
 				<strong>{tier.spins} {t('free spins')}</strong> — {tier.cost}{social()
 					? t('× your spin.')
 					: t('× the bet.')}
-				{t('RTP:')} {tier.rtp}%.
+				{t('RTP:')} {tier.rtp}%. {t('Max win:')} {tier.maxWin}×.
 			</li>
 		{/each}
 	</ul>
 
 	<h2>{t('RTP and max win')}</h2>
 	<p>
-		{t('Base mode RTP:')} {baseRtp}%.
-		{t('Max win:')} {maxWin}{social() ? t('× your spin.') : t('× the bet.')}
+		{t('Base mode RTP:')} {baseRtp}%. {t('Base mode max win:')} {maxWin}{social()
+			? t('× your spin.')
+			: t('× the bet.')}
+		{#each bonusTiers as tier}
+			{t('Bonus mode RTP:')} {tier.rtp}%. {t('Bonus mode max win:')} {tier.maxWin}{social()
+				? t('× your spin.')
+				: t('× the bet.')}
+		{/each}
 	</p>
 
 	<h2>{t('Independent rounds')}</h2>
