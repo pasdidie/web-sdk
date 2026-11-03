@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Container, Sprite } from 'pixi-svelte';
+	import { Container, Graphics, Sprite } from 'pixi-svelte';
 	import { FadeContainer, LoadingProgress } from 'components-pixi';
 	import { MainContainer } from 'components-layout';
 
@@ -58,15 +58,31 @@
 				/>
 			</Container>
 			{#if !context.stateApp.loaded}
-				<LoadingProgress y={250} width={1967 * 0.2} height={346 * 0.2}>
+				<LoadingProgress y={250} width={320} height={18}>
 					{#snippet background(sizes)}
-						<Sprite key="progressBarBackground.png" {...sizes} />
+						<Graphics
+							draw={(g) => {
+								g.clear();
+								g.roundRect(0, 0, sizes.width, sizes.height, sizes.height / 2).fill({ color: 0x05080e, alpha: 0.9 });
+							}}
+						/>
 					{/snippet}
 					{#snippet progress(sizes)}
-						<Sprite key="progressBar.png" {...sizes} />
+						<Graphics
+							draw={(g) => {
+								g.clear();
+								g.roundRect(3, 3, sizes.width - 6, sizes.height - 6, (sizes.height - 6) / 2).fill({ color: 0x3fb6ff });
+								g.roundRect(3, 3, sizes.width - 6, (sizes.height - 6) * 0.45, (sizes.height - 6) / 2).fill({ color: 0xbfeaff, alpha: 0.45 });
+							}}
+						/>
 					{/snippet}
 					{#snippet frame(sizes)}
-						<Sprite key="progressBarFrame.png" {...sizes} />
+						<Graphics
+							draw={(g) => {
+								g.clear();
+								g.roundRect(0, 0, sizes.width, sizes.height, sizes.height / 2).stroke({ color: 0xc8a25a, width: 2.5, alpha: 0.9 });
+							}}
+						/>
 					{/snippet}
 				</LoadingProgress>
 			{/if}

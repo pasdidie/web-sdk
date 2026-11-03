@@ -9,7 +9,7 @@
 	 */
 	import { onDestroy } from 'svelte';
 	import { Tween } from 'svelte/motion';
-	import { sineInOut } from 'svelte/easing';
+	import { sineInOut, backOut } from 'svelte/easing';
 	import { GlowFilter } from 'pixi-filters';
 	import { Container, Sprite, Graphics, Rectangle } from 'pixi-svelte';
 
@@ -95,7 +95,12 @@
 		if (props.loop) {
 			pulseRafId = requestAnimationFrame(runPulseLoop);
 		} else {
-			scale.set(cfg.scaleTo).then(() => scale.set(cfg.scaleFrom)).then(() => props.oncomplete?.());
+			scale
+				.set(cfg.scaleTo + 0.1, { duration: 220, easing: backOut })
+				.then(() => scale.set(cfg.scaleTo - 0.04, { duration: 160 }))
+				.then(() => scale.set(cfg.scaleTo, { duration: 140 }))
+				.then(() => scale.set(cfg.scaleFrom, { duration: 260 }))
+				.then(() => props.oncomplete?.());
 		}
 
 		return () => {
@@ -105,7 +110,7 @@
 	});
 </script>
 
-<Container x={props.x} y={props.y} scale={scale.current}>
+<Container x={props.x} y={props.y} scale={scale.current} rotation={(scale.current - 1) * 0.35 * Math.sin(scale.current * 40)}>
 	<Sprite anchor={0.5} key={props.assetKey} {width} {height} filters={[glow]} />
 	<Graphics isMask draw={(g) => g.rect(-width / 2, -height / 2, width, height).fill(0xffffff)} />
 	<Rectangle

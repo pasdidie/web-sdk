@@ -1,3 +1,4 @@
 export default {
 	HOME: 'HOME',
+	'PRESS ANYWHERE TO CONTINUE': 'PRESS ANYWHERE TO CONTINUE',
 };

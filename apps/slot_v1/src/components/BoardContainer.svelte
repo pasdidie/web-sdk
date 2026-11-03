@@ -4,6 +4,7 @@
 	import { Container } from 'pixi-svelte';
 
 	import { getContext } from '../game/context';
+	import { stateFx } from '../game/stateFx.svelte';
 
 	type Props = {
 		children: Snippet;
@@ -15,8 +16,8 @@
 </script>
 
 <Container
-	x={context.stateGameDerived.boardLayout().x}
-	y={context.stateGameDerived.boardLayout().y}
+	x={context.stateGameDerived.boardLayout().x + stateFx.shakeX}
+	y={context.stateGameDerived.boardLayout().y + stateFx.shakeY}
 	pivot={context.stateGameDerived.boardLayout().pivot}
 >
 	{@render props.children()}

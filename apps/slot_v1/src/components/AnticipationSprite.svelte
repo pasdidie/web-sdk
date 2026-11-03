@@ -11,6 +11,7 @@
 	import { sineInOut } from 'svelte/easing';
 	import { GlowFilter } from 'pixi-filters';
 	import { Rectangle } from 'pixi-svelte';
+	import FxParticles from './FxParticles.svelte';
 
 	import { getContext } from '../game/context';
 	import type { Reel } from '../game/stateGame.svelte';
@@ -26,13 +27,22 @@
 	const context = getContext();
 
 	const pulse = new Tween(0.35, { easing: sineInOut, duration: 500 });
-	const glow = new GlowFilter({ color: 0xffcc00, outerStrength: 2.5 });
+	const glow = new GlowFilter({ color: 0x3fb6ff, outerStrength: 3, quality: 0.2, distance: 12 });
 
 	// See SymbolWinSprite.svelte -- Container.destroy() doesn't free attached
 	// filters, so every anticipation pulse leaks a GlowFilter without this.
 	onDestroy(() => glow.destroy());
 
 	let running = true;
+	let flameCarry = 0;
+	const reelX = $derived(
+		context.stateGameDerived.boardLayout().x -
+			context.stateGameDerived.boardLayout().width * 0.5 +
+			(props.reel.reelIndex + REEL_PADDING) * SYMBOL_SIZE,
+	);
+	const reelBottom = $derived(
+		context.stateGameDerived.boardLayout().y + (SYMBOL_SIZE * BOARD_DIMENSIONS.y) / 2,
+	);
 
 	const runPulseLoop = async () => {
 		while (running) {
@@ -58,6 +68,33 @@
 	});
 </script>
 
+<FxParticles
+	max={60}
+	onframe={(system, dt, tex) => {
+		if (!running) return;
+		flameCarry += (38 * dt) / 1000;
+		const n = Math.floor(flameCarry);
+		if (n <= 0) return;
+		flameCarry -= n;
+		system.spawn({
+			texture: tex('fx_flame'),
+			x: reelX,
+			y: reelBottom,
+			spreadX: SYMBOL_SIZE * 0.4,
+			count: n,
+			angle: -Math.PI / 2,
+			cone: 0.25,
+			speed: [160, 320],
+			life: [700, 1100],
+			size: [SYMBOL_SIZE * 0.35, SYMBOL_SIZE * 0.6],
+			endSizeRatio: 0.15,
+			tint: [0x3fb6ff, 0x5cc4ff, 0xa8e4ff],
+			alpha: 0.75,
+			spin: [-0.6, 0.6],
+		});
+	}}
+/>
+
 <Rectangle
 	anchor={0.5}
 	x={context.stateGameDerived.boardLayout().x -
@@ -66,10 +103,10 @@
 	y={context.stateGameDerived.boardLayout().y - SYMBOL_SIZE * 0.06}
 	width={SYMBOL_SIZE * 0.95}
 	height={SYMBOL_SIZE * BOARD_DIMENSIONS.y}
-	borderColor={0xffcc00}
+	borderColor={0x6fd0ff}
 	borderWidth={5}
 	borderAlpha={pulse.current}
-	backgroundColor={0xffcc00}
+	backgroundColor={0x3fb6ff}
 	backgroundAlpha={pulse.current * 0.12}
 	filters={[glow]}
 />

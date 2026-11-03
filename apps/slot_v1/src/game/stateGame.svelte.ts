@@ -9,6 +9,7 @@ import type { GameType, RawSymbol, SymbolState } from './types';
 import { stateLayoutDerived } from './stateLayout';
 import { winLevelMap } from './winLevelMap';
 import { eventEmitter } from './eventEmitter';
+import { fx } from './fx';
 import {
 	SYMBOL_SIZE,
 	BOARD_SIZES,
@@ -44,6 +45,7 @@ const board = _.range(BOARD_DIMENSIONS.x).map((reelIndex) => {
 		initialSymbols: INITIAL_BOARD[reelIndex],
 		initialSymbolState: INITIAL_SYMBOL_STATE,
 		onReelStopping: () => {
+			fx.emit({ kind: 'reelLand', reelIndex, heavy: reelIndex === BOARD_DIMENSIONS.x - 1 });
 			eventEmitter.broadcast({
 				type: 'soundOnce',
 				name: 'sfx_reel_stop_1',

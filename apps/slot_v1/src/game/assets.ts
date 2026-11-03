@@ -315,6 +315,14 @@ export default {
 		src: new URL('../../assets/sprites/gemini/frame_reels.png', import.meta.url).href,
 	},
 	logo: { type: 'sprite', src: new URL('../../assets/sprites/gemini/logo.png', import.meta.url).href },
+	bigwin_frame: {
+		type: 'sprite',
+		src: new URL('../../assets/sprites/gemini/bigwin_frame.png', import.meta.url).href,
+	},
+	fx_spark: { type: 'sprite', src: new URL('../../assets/sprites/gemini/fx_spark.png', import.meta.url).href },
+	fx_flame: { type: 'sprite', src: new URL('../../assets/sprites/gemini/fx_flame.png', import.meta.url).href },
+	fx_ring: { type: 'sprite', src: new URL('../../assets/sprites/gemini/fx_ring.png', import.meta.url).href },
+	fx_rays: { type: 'sprite', src: new URL('../../assets/sprites/gemini/fx_rays.png', import.meta.url).href },
 	fx_particle: {
 		type: 'sprite',
 		src: new URL('../../assets/sprites/gemini/fx_particle.png', import.meta.url).href,

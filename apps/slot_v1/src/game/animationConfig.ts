@@ -15,9 +15,9 @@ export const ANIMATION_CONFIG = {
 	},
 	symbolWin: {
 		scaleFrom: 1,
-		scaleTo: 1.12,
+		scaleTo: 1.2,
 		loopDurationMs: 600,
-		glowColor: 0xffd700,
+		glowColor: 0x6fd0ff, // signature azure (was gold, read as generic)
 		glowOuterStrength: 2.2,
 		glowInnerStrength: 1,
 		// PixiJS GlowFilter defaults to quality 0.1 (few gradient samples) --

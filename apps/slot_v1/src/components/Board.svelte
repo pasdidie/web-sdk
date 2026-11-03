@@ -19,6 +19,9 @@
 	import BoardContainer from './BoardContainer.svelte';
 	import BoardMask from './BoardMask.svelte';
 	import BoardBase from './BoardBase.svelte';
+	import FxLayer from './FxLayer.svelte';
+	import { fx } from '../game/fx';
+	import { getSymbolX } from '../game/utils';
 
 	const context = getContext();
 
@@ -30,6 +33,23 @@
 		boardShow: () => (show = true),
 		boardHide: () => (show = false),
 		boardWithAnimateSymbols: async ({ symbolPositions }) => {
+			const reels = context.stateGame.board;
+			const points = symbolPositions.map((position) => ({
+				x: getSymbolX(position.reel),
+				y: reels[position.reel].reelState.symbols[position.row].symbolY(),
+			}));
+			const names = symbolPositions.map(
+				(position) => reels[position.reel].reelState.symbols[position.row].rawSymbol.name,
+			);
+			const isScatterWin = names.includes('S');
+			const special = isScatterWin || names.includes('W');
+			fx.emit({ kind: 'symbolWin', points, special });
+			if (!isScatterWin) {
+				const linePoints = [...points].sort((a, b) => a.x - b.x);
+				fx.emit({ kind: 'winLine', points: linePoints, durationMs: 1100 });
+			} else {
+				fx.emit({ kind: 'shake', intensity: 6, durationMs: 320 });
+			}
 			const getPromises = () =>
 				symbolPositions.map(async (position) => {
 					const reelSymbol = context.stateGame.board[position.reel].reelState.symbols[position.row];
@@ -56,6 +76,7 @@
 	<BoardContext animate={true}>
 		<BoardContainer>
 			<BoardBase />
+			<FxLayer />
 		</BoardContainer>
 	</BoardContext>
 {/if}

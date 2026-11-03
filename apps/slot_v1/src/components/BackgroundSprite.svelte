@@ -10,6 +10,7 @@
 	import { FadeContainer } from 'components-pixi';
 	import { SECOND } from 'constants-shared/time';
 
+	import AmbientEmbers from './AmbientEmbers.svelte';
 	import { getContext } from '../game/context';
 	import { ANIMATION_CONFIG, prefersReducedMotion } from '../game/animationConfig';
 
@@ -59,3 +60,5 @@
 	<Sprite anchor={0.5} x={canvas.width / 2 + midX.current} y={canvas.height / 2} width={overWidth} height={canvas.height} key="bg_free_mid" />
 	<Sprite anchor={0.5} x={canvas.width / 2 + nearX.current} y={canvas.height / 2} width={overWidth} height={canvas.height} key="bg_free_near" />
 </FadeContainer>
+
+<AmbientEmbers />

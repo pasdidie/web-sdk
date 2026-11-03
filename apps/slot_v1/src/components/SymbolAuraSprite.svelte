@@ -57,9 +57,35 @@
 	let lastTs = 0;
 	let pulseStartTs = 0;
 
+	// Living-flame layer: three additive fx_flame tongues with independent,
+	// non-repeating flicker (sum of incommensurate sines), plus a breathing
+	// aura alpha and a land shockwave -- so wild/scatter never sit still.
+	let flameT = $state(0);
+	let ringT = $state(1);
+	const flicker = (seed: number) =>
+		0.5 +
+		0.25 * Math.sin(flameT / 90 + seed * 2.1) +
+		0.15 * Math.sin(flameT / 37 + seed * 5.3) +
+		0.1 * Math.sin(flameT / 151 + seed);
+	const auraAlpha = $derived(
+		auraCfg.opacityMin +
+			(auraCfg.opacityMax - auraCfg.opacityMin) *
+				(0.5 + 0.5 * Math.sin((flameT / auraCfg.pulseDurationMs) * Math.PI * 2)),
+	);
+	const FLAMES = [
+		{ seed: 0, dx: 0, h: 0.95, w: 0.42 },
+		{ seed: 1, dx: -0.16, h: 0.7, w: 0.3 },
+		{ seed: 2, dx: 0.16, h: 0.72, w: 0.3 },
+	];
+
 	const runAuraRotation = (ts: number) => {
 		if (!running) return;
-		if (lastTs) auraRotation += auraCfg.rotationRadPerSec * ((ts - lastTs) / 1000);
+		if (lastTs) {
+			const dt = ts - lastTs;
+			auraRotation += auraCfg.rotationRadPerSec * (dt / 1000);
+			flameT += dt;
+			if (ringT < 1) ringT = Math.min(1, ringT + dt / 420);
+		}
 		lastTs = ts;
 		rafId = requestAnimationFrame(runAuraRotation);
 	};
@@ -96,9 +122,8 @@
 			};
 		}
 
-		if (props.mode === 'idle' || props.mode === 'win') {
-			rafId = requestAnimationFrame(runAuraRotation);
-		}
+		rafId = requestAnimationFrame(runAuraRotation);
+		if (props.mode === 'land') ringT = 0;
 		if (props.mode === 'win') {
 			if (props.loop) {
 				pulseRafId = requestAnimationFrame(runWinPulse);
@@ -121,8 +146,34 @@
 </script>
 
 <Container x={props.x} y={props.y} scale={bodyScale.current}>
-	<Container rotation={auraRotation}>
+	{#if ringT < 1}
+		<Sprite
+			key="fx_ring"
+			anchor={0.5}
+			width={width * (0.6 + 1.4 * ringT)}
+			height={width * (0.6 + 1.4 * ringT)}
+			alpha={1 - ringT}
+			tint={0x3fb6ff}
+			blendMode="add"
+		/>
+	{/if}
+	<Container rotation={auraRotation} alpha={auraAlpha}>
 		<Sprite anchor={0.5} key={props.auraKey} width={width * 1.3} height={height * 1.3} />
 	</Container>
 	<Sprite anchor={0.5} key={props.bodyKey} {width} {height} filters={props.mode === 'win' ? [glow] : []} />
+	{#each FLAMES as flame (flame.seed)}
+		{@const f = flicker(flame.seed)}
+		<Sprite
+			key="fx_flame"
+			anchor={{ x: 0.5, y: 0.92 }}
+			x={width * flame.dx}
+			y={-height * 0.02}
+			width={width * flame.w * (0.9 + 0.2 * f)}
+			height={height * flame.h * (0.75 + 0.45 * f) * (props.mode === 'win' ? 1.25 : 1)}
+			skew={{ x: (f - 0.5) * 0.25, y: 0 }}
+			alpha={0.35 + 0.45 * f}
+			tint={0x5cc4ff}
+			blendMode="add"
+		/>
+	{/each}
 </Container>

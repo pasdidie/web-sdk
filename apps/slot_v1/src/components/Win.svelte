@@ -15,7 +15,6 @@
 	import { CanvasSizeRectangle, MainContainer } from 'components-layout';
 	import { OnMount } from 'components-shared';
 
-	import WinCoins from './WinCoins.svelte';
 	import WinAnimation from './WinAnimationSprite.svelte';
 	import PressToContinue from './PressToContinue.svelte';
 	import { SYMBOL_SIZE } from '../game/constants';
@@ -64,7 +63,11 @@
 						y={context.stateGameDerived.boardLayout().y}
 					>
 						{#if winLevelData?.animation}
-							<WinAnimation animationMap={winLevelData.animation}>
+							<WinAnimation
+								animationMap={winLevelData.animation}
+								title={winLevelData.text}
+								tier={Math.max(1, winLevelData.level - 5)}
+							>
 								<ResponsiveBitmapText
 									anchor={0.5}
 									maxWidth={2130}
@@ -96,7 +99,6 @@
 					</Container>
 				</MainContainer>
 
-				<WinCoins emit={!countUpCompleted} levelAlias={winLevelData?.alias} />
 
 				<PressToContinue onpress={() => (countUpCompleted ? oncomplete() : finishCountUp())} />
 			{/snippet}
