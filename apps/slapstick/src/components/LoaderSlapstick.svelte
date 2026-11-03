@@ -16,7 +16,7 @@
 	type Props = { oncomplete?: () => void };
 	const props: Props = $props();
 
-	const logoSrc = (assets as any).logo_mark?.src ?? '';
+	const logoSrc = (assets as any).title_logo?.src ?? '';
 	const STEP_MS = 900;
 
 	let loading = $state(true);
@@ -51,8 +51,7 @@
 			{/key}
 		{:else}
 			<div class="title" in:fade={{ duration: 400 }}>
-				<img src={logoSrc} alt="" draggable="false" />
-				<h1>SLAPSTICK</h1>
+				<img src={logoSrc} alt="SLAPSTICK" draggable="false" />
 			</div>
 		{/if}
 		<div class="grain"></div>
@@ -130,19 +129,7 @@
 		align-items: center;
 		justify-content: center;
 		img {
-			width: min(90vw, 140vmin);
-		}
-		h1 {
-			position: absolute;
-			margin: 0;
-			font-family: 'Limelight', serif;
-			font-weight: 400;
-			font-size: min(11vw, 16vmin);
-			letter-spacing: 0.08em;
-			color: #f2eee4;
-			text-shadow:
-				0 0.4vmin 0 #0d0d0d,
-				0 0 2vmin rgba(13, 13, 13, 0.9);
+			width: min(86vw, 150vmin);
 		}
 	}
 

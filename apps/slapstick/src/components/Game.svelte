@@ -4,7 +4,7 @@
 	import { EnablePixiExtension } from 'components-pixi';
 	import { EnableHotkey } from 'components-shared';
 	import { MainContainer } from 'components-layout';
-	import { App, Sprite, REM } from 'pixi-svelte';
+	import { App } from 'pixi-svelte';
 	import { stateModal } from 'state-shared';
 
 	import { UI, UiGameName, setMetalTextTheme } from 'components-ui-pixi';
@@ -112,7 +112,7 @@
 				<UiGameName name="SLAPSTICK" />
 			{/snippet}
 			{#snippet logo()}
-				<Sprite anchor={{ x: 1, y: 0 }} key="logo" width={REM * 6} height={REM * 3} />
+				<!-- the SLAPSTICK wordmark already sits by the clock (UiGameName) -->
 			{/snippet}
 		</UI>
 		<Win />

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Container, Sprite, Text } from 'pixi-svelte';
+	import { Container, Sprite } from 'pixi-svelte';
 	import { FadeContainer, LoadingProgress } from 'components-pixi';
 	import { MainContainer } from 'components-layout';
 
@@ -13,8 +13,8 @@
 		onloaded: () => void;
 	};
 
-	const TITLE_HERO_ASPECT_RATIO = 1376 / 768; // logo_mark (title card emblem)
-	const TITLE_HERO_HEIGHT = 380;
+	const TITLE_HERO_ASPECT_RATIO = 1200 / 397; // title_logo.png (SLAPSTICK wordmark)
+	const TITLE_HERO_HEIGHT = 260;
 	// Slow idle bob + breathing scale so the mascot doesn't sit frozen while
 	// the player reads the title screen -- continuous sine, same raf-driven
 	// approach used for the aura idle rotation (see DECISIONS.md: chained
@@ -51,15 +51,10 @@
 		>
 			<Container y={heroBobY} scale={heroScale}>
 				<Sprite
-					key="logo_mark"
+					key="title_logo"
 					anchor={0.5}
 					width={TITLE_HERO_HEIGHT * TITLE_HERO_ASPECT_RATIO}
 					height={TITLE_HERO_HEIGHT}
-				/>
-				<Text
-					anchor={0.5}
-					text="SLAPSTICK"
-					style={{ fontFamily: 'Limelight', fontSize: 92, fill: 0xf2eee4, letterSpacing: 6, stroke: { color: 0x0d0d0d, width: 6 } }}
 				/>
 			</Container>
 			{#if !context.stateApp.loaded}
