@@ -5,12 +5,15 @@ import { stateBet, stateUi } from 'state-shared';
 import { sequence } from 'utils-shared/sequence';
 
 import { eventEmitter } from './eventEmitter';
-import { playBookEvent } from './utils';
 import { winLevelMap, type WinLevel, type WinLevelData } from './winLevelMap';
 import { stateGame, stateGameDerived } from './stateGame.svelte';
 import type { BookEvent, BookEventOfType, BookEventContext } from './typesBookEvent';
 import type { Position } from './types';
 import config from './config';
+import { fx } from './fx';
+import { stateFx, positionKey } from './stateFx.svelte';
+import { bookEventAmountToCurrencyString } from 'utils-shared/amount';
+import { playBookEvent, getSymbolX, getSymbolY } from './utils';
 
 const winLevelSoundsPlay = ({ winLevelData }: { winLevelData: WinLevelData }) => {
 	if (winLevelData?.alias === 'max') eventEmitter.broadcastAsync({ type: 'uiHide' });
@@ -61,9 +64,26 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 	},
 	winInfo: async (bookEvent: BookEventOfType<'winInfo'>) => {
 		eventEmitter.broadcast({ type: 'soundOnce', name: 'sfx_winlevel_small' });
-		await sequence(bookEvent.wins, async (win) => {
-			await animateSymbols({ positions: win.positions });
-		});
+		stateFx.dimming = true;
+		try {
+			await sequence(bookEvent.wins, async (win) => {
+				stateFx.highlight = win.positions.map((p) => positionKey(p.reel, p.row));
+				// Amount over the middle of the line (x-sorted middle symbol).
+				const sorted = [...win.positions].sort((a, b) => a.reel - b.reel);
+				const mid = sorted[Math.floor(sorted.length / 2)];
+				fx.emit({
+					kind: 'lineAmount',
+					text: bookEventAmountToCurrencyString(win.win),
+					point: { x: getSymbolX(mid.reel), y: getSymbolY(mid.row) },
+					durationMs: 1100,
+				});
+				if (win.symbol === 'W' || win.symbol === 'S') fx.emit({ kind: 'mascotCheer', durationMs: 1200 });
+				await animateSymbols({ positions: win.positions });
+			});
+		} finally {
+			stateFx.dimming = false;
+			stateFx.highlight = [];
+		}
 	},
 	setTotalWin: async (bookEvent: BookEventOfType<'setTotalWin'>) => {
 		stateBet.winBookEventAmount = bookEvent.amount;
@@ -72,6 +92,7 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 		// animate scatters
 		eventEmitter.broadcast({ type: 'soundOnce', name: 'sfx_scatter_win_v2' });
 		await animateSymbols({ positions: bookEvent.positions });
+		fx.emit({ kind: 'mascotCheer', durationMs: 1600 });
 		// show free spin intro
 		eventEmitter.broadcast({ type: 'soundOnce', name: 'sfx_superfreespin' });
 		await eventEmitter.broadcastAsync({ type: 'uiHide' });

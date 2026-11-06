@@ -27,8 +27,11 @@
 	import FreeSpinCounter from './FreeSpinCounter.svelte';
 	import FreeSpinOutro from './FreeSpinOutro.svelte';
 	import Transition from './Transition.svelte';
+	import FeatureIntro from './FeatureIntro.svelte';
+	import SideDecor from './SideDecor.svelte';
 
 	const context = getContext();
+	let showFeatureIntro = $state(true);
 
 	onMount(() => {
 		context.stateLayout.showLoadingScreen = true;
@@ -57,6 +60,9 @@
 
 	{#if context.stateLayout.showLoadingScreen}
 		<LoadingScreen onloaded={() => (context.stateLayout.showLoadingScreen = false)} />
+	{:else if showFeatureIntro}
+		<!-- Before the game UI mounts so its Space/press can't also spin. -->
+		<FeatureIntro onclose={() => (showFeatureIntro = false)} />
 	{:else}
 		<ResumeBet />
 		<!--
@@ -65,6 +71,10 @@
 			Ref: https://developer.chrome.com/blog/autoplay
 		-->
 		<Sound />
+
+		<MainContainer>
+			<SideDecor />
+		</MainContainer>
 
 		<MainContainer>
 			<BoardFrame />

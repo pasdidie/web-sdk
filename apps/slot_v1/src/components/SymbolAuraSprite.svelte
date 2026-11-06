@@ -12,7 +12,7 @@
 	import { Tween } from 'svelte/motion';
 	import { sineInOut } from 'svelte/easing';
 	import { GlowFilter } from 'pixi-filters';
-	import { Container, Sprite } from 'pixi-svelte';
+	import { Container, Graphics, Sprite, Text } from 'pixi-svelte';
 
 	import { SYMBOL_SIZE } from '../game/constants';
 	import { ANIMATION_CONFIG, prefersReducedMotion } from '../game/animationConfig';
@@ -26,6 +26,8 @@
 		auraKey: string;
 		sizeRatios: { width: number; height: number };
 		mode: Mode;
+		/** Name plate baked under the art (WILD / SCATTER), provider-style. */
+		label?: string;
 		loop?: boolean;
 		oncomplete?: () => void;
 	};
@@ -176,4 +178,36 @@
 			blendMode="add"
 		/>
 	{/each}
+	{#if props.label}
+		{@const plateW = width * 0.78}
+		{@const plateH = height * 0.17}
+		<Container y={height * 0.36}>
+			<Graphics
+				draw={(g) => {
+					g.clear();
+					g.roundRect(-plateW / 2, -plateH / 2, plateW, plateH, plateH * 0.35)
+						.fill({ color: 0x0a0f18, alpha: 0.92 })
+						.stroke({ color: 0xd9a84e, width: Math.max(2, plateH * 0.09) });
+					g.roundRect(-plateW / 2 + 4, -plateH / 2 + 4, plateW - 8, plateH - 8, plateH * 0.28).stroke({
+						color: 0x3fb6ff,
+						width: 1.5,
+						alpha: 0.8,
+					});
+				}}
+			/>
+			<Text
+				anchor={0.5}
+				text={props.label}
+				style={{
+					fontFamily: 'Cinzel, serif',
+					fontWeight: '700',
+					fontSize: plateH * 0.62,
+					fill: 0xffe2a0,
+					letterSpacing: 2,
+					stroke: { color: 0x120a04, width: 3 },
+					dropShadow: { color: 0x3fb6ff, blur: 6, distance: 0, alpha: 0.9, angle: 0 },
+				}}
+			/>
+		</Container>
+	{/if}
 </Container>

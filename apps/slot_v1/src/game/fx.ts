@@ -16,6 +16,12 @@ export type FxEvent =
 	| { kind: 'symbolWin'; points: FxPoint[]; special?: boolean }
 	| { kind: 'winLine'; points: FxPoint[]; durationMs: number }
 	| { kind: 'scatterLand'; point: FxPoint }
+	/** Vertical light beam up a reel where a wild/scatter just landed. */
+	| { kind: 'columnBeam'; reelIndex: number; special: 'W' | 'S' }
+	/** Amount of the line currently being presented, shown over the line. */
+	| { kind: 'lineAmount'; text: string; point: FxPoint; durationMs: number }
+	/** Mascot reaction (big win, free spins trigger, special win). */
+	| { kind: 'mascotCheer'; durationMs: number }
 	| { kind: 'shake'; intensity: number; durationMs: number }
 	| { kind: 'bigWinStart'; tier: number }
 	| { kind: 'bigWinStop' }

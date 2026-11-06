@@ -19,6 +19,7 @@ import {
 	SPIN_OPTIONS_FAST,
 	INITIAL_SYMBOL_STATE,
 	SCATTER_LAND_SOUND_MAP,
+	REEL_PADDING,
 } from './constants';
 
 const onSymbolLand = ({ rawSymbol }: { rawSymbol: RawSymbol }) => {
@@ -38,6 +39,29 @@ const onSymbolLand = ({ rawSymbol }: { rawSymbol: RawSymbol }) => {
 	}
 };
 
+// onSymbolLand fires once per symbol of the reel (padding rows included) and
+// carries no position, so batch per reel in a microtask and then look at
+// which wild/scatter actually sits inside the visible 3 rows.
+const pendingSpecialLand = new Set<number>();
+const emitSpecialLand = (reelIndex: number) => {
+	const reel = stateGame.board[reelIndex];
+	const bottom = SYMBOL_SIZE * BOARD_DIMENSIONS.y;
+	let beam: 'W' | 'S' | undefined;
+	for (const reelSymbol of reel.reelState.symbols) {
+		const name = reelSymbol.rawSymbol.name;
+		if (name !== 'S' && name !== 'W') continue;
+		const y = reelSymbol.symbolY();
+		if (y < 0 || y > bottom) continue;
+		if (name === 'S') {
+			beam = 'S';
+			fx.emit({ kind: 'scatterLand', point: { x: SYMBOL_SIZE * (reelIndex + REEL_PADDING), y } });
+		} else if (!beam) {
+			beam = 'W';
+		}
+	}
+	if (beam) fx.emit({ kind: 'columnBeam', reelIndex, special: beam });
+};
+
 const board = _.range(BOARD_DIMENSIONS.x).map((reelIndex) => {
 	const reel = createReelForSpinning({
 		reelIndex,
@@ -52,7 +76,17 @@ const board = _.range(BOARD_DIMENSIONS.x).map((reelIndex) => {
 				forcePlay: !stateBet.isTurbo,
 			});
 		},
-		onSymbolLand,
+		onSymbolLand: (args) => {
+			onSymbolLand(args);
+			const name = args.rawSymbol.name;
+			if ((name === 'S' || name === 'W') && !pendingSpecialLand.has(reelIndex)) {
+				pendingSpecialLand.add(reelIndex);
+				queueMicrotask(() => {
+					pendingSpecialLand.delete(reelIndex);
+					emitSpecialLand(reelIndex);
+				});
+			}
+		},
 	});
 
 	reel.reelState.spinOptions = () =>

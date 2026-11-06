@@ -323,6 +323,19 @@ export default {
 	fx_flame: { type: 'sprite', src: new URL('../../assets/sprites/gemini/fx_flame.png', import.meta.url).href },
 	fx_ring: { type: 'sprite', src: new URL('../../assets/sprites/gemini/fx_ring.png', import.meta.url).href },
 	fx_rays: { type: 'sprite', src: new URL('../../assets/sprites/gemini/fx_rays.png', import.meta.url).href },
+	fx_beam: { type: 'sprite', src: new URL('../../assets/sprites/gemini/fx_beam.png', import.meta.url).href },
+	mascot_idle: {
+		type: 'sprite',
+		src: new URL('../../assets/sprites/gemini/mascot_idle.png', import.meta.url).href,
+	},
+	mascot_cheer: {
+		type: 'sprite',
+		src: new URL('../../assets/sprites/gemini/mascot_cheer.png', import.meta.url).href,
+	},
+	panel_frame: {
+		type: 'sprite',
+		src: new URL('../../assets/sprites/gemini/panel_frame.png', import.meta.url).href,
+	},
 	fx_particle: {
 		type: 'sprite',
 		src: new URL('../../assets/sprites/gemini/fx_particle.png', import.meta.url).href,

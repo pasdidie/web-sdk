@@ -37,6 +37,7 @@
 	parent.addToParent(root);
 
 	const tex = (key: string) => getFxTexture(app.stateApp.loadedAssets, key);
+	const reelBottom = SYMBOL_SIZE * BOARD_DIMENSIONS.y;
 
 	// ---- win lines --------------------------------------------------------
 	type ActiveLine = { points: FxPoint[]; age: number; durationMs: number };
@@ -116,6 +117,46 @@
 		});
 	};
 
+	// ---- column beams (wild / scatter land) --------------------------------
+	type Beam = { sprite: PIXI.Sprite; age: number; life: number; baseW: number; baseH: number };
+	let beams: Beam[] = [];
+	const beamLayer = new PIXI.Container();
+	root.addChildAt(beamLayer, 0);
+	const spawnBeam = (reelIndex: number, special: 'W' | 'S') => {
+		const sprite = new PIXI.Sprite(tex('fx_beam'));
+		sprite.anchor.set(0.5);
+		sprite.blendMode = 'add';
+		sprite.tint = special === 'S' ? AZURE_LIGHT : AZURE;
+		sprite.position.set(getSymbolX(reelIndex), reelBottom / 2);
+		beamLayer.addChild(sprite);
+		beams.push({
+			sprite,
+			age: 0,
+			life: special === 'S' ? 900 : 700,
+			baseW: SYMBOL_SIZE * 1.25,
+			baseH: reelBottom * 1.45,
+		});
+	};
+	const updateBeams = (dt: number) => {
+		beams = beams.filter((b) => {
+			b.age += dt;
+			const t = b.age / b.life;
+			if (t >= 1) {
+				b.sprite.destroy();
+				return false;
+			}
+			// fast flare-up (first 15%), then a slow fade with a slight narrowing
+			const rise = Math.min(1, t / 0.15);
+			const fade = t < 0.15 ? 1 : 1 - (t - 0.15) / 0.85;
+			const w = b.baseW * (0.35 + 0.65 * rise) * (1 - 0.3 * (1 - fade));
+			const texW = b.sprite.texture.width || 1;
+			const texH = b.sprite.texture.height || 1;
+			b.sprite.scale.set(w / texW, b.baseH / texH);
+			b.sprite.alpha = Math.max(0, fade) * 0.95;
+			return true;
+		});
+	};
+
 	// ---- screen shake -----------------------------------------------------
 	let shakeAge = 0;
 	let shakeLife = 0;
@@ -143,7 +184,6 @@
 	};
 
 	// ---- event handlers ---------------------------------------------------
-	const reelBottom = SYMBOL_SIZE * BOARD_DIMENSIONS.y;
 
 	const handle = (e: FxEvent) => {
 		if (prefersReducedMotion() && e.kind !== 'winLine') return;
@@ -216,6 +256,26 @@
 				startShake(4, 180);
 				break;
 			}
+			case 'columnBeam': {
+				spawnBeam(e.reelIndex, e.special);
+				particles.spawn({
+					texture: tex('fx_spark'),
+					x: getSymbolX(e.reelIndex),
+					y: reelBottom,
+					spreadX: SYMBOL_SIZE * 0.3,
+					count: stateBet.isTurbo ? 6 : 14,
+					angle: -Math.PI / 2,
+					cone: 0.5,
+					speed: [420, 900],
+					drag: 0.25,
+					life: [400, 800],
+					size: [10, 22],
+					tint: [AZURE, AZURE_LIGHT, 0xffffff],
+					alignToVelocity: true,
+					stretch: 3,
+				});
+				break;
+			}
 			case 'shake':
 				startShake(e.intensity, e.durationMs);
 				break;
@@ -228,6 +288,7 @@
 		const dt = Math.min(ticker.deltaMS, 50);
 		particles.update(dt);
 		updateRings(dt);
+		updateBeams(dt);
 		lines = lines.filter((l) => (l.age += dt) < l.durationMs);
 		drawLines();
 		updateShake(dt);
@@ -256,6 +317,8 @@
 		stateFx.shakeY = 0;
 		for (const r of rings) r.sprite.destroy();
 		rings = [];
+		for (const b of beams) b.sprite.destroy();
+		beams = [];
 		particles.destroy();
 	});
 </script>

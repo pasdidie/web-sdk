@@ -20,6 +20,7 @@
 	import BoardMask from './BoardMask.svelte';
 	import BoardBase from './BoardBase.svelte';
 	import FxLayer from './FxLayer.svelte';
+	import LineWinAmount from './LineWinAmount.svelte';
 	import { fx } from '../game/fx';
 	import { getSymbolX } from '../game/utils';
 
@@ -77,6 +78,7 @@
 		<BoardContainer>
 			<BoardBase />
 			<FxLayer />
+			<LineWinAmount />
 		</BoardContainer>
 	</BoardContext>
 {/if}

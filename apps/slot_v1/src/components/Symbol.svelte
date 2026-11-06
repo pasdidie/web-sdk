@@ -8,6 +8,7 @@
 	import type { SymbolState, RawSymbol } from '../game/types';
 	import { getContext } from '../game/context';
 	import { BitmapText, Sprite } from 'pixi-svelte';
+	import { stateI18nDerived } from 'state-shared';
 	import { SYMBOL_SIZE } from '../game/constants';
 
 	type Props = {
@@ -43,6 +44,11 @@
 		auraKey={symbolInfo.auraKey}
 		sizeRatios={symbolInfo.sizeRatios}
 		mode={symbolInfo.mode}
+		label={props.rawSymbol.name === 'W'
+			? stateI18nDerived.translate('WILD')
+			: props.rawSymbol.name === 'S'
+				? stateI18nDerived.translate('SCATTER')
+				: undefined}
 		loop={props.loop}
 		oncomplete={props.oncomplete}
 	/>

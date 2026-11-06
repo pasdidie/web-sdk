@@ -24,8 +24,8 @@
 
 {#each context.stateGame.board as reel, reelIndex (reelIndex)}
 	<Container filters={!reduced && reel.reelState.motion === 'spinning' ? [blurs[reelIndex]] : []}>
-		{#each reel.reelState.symbols as reelSymbol}
-			<ReelSymbol {reelIndex} {reelSymbol} />
+		{#each reel.reelState.symbols as reelSymbol, rowIndex}
+			<ReelSymbol {reelIndex} {rowIndex} {reelSymbol} />
 		{/each}
 	</Container>
 {/each}

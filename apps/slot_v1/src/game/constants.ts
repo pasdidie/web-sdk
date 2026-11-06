@@ -189,8 +189,12 @@ const l5Static = { type: 'sprite', assetKey: 'sym_L5', sizeRatios: { width: 1, h
 // 2+ cells oversized, overlapping the board frame. Our body+aura art is a
 // single square canvas per symbol, like H/L, just slightly larger to still
 // read as "special".
-const wSizeRatios = { width: 1.15, height: 1.15 };
-const sSizeRatios = { width: 1.15, height: 1.15 };
+// Specials are deliberately bigger than a cell (1.3) so they break out over
+// their neighbours like top-provider wilds/scatters do; ReelSymbol renders
+// them on the unmasked board layer once the reel has stopped so the overflow
+// isn't clipped at the board edge.
+const wSizeRatios = { width: 1.3, height: 1.3 };
+const sSizeRatios = { width: 1.3, height: 1.3 };
 
 export const SYMBOL_INFO_MAP = {
 	H1: {
@@ -316,10 +320,14 @@ export const SYMBOL_INFO_MAP = {
 	},
 	W: {
 		explosion,
+		// Was the upstream example's 'explodedW.png' (template art in another
+		// style); our wild simply goes back to its idle state after a win.
 		postWinStatic: {
-			type: 'sprite',
-			assetKey: 'explodedW.png',
-			sizeRatios: { width: 0.85, height: 0.85 },
+			type: 'sprite-aura',
+			bodyKey: 'sym_W_body',
+			auraKey: 'sym_W_aura',
+			mode: 'idle',
+			sizeRatios: wSizeRatios,
 		},
 		static: {
 			type: 'sprite-aura',

@@ -73,6 +73,7 @@
 	onMount(() => {
 		if (reduced) return;
 		raysAlpha.set(1);
+		fx.emit({ kind: 'mascotCheer', durationMs: 2600 + tier * 400 });
 		scale.set(1).then(() => titleScale.set(1));
 		setTimeout(() => impact(1), cfg.introDurationMs * 0.55);
 		let last = performance.now();
@@ -96,6 +97,7 @@
 		const t = tier;
 		if (lastTier && t > lastTier) {
 			impact(1 + (t - lastTier) * 0.3);
+			fx.emit({ kind: 'mascotCheer', durationMs: 2000 });
 			titleScale.set(0.6, { duration: 0 }).then(() => titleScale.set(1));
 		}
 		lastTier = t;
