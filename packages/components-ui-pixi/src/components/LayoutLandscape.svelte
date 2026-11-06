@@ -6,6 +6,7 @@
 
 	import { LANDSCAPE_BASE_SIZE, LANDSCAPE_BACKGROUND_WIDTH_LIST } from '../constants';
 	import type { LayoutUiProps } from '../types';
+	import UiConsole from './UiConsole.svelte';
 	import { getContext } from '../context';
 
 	const props: LayoutUiProps = $props();
@@ -32,6 +33,8 @@
 			},
 		})}
 	>
+		<UiConsole x={40} y={50} width={1740} height={140} />
+
 		<Container y={LANDSCAPE_BASE_SIZE * 0.5 - 90} x={85 + 20} scale={0.8}>
 			{@render props.buttonMenu({ anchor: 0.5 })}
 		</Container>

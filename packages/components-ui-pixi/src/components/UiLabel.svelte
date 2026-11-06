@@ -4,6 +4,11 @@
 	import UiSprite from './UiSprite.svelte';
 	import { UI_BASE_FONT_SIZE } from '../constants';
 	import { metalTextStyle } from '../metalTextStyle';
+	import { getUiSkin } from '../uiSkin';
+
+	const skin = getUiSkin();
+	const panelKey = skin.labelKey ?? 'base_ticker';
+	const panelRatio = skin.labelRatio ?? 326 / 73;
 
 	type Props = {
 		label: string;
@@ -28,8 +33,8 @@
 		<UiSprite
 			y={-20}
 			anchor={{ x: 0.5, y: 0 }}
-			key="base_ticker"
-			width={UI_BASE_FONT_SIZE * 3 * (326 / 73)}
+			key={panelKey}
+			width={UI_BASE_FONT_SIZE * 3 * panelRatio}
 			height={UI_BASE_FONT_SIZE * 3}
 			borderRadius={35}
 		/>
@@ -46,8 +51,8 @@
 		<UiSprite
 			x={-90}
 			anchor={{ x: 0, y: 0.5 }}
-			key="base_ticker"
-			width={UI_BASE_FONT_SIZE * 3 * (326 / 73)}
+			key={panelKey}
+			width={UI_BASE_FONT_SIZE * 3 * panelRatio}
 			height={UI_BASE_FONT_SIZE * 3}
 			borderRadius={35}
 		/>

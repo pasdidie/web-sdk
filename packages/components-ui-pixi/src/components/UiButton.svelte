@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Text } from 'pixi-svelte';
+	import { Container, Sprite, Text } from 'pixi-svelte';
 	import { Button, type ButtonProps } from 'components-pixi';
 
 	import UiSprite from './UiSprite.svelte';
@@ -8,6 +8,7 @@
 	import { i18nDerived } from '../i18n/i18nDerived';
 	import { UI_BASE_FONT_SIZE } from '../constants';
 	import { getMetalTextTheme, metalTextStyle } from '../metalTextStyle';
+	import { getUiSkin } from '../uiSkin';
 
 	type Props = Omit<ButtonProps, 'children'> & {
 		icon: ButtonIcon;
@@ -28,6 +29,7 @@
 	const theme = getMetalTextTheme();
 	const label = $derived(i18nDerived[icon]());
 	const fontScale = $derived(label.length <= 1 ? theme.buttonGlyphScale : 1);
+	const iconKey = $derived(getUiSkin().iconKeys[icon]);
 </script>
 
 <Button {...buttonProps}>
@@ -52,6 +54,17 @@
 				: {}}
 		/>
 
+		{#if iconKey}
+			<Container {...center} scale={pressed ? 0.9 : hovered ? 1.08 : 1}>
+				<Sprite
+					anchor={0.5}
+					key={iconKey}
+					width={buttonProps.sizes.width * 0.5}
+					height={buttonProps.sizes.height * 0.5}
+					alpha={buttonProps.disabled ? 0.5 : 1}
+				/>
+			</Container>
+		{:else}
 		<Text
 			{...center}
 			anchor={0.5}
@@ -63,6 +76,7 @@
 				...metalTextStyle(UI_BASE_FONT_SIZE * 0.6 * fontScale, { fontWeight: '600' }),
 			}}
 		/>
+		{/if}
 
 		{@render childrenFromParent?.()}
 	{/snippet}

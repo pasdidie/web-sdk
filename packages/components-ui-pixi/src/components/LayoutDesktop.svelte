@@ -7,6 +7,7 @@
 	import { DESKTOP_BASE_SIZE, DESKTOP_BACKGROUND_WIDTH_LIST } from '../constants';
 	import { getContext } from '../context';
 	import type { LayoutUiProps } from '../types';
+	import UiConsole from './UiConsole.svelte';
 
 	const props: LayoutUiProps = $props();
 	const context = getContext();
@@ -32,6 +33,8 @@
 			},
 		})}
 	>
+		<UiConsole x={110} y={-8} width={1590} height={DESKTOP_BASE_SIZE + 16} />
+
 		<Container y={DESKTOP_BASE_SIZE * 0.5 - 160} x={900 - 500} scale={0.8}>
 			{@render props.amountBalance({ stacked: true })}
 		</Container>

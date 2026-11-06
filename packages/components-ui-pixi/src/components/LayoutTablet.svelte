@@ -6,6 +6,7 @@
 
 	import { getContext } from '../context';
 	import type { LayoutUiProps } from '../types';
+	import UiConsole from './UiConsole.svelte';
 	import LabelFreeSpinCounter from './LabelFreeSpinCounter.svelte';
 	import { DESKTOP_BASE_SIZE, DESKTOP_BACKGROUND_WIDTH_LIST } from '../constants';
 
@@ -33,6 +34,8 @@
 			},
 		})}
 	>
+		<UiConsole x={-75} y={-20} width={1965} height={DESKTOP_BASE_SIZE + 40} />
+
 		<Container y={DESKTOP_BASE_SIZE * 0.5 - 220} x={880 - 640}>
 			{@render props.amountBalance({ stacked: true })}
 		</Container>

@@ -12,6 +12,7 @@
 	import LabelFreeSpinCounter from './LabelFreeSpinCounter.svelte';
 	import ButtonDrawer from './ButtonDrawer.svelte';
 	import type { LayoutUiProps } from '../types';
+	import UiConsole from './UiConsole.svelte';
 	import { getContext } from '../context';
 
 	const props: LayoutUiProps = $props();
@@ -77,6 +78,13 @@
 <MainContainer standard alignVertical="bottom">
 	<!-- drawer container -->
 	<Container y={drawerTween.current}>
+		<UiConsole
+			x={context.stateLayoutDerived.mainLayoutStandard().width * 0.5 - 530}
+			y={context.stateLayoutDerived.mainLayoutStandard().height - 495}
+			width={1060}
+			height={190}
+		/>
+
 		<Container
 			x={context.stateLayoutDerived.mainLayoutStandard().width * 0.5 - 440}
 			y={context.stateLayoutDerived.mainLayoutStandard().height - 400}

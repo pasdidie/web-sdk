@@ -7,7 +7,7 @@
 	import { App } from 'pixi-svelte';
 	import { stateModal } from 'state-shared';
 
-	import { UI, UiGameName, setMetalTextTheme } from 'components-ui-pixi';
+	import { UI, UiGameName, setMetalTextTheme, setUiSkin } from 'components-ui-pixi';
 	import { GameVersion, Modals } from 'components-ui-html';
 	import PayTableContent from './PayTableContent.svelte';
 	import GameRulesContent from './GameRulesContent.svelte';
@@ -48,6 +48,19 @@
 		fontWeight: '400',
 		buttonTextWidth: 0.6,
 		buttonGlyphScale: 3,
+	});
+
+	// Bespoke bar (reviewer feedback "poor bet UI bar"): a projection-booth
+	// console behind the controls, engraved silver icons instead of words,
+	// a film reel spin button that turns while a bet plays, ticket labels.
+	const ICONS = ['increase', 'decrease', 'menu', 'turbo', 'autoSpin', 'soundOn', 'soundOff', 'settings', 'info', 'payTable', 'menuExit', 'spin'] as const;
+	setUiSkin({
+		iconKeys: Object.fromEntries(ICONS.map((icon) => [icon, `icon_${icon}`])),
+		spinReelKey: 'ui_reel',
+		// ui_console.png is 968x207: stepped end caps ~110px wide each
+		console: { key: 'ui_console', slice: { left: 110, right: 110, top: 30, bottom: 30 } },
+		labelKey: 'ui_ticket',
+		labelRatio: 900 / 281,
 	});
 
 	// Monsieur Pip stands on the stage left of the screen (landscape), or
