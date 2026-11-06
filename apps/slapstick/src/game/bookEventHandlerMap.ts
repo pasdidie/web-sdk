@@ -8,6 +8,7 @@ import { eventEmitter } from './eventEmitter';
 import { playBookEvent } from './utils';
 import { winLevelMap, type WinLevel, type WinLevelData } from './winLevelMap';
 import { stateGame, stateGameDerived } from './stateGame.svelte';
+import { shakeCamera } from './camera.svelte';
 import type { BookEvent, BookEventOfType, BookEventContext } from './typesBookEvent';
 import type { Position } from './types';
 import config from './config';
@@ -71,8 +72,10 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 		eventEmitter.broadcast({ type: 'pipMood', mood: 'winSmall' });
 		stateGame.winSpotlight = true;
 		await sequence(bookEvent.wins, async (win) => {
+			stateGame.winLine = win.positions;
 			await animateSymbols({ positions: win.positions });
 		});
+		stateGame.winLine = [];
 		stateGame.winSpotlight = false;
 	},
 	setTotalWin: async (bookEvent: BookEventOfType<'setTotalWin'>) => {
@@ -82,6 +85,7 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 		// animate scatters
 		eventEmitter.broadcast({ type: 'pipMood', mood: 'freeSpins' });
 		eventEmitter.broadcast({ type: 'soundOnce', name: 'sfx_scatter_win_v2' });
+		shakeCamera(9, 700);
 		stateGame.winSpotlight = true;
 		await animateSymbols({ positions: bookEvent.positions });
 		stateGame.winSpotlight = false;
@@ -178,6 +182,7 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 		const winLevelData = winLevelMap[bookEvent.winLevel as WinLevel];
 
 		eventEmitter.broadcast({ type: 'winShow' });
+		if (winLevelData?.type === 'big') shakeCamera(12, 800);
 		if (winLevelData?.type === 'big') eventEmitter.broadcast({ type: 'pipMood', mood: 'winBig' });
 		else if (winLevelData?.type === 'medium') eventEmitter.broadcast({ type: 'pipMood', mood: 'winMedium' });
 		winLevelSoundsPlay({ winLevelData });

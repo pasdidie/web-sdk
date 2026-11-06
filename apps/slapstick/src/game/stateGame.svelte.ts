@@ -5,7 +5,8 @@ import { stateBet } from 'state-shared';
 import { createEnhanceBoard, createReelForSpinning } from 'utils-slots';
 import { createGetWinLevelDataByWinLevelAlias } from 'utils-shared/winLevel';
 
-import type { GameType, RawSymbol, SymbolState } from './types';
+import type { GameType, Position, RawSymbol, SymbolState } from './types';
+import { camera, shakeCamera } from './camera.svelte';
 import { stateLayoutDerived } from './stateLayout';
 import { winLevelMap } from './winLevelMap';
 import { eventEmitter } from './eventEmitter';
@@ -22,6 +23,7 @@ import {
 
 const onSymbolLand = ({ rawSymbol }: { rawSymbol: RawSymbol }) => {
 	if (rawSymbol.name === 'S') {
+		shakeCamera(4 + scatterLandIndex() * 1.5, 320);
 		eventEmitter.broadcast({ type: 'soundScatterCounterIncrease' });
 		eventEmitter.broadcast({
 			type: 'soundOnce',
@@ -44,6 +46,8 @@ const board = _.range(BOARD_DIMENSIONS.x).map((reelIndex) => {
 		initialSymbols: INITIAL_BOARD[reelIndex],
 		initialSymbolState: INITIAL_SYMBOL_STATE,
 		onReelStopping: () => {
+			// each reel lands with a small knock of the projector
+			shakeCamera(stateBet.isTurbo ? 2.5 : 1.6, 180);
 			eventEmitter.broadcast({
 				type: 'soundOnce',
 				name: 'sfx_reel_stop_1',
@@ -79,6 +83,8 @@ export const stateGame = $state({
 	scatterCounter: 0,
 	// true while winning symbols are shown: the others dim (ReelSymbol.svelte)
 	winSpotlight: false,
+	// payline currently shown (WinLine.svelte), empty when none
+	winLine: [] as Position[],
 });
 
 // Landscape: the screen sits a little right of centre and above the UI bar,
@@ -88,8 +94,8 @@ export const stateGame = $state({
 // and raised to leave Pip a spot on the stage below it.
 const PORTRAIT_BOARD_SCALE = 0.8;
 const boardLayout = () => ({
-	x: stateLayoutDerived.mainLayout().width * (stateLayoutDerived.layoutType() === 'portrait' ? 0.5 : 0.56),
-	y: stateLayoutDerived.mainLayout().height * (stateLayoutDerived.layoutType() === 'portrait' ? 0.34 : 0.44),
+	x: stateLayoutDerived.mainLayout().width * (stateLayoutDerived.layoutType() === 'portrait' ? 0.5 : 0.56) + camera.x,
+	y: stateLayoutDerived.mainLayout().height * (stateLayoutDerived.layoutType() === 'portrait' ? 0.34 : 0.44) + camera.y,
 	scale: stateLayoutDerived.layoutType() === 'portrait' ? PORTRAIT_BOARD_SCALE : 1,
 	anchor: { x: 0.5, y: 0.5 },
 	pivot: { x: BOARD_SIZES.width / 2, y: BOARD_SIZES.height / 2 },

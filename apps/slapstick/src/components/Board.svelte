@@ -19,6 +19,7 @@
 	import BoardContainer from './BoardContainer.svelte';
 	import BoardMask from './BoardMask.svelte';
 	import BoardBase from './BoardBase.svelte';
+	import WinLine from './WinLine.svelte';
 
 	const context = getContext();
 
@@ -55,6 +56,7 @@
 
 	<BoardContext animate={true}>
 		<BoardContainer>
+			<WinLine />
 			<BoardBase />
 		</BoardContainer>
 	</BoardContext>

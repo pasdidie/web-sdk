@@ -4,8 +4,11 @@
 	 * Same external contract (animationMap kept for prop-compatibility with
 	 * Win.svelte/winLevelMap.ts even though the sprite version doesn't need
 	 * named Spine animations) so Win.svelte only needed an import swap.
-	 * Intro zoom-in -> idle pulse+glow loop, per ANIMATION_SPEC.md "Big win".
-	 * banner_frame.png stands in until a dedicated big-win frame asset exists.
+	 * The intertitle card is lowered into the frame like a hanging stage card:
+	 * it drops from above, bounces at the end of its wires, swings on its
+	 * pivot (damped pendulum) and keeps a slow sway while the amount counts
+	 * up. The earlier zoom + GlowFilter pulse read as a generic effect
+	 * (reviewer feedback "poor animations"), so there is no glow here.
 	 *
 	 * No x/y here: Win.svelte already wraps this in a Container translated to
 	 * boardLayout().x/y (the board's on-screen center) -- adding boardLayout
@@ -13,14 +16,11 @@
 	 * the first time a win actually triggers it. Position relative to (0,0).
 	 */
 	import type { Snippet } from 'svelte';
-	import { onDestroy } from 'svelte';
-	import { Tween } from 'svelte/motion';
-	import { backOut, sineInOut } from 'svelte/easing';
-	import { GlowFilter } from 'pixi-filters';
+	import { onMount } from 'svelte';
 	import { Container, Sprite } from 'pixi-svelte';
 
 	import { getContext } from '../game/context';
-	import { ANIMATION_CONFIG, prefersReducedMotion } from '../game/animationConfig';
+	import { prefersReducedMotion } from '../game/animationConfig';
 
 	type Props = {
 		animationMap: unknown;
@@ -29,51 +29,38 @@
 
 	const props: Props = $props();
 	const context = getContext();
-	const cfg = ANIMATION_CONFIG.bigWin;
 
 	// Silent-film intertitle card (1376x768) framing the amount, wider than the 3x3 board.
 	const bannerWidth = $derived(context.stateGameDerived.boardLayout().height * 2.1);
 	const bannerHeight = $derived(bannerWidth / (1376 / 768));
+	// The card hangs from a point above its top edge, so it swings like a sign on two wires.
+	const pivotY = $derived(-bannerHeight * 0.9);
 
-	const scale = new Tween(0, { easing: backOut, duration: cfg.introDurationMs });
-	const glowStrength = new Tween(1, { easing: sineInOut, duration: 900 });
+	let t = $state(prefersReducedMotion() ? 10 : 0);
 
-	const glow = new GlowFilter({ color: 0xf2eee4, outerStrength: glowStrength.current, innerStrength: 0.5 });
-
-	// See SymbolWinSprite.svelte -- Container.destroy() doesn't free attached
-	// filters, so every big win leaks a GlowFilter without this.
-	onDestroy(() => glow.destroy());
-
-	let running = true;
-
-	const runIdleGlowLoop = async () => {
-		while (running) {
-			await glowStrength.set(3);
-			if (!running) break;
-			await glowStrength.set(1);
-		}
-	};
-
-	$effect(() => {
-		running = true;
-		if (prefersReducedMotion()) {
-			scale.set(1, { duration: 0 });
-			return () => {
-				running = false;
-			};
-		}
-		scale.set(1).then(() => runIdleGlowLoop());
-		return () => {
-			running = false;
-		};
+	onMount(() => {
+		if (prefersReducedMotion()) return;
+		let last = 0;
+		let frame = requestAnimationFrame(function tick(ts) {
+			t += last ? Math.min((ts - last) / 1000, 0.05) : 0;
+			last = ts;
+			frame = requestAnimationFrame(tick);
+		});
+		return () => cancelAnimationFrame(frame);
 	});
 
-	$effect(() => {
-		glow.outerStrength = glowStrength.current;
-	});
+	// Drop: falls from 1.6 card heights above with a damped bounce at the end of its wires.
+	const drop = $derived(t < 0 ? 1 : Math.exp(-t * 7) * Math.cos(t * 14));
+	const dropY = $derived(-bannerHeight * 1.6 * Math.max(-0.12, drop));
+	// Swing: kicked by the stop, damped, then a slow residual sway.
+	const swing = $derived(0.16 * Math.exp(-t * 2.6) * Math.sin(t * 7.5) + 0.012 * Math.sin(t * 1.7));
+	// A short jolt in scale when the wires go taut.
+	const taut = $derived(1 + 0.05 * Math.exp(-t * 10) * Math.sin(t * 30));
 </script>
 
-<Container scale={scale.current}>
-	<Sprite anchor={0.5} key="banner_frame" width={bannerWidth} height={bannerHeight} filters={[glow]} />
-	{@render props.children()}
+<Container y={pivotY + dropY} rotation={swing}>
+	<Container y={-pivotY} scale={taut}>
+		<Sprite anchor={0.5} key="banner_frame" width={bannerWidth} height={bannerHeight} />
+		{@render props.children()}
+	</Container>
 </Container>

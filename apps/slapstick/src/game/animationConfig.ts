@@ -65,6 +65,17 @@ export const ANIMATION_CONFIG = {
 		bounceOvershootRatio: 0.08, // ~8% overshoot then settle
 		bounceDurationMs: 175, // midpoint of the 150-200ms spec range
 		anticipationExtraMsPerReel: 800,
+		spinBlur: 14, // vertical BlurFilter strength while a reel spins
+		blurInMs: 160,
+		blurOutMs: 90,
+		landSquash: 0.07, // peak squash of a column as it lands (fraction of its height)
+		landSquashSeconds: 0.45,
+	},
+	winLine: {
+		drawMs: 380,
+		color: 0xf2eee4,
+		width: 5,
+		shadowWidth: 11,
 	},
 	bigWin: {
 		// Thresholds are multiples of total bet; tune against real math once

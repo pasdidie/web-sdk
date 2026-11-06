@@ -19,8 +19,10 @@
 	 * Every piece is a separate Gemini PNG (tools/assets split_sheets.py ->
 	 * rig/*.png). Coordinates below are in "sheet pixels" of the parts sheet,
 	 * origin at the feet, y up = negative; the whole puppet is scaled by
-	 * `height` / PUPPET_HEIGHT. Motion = eased pose targets (Tween, so mood
-	 * changes blend smoothly) + continuous oscillations from one rAF clock.
+	 * `height` / PUPPET_HEIGHT. Motion = pose targets reached through springs
+	 * (Spring: a limb overshoots and settles like a real gesture instead of
+	 * a linear tween) + continuous oscillations from one rAF clock.
+	 * Hops land with a squash of the whole body (squash and stretch).
 	 * The articulated arm pieces of the parts sheet are not used (the
 	 * upper-arm piece reads as a loose sausage); both arms swing at the shoulder.
 	 * The umbrella arm is arm_R_grip (tools/assets/compose_rig.py: arm_R with the
@@ -31,8 +33,7 @@
 	 * scaled down by HEAD_SCALE to match the body.
 	 */
 	import { onMount } from 'svelte';
-	import { Tween } from 'svelte/motion';
-	import { cubicOut } from 'svelte/easing';
+	import { Spring } from 'svelte/motion';
 	import { Container, Sprite } from 'pixi-svelte';
 
 	import { getContext } from '../game/context';
@@ -106,12 +107,14 @@
 		shrug: { ...IDLE, head: 'worried', armCrank: 0.4, armUmbrella: -0.4, holdMs: 1300 },
 	};
 
-	const ease = { duration: 280, easing: cubicOut };
-	const lean = new Tween(IDLE.lean, ease);
-	const armCrank = new Tween(IDLE.armCrank, ease);
-	const armUmbrella = new Tween(IDLE.armUmbrella, ease);
-	const hatLift = new Tween(IDLE.hatLift, ease);
-	const hatTilt = new Tween(IDLE.hatTilt, ease);
+	// Limbs are light and snappy, the body is heavier and slower.
+	const limb = { stiffness: 0.14, damping: 0.38 };
+	const body = { stiffness: 0.08, damping: 0.45 };
+	const lean = new Spring(IDLE.lean, body);
+	const armCrank = new Spring(IDLE.armCrank, limb);
+	const armUmbrella = new Spring(IDLE.armUmbrella, limb);
+	const hatLift = new Spring(IDLE.hatLift, { stiffness: 0.12, damping: 0.3 });
+	const hatTilt = new Spring(IDLE.hatTilt, limb);
 
 	let mood = $state<PipMood>('idle');
 	let head = $state<HeadKey>('neutral');
@@ -180,6 +183,9 @@
 				? -Math.max(0, Math.sin(time * 6)) * 30
 				: Math.sin(time * 2.1) * 3,
 	);
+	// Squash on each landing of a hop (bob back near 0), stretch at take-off.
+	const hopPhase = $derived(mood === 'winBig' ? Math.abs(Math.sin(time * 9)) : mood === 'winMedium' ? Math.max(0, Math.sin(time * 6)) : 1);
+	const squash = $derived(mood === 'winBig' || mood === 'winMedium' ? Math.max(0, 0.25 - hopPhase) * 0.32 - hopPhase * 0.03 : 0);
 	const sway = $derived(mood === 'winBig' ? Math.sin(time * 4.5) * 0.06 : Math.sin(time * 0.7) * 0.015);
 	const legKick = $derived(
 		mood === 'winBig' ? Math.sin(time * 9) * 0.3 : mood === 'winMedium' ? Math.max(0, Math.sin(time * 6)) * 0.35 : 0,
@@ -217,7 +223,7 @@
 		</Container>
 	{/if}
 
-	<Container rotation={lean.current + sway} y={bob}>
+	<Container rotation={lean.current + sway} y={bob} scale={{ x: 1 + squash * 0.6, y: 1 - squash }}>
 		<!-- legs + boots -->
 		<Container x={-38} y={-448} rotation={-legKick}>
 			<Sprite key="pip_leg_L" anchor={{ x: 0.5, y: 0 }} />

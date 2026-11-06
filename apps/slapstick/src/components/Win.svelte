@@ -20,6 +20,7 @@
 	import WinCoins from './WinCoins.svelte';
 	import WinAnimation from './WinAnimationSprite.svelte';
 	import PressToContinue from './PressToContinue.svelte';
+	import PopIn from './PopIn.svelte';
 	import { SYMBOL_SIZE } from '../game/constants';
 	import { getContext } from '../game/context';
 
@@ -78,17 +79,18 @@
 						{#if winLevelData?.animation}
 							<WinAnimation animationMap={winLevelData.animation}>
 								{#if INTERTITLES[winLevelData.alias]}
-									<Text
-										anchor={0.5}
-										y={-SYMBOL_SIZE * 1.15}
-										text={t(INTERTITLES[winLevelData.alias] ?? '')}
-										style={{
-											fontFamily: 'Limelight, serif',
-											fontSize: SYMBOL_SIZE * 0.42,
-											fill: 0xf2eee4,
-											letterSpacing: 4,
-										}}
-									/>
+									<PopIn y={-SYMBOL_SIZE * 1.15}>
+										<Text
+											anchor={0.5}
+											text={t(INTERTITLES[winLevelData.alias] ?? '')}
+											style={{
+												fontFamily: 'Limelight, serif',
+												fontSize: SYMBOL_SIZE * 0.42,
+												fill: 0xf2eee4,
+												letterSpacing: 4,
+											}}
+										/>
+									</PopIn>
 								{/if}
 								<ResponsiveText
 									anchor={0.5}
@@ -99,13 +101,15 @@
 								/>
 							</WinAnimation>
 						{:else}
-							<ResponsiveText
-								anchor={0.5}
-								maxWidth={context.stateLayoutDerived.canvasSizes().width /
-									context.stateLayoutDerived.mainLayout().scale}
-								text={bookEventAmountToCurrencyString(countUpAmount)}
-								style={silverText(SYMBOL_SIZE * 0.6)}
-							/>
+							<PopIn>
+								<ResponsiveText
+									anchor={0.5}
+									maxWidth={context.stateLayoutDerived.canvasSizes().width /
+										context.stateLayoutDerived.mainLayout().scale}
+									text={bookEventAmountToCurrencyString(countUpAmount)}
+									style={silverText(SYMBOL_SIZE * 0.6)}
+								/>
+							</PopIn>
 						{/if}
 					</Container>
 				</MainContainer>
