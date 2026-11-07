@@ -25,6 +25,9 @@
 
 	const props: Props = $props();
 	const context = getContext();
+	// Only mount a Sprite once its texture is loaded (avoids load-time
+	// 'key not found in loadedAssets' console errors).
+	const hasAsset = (key: string) => !!context.stateApp?.loadedAssets?.[key];
 
 	let loadingType = $state<'start' | 'transition'>('start');
 	let heroBobY = $state(0);
@@ -50,12 +53,14 @@
 			y={context.stateLayoutDerived.mainLayout().height * 0.5}
 		>
 			<Container y={heroBobY} scale={heroScale}>
+				{#if hasAsset('title_hero')}
 				<Sprite
 					key="title_hero"
 					anchor={0.5}
 					width={TITLE_HERO_HEIGHT * TITLE_HERO_ASPECT_RATIO}
 					height={TITLE_HERO_HEIGHT}
 				/>
+				{/if}
 			</Container>
 			{#if !context.stateApp.loaded}
 				<LoadingProgress y={250} width={320} height={18}>

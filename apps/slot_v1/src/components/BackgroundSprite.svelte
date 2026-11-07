@@ -15,6 +15,9 @@
 	import { ANIMATION_CONFIG, prefersReducedMotion } from '../game/animationConfig';
 
 	const context = getContext();
+	// Only mount a Sprite once its texture is loaded (avoids load-time
+	// 'key not found in loadedAssets' console errors).
+	const hasAsset = (key: string) => !!context.stateApp?.loadedAssets?.[key];
 	const showBase = $derived(context.stateGame.gameType === 'basegame');
 	const showFree = $derived(context.stateGame.gameType === 'freegame');
 	const canvas = $derived(context.stateLayoutDerived.canvasSizes());
@@ -50,15 +53,27 @@
 <Rectangle {...canvas} backgroundColor={0x000000} zIndex={-3} />
 
 <FadeContainer show={showBase} duration={SECOND} zIndex={-2}>
+	{#if hasAsset('bg_base_far')}
 	<Sprite anchor={0.5} x={canvas.width / 2} y={canvas.height / 2} width={canvas.width} height={canvas.height} key="bg_base_far" />
+	{/if}
+	{#if hasAsset('bg_base_mid')}
 	<Sprite anchor={0.5} x={canvas.width / 2 + midX.current} y={canvas.height / 2} width={overWidth} height={canvas.height} key="bg_base_mid" />
+	{/if}
+	{#if hasAsset('bg_base_near')}
 	<Sprite anchor={0.5} x={canvas.width / 2 + nearX.current} y={canvas.height / 2} width={overWidth} height={canvas.height} key="bg_base_near" />
+	{/if}
 </FadeContainer>
 
 <FadeContainer show={showFree} duration={SECOND} zIndex={-1}>
+	{#if hasAsset('bg_free_far')}
 	<Sprite anchor={0.5} x={canvas.width / 2} y={canvas.height / 2} width={canvas.width} height={canvas.height} key="bg_free_far" />
+	{/if}
+	{#if hasAsset('bg_free_mid')}
 	<Sprite anchor={0.5} x={canvas.width / 2 + midX.current} y={canvas.height / 2} width={overWidth} height={canvas.height} key="bg_free_mid" />
+	{/if}
+	{#if hasAsset('bg_free_near')}
 	<Sprite anchor={0.5} x={canvas.width / 2 + nearX.current} y={canvas.height / 2} width={overWidth} height={canvas.height} key="bg_free_near" />
+	{/if}
 </FadeContainer>
 
 <AmbientEmbers />

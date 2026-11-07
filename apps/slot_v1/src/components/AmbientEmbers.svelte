@@ -12,6 +12,9 @@
 	import { ANIMATION_CONFIG, prefersReducedMotion } from '../game/animationConfig';
 
 	const context = getContext();
+	// Only mount a Sprite once its texture is loaded (avoids load-time
+	// 'key not found in loadedAssets' console errors).
+	const hasAsset = (key: string) => !!context.stateApp?.loadedAssets?.[key];
 	const canvas = $derived(context.stateLayoutDerived.canvasSizes());
 	const isFree = $derived(context.stateGame.gameType === 'freegame');
 	const max = ANIMATION_CONFIG.ambienceParticles.maxSimultaneous;
@@ -23,6 +26,7 @@
 </script>
 
 {#if !reduced}
+	{#if hasAsset('fx_flame')}
 	<Sprite
 		key="fx_flame"
 		anchor={{ x: 0.5, y: 1 }}
@@ -34,6 +38,7 @@
 		alpha={0.1 + 0.12 * breath}
 		blendMode="add"
 	/>
+	{/if}
 	<FxParticles
 		{max}
 		onframe={(system, dt, tex) => {
