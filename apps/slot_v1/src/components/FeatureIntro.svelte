@@ -40,7 +40,7 @@
 			title: t('WILD'),
 			lines: [
 				t('Substitutes for every symbol except Scatter.'),
-				t('Free spins: wild multipliers add up on a line.'),
+				t('In free spins, wild multipliers add up.'),
 			],
 		},
 		{
@@ -128,7 +128,7 @@
 
 				<Text
 					anchor={0.5}
-					y={ph * 0.1}
+					y={ph * 0.08}
 					text={panel.title}
 					style={{
 						fontFamily: 'Cinzel, serif',
@@ -144,15 +144,15 @@
 				{#if panel.lines.length}
 					<Text
 						anchor={{ x: 0.5, y: 0 }}
-						y={ph * 0.16}
+						y={ph * 0.13}
 						text={panel.lines.join('\n')}
 						style={{
 							fontFamily: 'Cinzel, serif',
 							fontWeight: '600',
-							fontSize: pw * 0.052,
+							fontSize: pw * 0.048,
 							fill: 0xcfe9ff,
 							align: 'center',
-							lineHeight: pw * 0.07,
+							lineHeight: pw * 0.062,
 							wordWrap: true,
 							wordWrapWidth: pw * 0.6,
 							stroke: { color: 0x05080e, width: 3 },

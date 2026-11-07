@@ -9,7 +9,7 @@
 
 <script lang="ts">
 	import { Container } from 'pixi-svelte';
-	import { FadeContainer, WinCountUpProvider, ResponsiveBitmapText } from 'components-pixi';
+	import { FadeContainer, WinCountUpProvider } from 'components-pixi';
 	import { waitForResolve, waitForTimeout } from 'utils-shared/wait';
 	import { bookEventAmountToCurrencyString } from 'utils-shared/amount';
 	import { CanvasSizeRectangle, MainContainer } from 'components-layout';
@@ -17,6 +17,7 @@
 
 	import WinAnimation from './WinAnimationSprite.svelte';
 	import PressToContinue from './PressToContinue.svelte';
+	import WinAmountText from './WinAmountText.svelte';
 	import { SYMBOL_SIZE } from '../game/constants';
 	import { getContext } from '../game/context';
 
@@ -68,32 +69,17 @@
 								title={winLevelData.text}
 								tier={Math.max(1, winLevelData.level - 5)}
 							>
-								<ResponsiveBitmapText
-									anchor={0.5}
-									maxWidth={2130}
+								<WinAmountText
 									text={bookEventAmountToCurrencyString(countUpAmount)}
-									style={{
-										fontFamily: 'gold',
-										fontSize: SYMBOL_SIZE * 3.6,
-										align: 'center',
-										fontWeight: 'bold',
-										letterSpacing: 0,
-									}}
+									fontSize={SYMBOL_SIZE * 1.15}
+									maxWidth={context.stateGameDerived.boardLayout().width * 0.95 * 0.74}
 								/>
 							</WinAnimation>
 						{:else}
-							<ResponsiveBitmapText
-								anchor={0.5}
-								maxWidth={context.stateLayoutDerived.canvasSizes().width /
-									context.stateLayoutDerived.mainLayout().scale}
+							<WinAmountText
 								text={bookEventAmountToCurrencyString(countUpAmount)}
-								style={{
-									fontFamily: 'gold',
-									fontSize: SYMBOL_SIZE,
-									align: 'center',
-									fontWeight: 'bold',
-									letterSpacing: 0,
-								}}
+								fontSize={SYMBOL_SIZE * 0.9}
+								maxWidth={context.stateGameDerived.boardLayout().width}
 							/>
 						{/if}
 					</Container>

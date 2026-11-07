@@ -7,6 +7,8 @@
 	 *     trigger, wild/scatter wins).
 	 * Desktop/landscape: plaque left of the reel frame, mascot right of it.
 	 * Portrait: no side room -> plaque above the frame, mascot hidden.
+ * During free spins the plaque turns into the FREE SPINS "current / total"
+ * counter (replaces the template's FreeSpinCounter, which sat on top of it).
 	 * Rendered in a MainContainer *before* BoardFrame so it sits behind it.
 	 */
 	import { onMount } from 'svelte';
@@ -48,6 +50,23 @@
 	const mascotX = $derived(layout.x + frameW / 2 + sideRoom * 0.42);
 	const mascotBottom = $derived(layout.y + frameH * 0.42);
 	const showMascot = $derived(!portrait && sideRoom > mascotW * 0.55);
+
+	// ---- free spins counter (same plaque) ------------------------------------
+	let fsActive = $state(false);
+	let fsCurrent = $state(0);
+	let fsTotal = $state(0);
+	context.eventEmitter.subscribeOnMount({
+		freeSpinCounterShow: () => (fsActive = true),
+		freeSpinCounterHide: () => (fsActive = false),
+		freeSpinCounterUpdate: (e) => {
+			if (e.current !== undefined) fsCurrent = e.current;
+			if (e.total !== undefined) fsTotal = e.total;
+		},
+	});
+	const tr = stateI18nDerived.translate;
+	const plaqueTop = $derived(fsActive ? tr('FREE SPINS') : tr('WIN UP TO'));
+	const plaqueMain = $derived(fsActive ? `${fsCurrent} / ${fsTotal}` : maxWinText);
+	const plaqueBottom = $derived(fsActive ? '' : tr('MAX WIN'));
 
 	let t = $state(0);
 	let cheering = $state(false);
@@ -125,7 +144,7 @@
 		<Text
 			anchor={0.5}
 			y={-plaqueH * 0.17}
-			text={stateI18nDerived.translate('WIN UP TO')}
+			text={plaqueTop}
 			style={{
 				fontFamily: 'Cinzel, serif',
 				fontWeight: '700',
@@ -140,7 +159,7 @@
 			anchor={0.5}
 			y={plaqueH * 0.03}
 			scale={1 + 0.03 * glowPulse}
-			text={maxWinText}
+			text={plaqueMain}
 			style={{
 				fontFamily: 'Cinzel, serif',
 				fontWeight: '700',
@@ -154,7 +173,7 @@
 		<Text
 			anchor={0.5}
 			y={plaqueH * 0.2}
-			text={stateI18nDerived.translate('MAX WIN')}
+			text={plaqueBottom}
 			style={{
 				fontFamily: 'Cinzel, serif',
 				fontWeight: '700',
@@ -171,7 +190,7 @@
 		<Sprite key="bigwin_frame" anchor={0.5} width={frameW * 0.5} height={frameW * 0.5 * 0.36} />
 		<Text
 			anchor={0.5}
-			text={`${stateI18nDerived.translate('WIN UP TO')} ${maxWinText}`}
+			text={`${plaqueTop} ${plaqueMain}`}
 			style={{
 				fontFamily: 'Cinzel, serif',
 				fontWeight: '700',
