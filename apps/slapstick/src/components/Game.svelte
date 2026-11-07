@@ -125,7 +125,8 @@
 
 		<MainContainer>
 			<PipPuppet {...pipPlacement} />
-			{#if context.stateLayoutDerived.layoutType() !== 'portrait'}
+			<!-- desktop only (landscape puts buttons there); hidden during free spins, where the spin counter takes that corner -->
+			{#if context.stateLayoutDerived.layoutType() === 'desktop' && context.stateGame.gameType !== 'freegame'}
 				{@const board = context.stateGameDerived.boardLayout()}
 				<!-- stage right of the screen frame (its outer edge is ~1.03 board heights from the centre) -->
 				<MaxWinPlaque x={board.x + board.height * 1.03 * board.scale + 112} y={board.y - board.height * 0.15} width={190} />
