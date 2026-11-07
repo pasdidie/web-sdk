@@ -8,6 +8,9 @@
 	import { prefersReducedMotion } from '../game/animationConfig';
 	import TransitionAnimation from './TransitionAnimationSprite.svelte';
 	import PressToContinue from './PressToContinue.svelte';
+	import IntroPanels from './IntroPanels.svelte';
+	import { Tween } from 'svelte/motion';
+	import { cubicInOut } from 'svelte/easing';
 
 	type Props = {
 		onloaded: () => void;
@@ -30,6 +33,16 @@
 	let heroBobY = $state(0);
 	let heroScale = $state(1);
 
+	// Once loaded, the title rises to make room for the feature cards.
+	const portrait = $derived(context.stateLayoutDerived.layoutType() === 'portrait');
+	const titleRise = new Tween(0, { duration: 700, easing: cubicInOut });
+	$effect(() => {
+		titleRise.set(context.stateApp.loaded ? 1 : 0, { duration: prefersReducedMotion() ? 0 : 700 });
+	});
+	const mainHeight = $derived(context.stateLayoutDerived.mainLayout().height);
+	const titleY = $derived(mainHeight * (0.5 - titleRise.current * (portrait ? 0.33 : 0.27)));
+	const titleScale = $derived(1 - titleRise.current * 0.3);
+
 	onMount(() => {
 		if (prefersReducedMotion()) return;
 		let rafId = requestAnimationFrame(function tick(ts) {
@@ -47,9 +60,9 @@
 	<MainContainer>
 		<Container
 			x={context.stateLayoutDerived.mainLayout().width * 0.5}
-			y={context.stateLayoutDerived.mainLayout().height * 0.5}
+			y={titleY}
 		>
-			<Container y={heroBobY} scale={heroScale}>
+			<Container y={heroBobY} scale={heroScale * titleScale}>
 				<Sprite
 					key="title_logo"
 					anchor={0.5}
@@ -74,8 +87,17 @@
 	</MainContainer>
 </FadeContainer>
 
-<!-- press to continue -->
+<!-- feature cards + press to continue -->
 <FadeContainer show={loadingType === 'start' && context.stateApp.loaded}>
+	{#if context.stateApp.loaded}
+		<MainContainer>
+			<IntroPanels
+				x={context.stateLayoutDerived.mainLayout().width * 0.5}
+				y={mainHeight * 0.6}
+				vertical={portrait}
+			/>
+		</MainContainer>
+	{/if}
 	<PressToContinue onpress={() => (loadingType = 'transition')} />
 </FadeContainer>
 

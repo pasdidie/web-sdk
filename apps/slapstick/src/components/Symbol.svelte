@@ -7,7 +7,8 @@
 	import { getSymbolInfo } from '../game/utils';
 	import type { SymbolState, RawSymbol } from '../game/types';
 	import { getContext } from '../game/context';
-	import { Sprite, Text } from 'pixi-svelte';
+	import { Container, Sprite, Text } from 'pixi-svelte';
+	import { stateI18nDerived } from 'state-shared';
 	import { SYMBOL_SIZE } from '../game/constants';
 
 	type Props = {
@@ -21,6 +22,8 @@
 
 	const props: Props = $props();
 	const context = getContext();
+	const t = stateI18nDerived.translate;
+	const SPECIAL_LABELS: Partial<Record<string, string>> = { W: 'WILD', S: 'SCATTER' };
 	const symbolInfo = $derived(getSymbolInfo({ rawSymbol: props.rawSymbol, state: props.state }));
 </script>
 
@@ -62,6 +65,19 @@
 			},
 		}}
 	/>
+{/if}
+
+{#if SPECIAL_LABELS[props.rawSymbol.name] && !props.rawSymbol.multiplier}
+	<!-- WILD / SCATTER written in code on a blank Gemini ribbon (no text baked
+	     into the art, so it stays translatable); sym_ribbon.png is ~4:1 -->
+	<Container x={props.x} y={(props.y ?? 0) + SYMBOL_SIZE * 0.4}>
+		<Sprite anchor={0.5} key="sym_ribbon" width={SYMBOL_SIZE * 1.1} height={SYMBOL_SIZE * 0.3} />
+		<Text
+			anchor={0.5}
+			text={t(SPECIAL_LABELS[props.rawSymbol.name] ?? '')}
+			style={{ fontFamily: 'Limelight, serif', fontSize: SYMBOL_SIZE * 0.15, fill: 0xf2eee4, letterSpacing: 2 }}
+		/>
+	</Container>
 {/if}
 
 {#if props.rawSymbol.multiplier}

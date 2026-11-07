@@ -10,10 +10,10 @@
 
 	import { prefersReducedMotion } from '../game/animationConfig';
 
-	type Props = { x?: number; y?: number; children: Snippet };
+	type Props = { x?: number; y?: number; delayMs?: number; children: Snippet };
 	const props: Props = $props();
 
-	let t = $state(prefersReducedMotion() ? 10 : 0);
+	let t = $state(prefersReducedMotion() ? 10 : -(props.delayMs ?? 0) / 1000);
 
 	onMount(() => {
 		if (prefersReducedMotion()) return;
@@ -26,10 +26,11 @@
 		return () => cancelAnimationFrame(frame);
 	});
 
-	const scale = $derived(1 - 0.6 * Math.exp(-t * 8) * Math.cos(t * 15));
-	const rotation = $derived(-0.08 * Math.exp(-t * 6) * Math.cos(t * 11));
+	const tt = $derived(Math.max(0, t));
+	const scale = $derived(1 - 0.6 * Math.exp(-tt * 8) * Math.cos(tt * 15));
+	const rotation = $derived(-0.08 * Math.exp(-tt * 6) * Math.cos(tt * 11));
 </script>
 
-<Container x={props.x} y={props.y} {scale} {rotation} alpha={Math.min(1, t * 8)}>
+<Container x={props.x} y={props.y} {scale} {rotation} alpha={Math.max(0, Math.min(1, t * 8))}>
 	{@render props.children()}
 </Container>

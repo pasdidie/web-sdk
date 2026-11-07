@@ -33,7 +33,8 @@
 	const frameHeight = $derived((board.height * board.scale * 1.08) / OPENING.height);
 	const frameWidth = $derived(frameHeight * FRAME_RATIO);
 
-	// One column per reel, separated by darker gaps, so the 3x3 reads as a grid.
+	// One film strip per reel (reel_strip.png: three frames = the three rows),
+	// separated by darker gaps, so the 3x3 reads as a grid.
 	const columns = $derived(
 		Array.from({ length: BOARD_DIMENSIONS.x }, (_, reelIndex) => board.x + (getSymbolX(reelIndex) - board.width / 2) * board.scale),
 	);
@@ -62,15 +63,14 @@
 />
 
 {#each columns as columnX}
-	<Rectangle
+	<Sprite
+		key="reel_strip"
 		anchor={0.5}
 		x={columnX}
 		y={board.y}
-		width={REEL_PITCH * 0.9 * board.scale}
-		height={board.height * 1.04 * board.scale}
-		backgroundColor={0x1d1c1a}
-		borderColor={0x3a3834}
-		borderWidth={2}
+		width={REEL_PITCH * 0.94 * board.scale}
+		height={board.height * 1.06 * board.scale}
+		tint={0x8a8781}
 	/>
 {/each}
 

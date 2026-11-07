@@ -286,6 +286,8 @@ export default {
 	sym_W_aura: { type: 'sprite', src: new URL('../../assets/sprites/slapstick/sym_W_aura.png', import.meta.url).href },
 	sym_S_body: { type: 'sprite', src: new URL('../../assets/sprites/slapstick/sym_S_body.png', import.meta.url).href },
 	sym_S_aura: { type: 'sprite', src: new URL('../../assets/sprites/slapstick/sym_S_aura.png', import.meta.url).href },
+	sym_ribbon: { type: 'sprite', src: new URL('../../assets/sprites/slapstick/sym_ribbon.png', import.meta.url).href },
+	reel_strip: { type: 'sprite', src: new URL('../../assets/sprites/slapstick/reel_strip.png', import.meta.url).href },
 	badge_mult: { type: 'sprite', src: new URL('../../assets/sprites/slapstick/badge_mult.png', import.meta.url).href },
 	intertitle_frame: { type: 'sprite', src: new URL('../../assets/sprites/slapstick/intertitle_frame.png', import.meta.url).href },
 	banner_frame: { type: 'sprite', src: new URL('../../assets/sprites/slapstick/intertitle_frame.png', import.meta.url).href },

@@ -29,6 +29,7 @@
 	import Transition from './Transition.svelte';
 	import FilmOverlay from './FilmOverlay.svelte';
 	import PipPuppet from './PipPuppet.svelte';
+	import MaxWinPlaque from './MaxWinPlaque.svelte';
 	import { Filter } from 'pixi.js';
 
 	const context = getContext();
@@ -124,6 +125,11 @@
 
 		<MainContainer>
 			<PipPuppet {...pipPlacement} />
+			{#if context.stateLayoutDerived.layoutType() !== 'portrait'}
+				{@const board = context.stateGameDerived.boardLayout()}
+				<!-- stage right of the screen frame (its outer edge is ~1.03 board heights from the centre) -->
+				<MaxWinPlaque x={board.x + board.height * 1.03 * board.scale + 112} y={board.y - board.height * 0.15} width={190} />
+			{/if}
 		</MainContainer>
 
 		<UI>

@@ -90,8 +90,9 @@ const explosion = {
 };
 
 // Gemini assets processed by tools/assets (film-toned, keyed). 3 high + 3 low symbols.
-// The art keeps a margin inside its square canvas, so it is drawn slightly larger than a cell.
-const SYMBOL_ART_RATIOS = { width: 1.2, height: 1.2 };
+// Exported trimmed + re-padded to a square with a 4% margin (export_to_web.py
+// SQUARE_FIT), so every symbol fills its cell the same way, like the big studios'.
+const SYMBOL_ART_RATIOS = { width: 1.04, height: 1.04 };
 const h1Static = { type: 'sprite', assetKey: 'sym_H1', sizeRatios: SYMBOL_ART_RATIOS };
 const h2Static = { type: 'sprite', assetKey: 'sym_H2', sizeRatios: SYMBOL_ART_RATIOS };
 const h3Static = { type: 'sprite', assetKey: 'sym_H3', sizeRatios: SYMBOL_ART_RATIOS };
@@ -105,8 +106,9 @@ const l3Static = { type: 'sprite', assetKey: 'sym_L3', sizeRatios: SYMBOL_ART_RA
 // 2+ cells oversized, overlapping the board frame. Our body+aura art is a
 // single square canvas per symbol, like H/L, just slightly larger to still
 // read as "special".
-const wSizeRatios = { width: 1.2, height: 1.2 };
-const sSizeRatios = { width: 1.2, height: 1.2 };
+// Specials break the cell a little (provider convention) to read as special.
+const wSizeRatios = { width: 1.16, height: 1.16 };
+const sSizeRatios = { width: 1.16, height: 1.16 };
 
 export const SYMBOL_INFO_MAP = {
 	H1: {
