@@ -1,7 +1,6 @@
 import { stateUrlDerived, type BetModeMeta } from 'state-shared';
 
 import config from './config';
-import assets from './assets';
 
 const social = stateUrlDerived.social();
 
@@ -40,7 +39,13 @@ const social = stateUrlDerived.social();
  * key===mode equality.
  */
 const EMPTY_ASSETS = { icon: '', volatility: '', button: '', dialogImage: '', dialogVolatility: '' };
-const bonusIllustration = (assets as any).bonus_illustration?.src ?? '';
+// Buy Bonus dialog art: one HTML <img> per tier, escalating intensity
+// (10 -> 12 -> 15 spins). Plain URLs, not Pixi assets: nothing to preload.
+const bonusIllustration: Record<number, string> = {
+	10: new URL('../../assets/sprites/gemini/bonus_10.jpg', import.meta.url).href,
+	12: new URL('../../assets/sprites/gemini/bonus_12.jpg', import.meta.url).href,
+	15: new URL('../../assets/sprites/gemini/bonus_15.jpg', import.meta.url).href,
+};
 
 type BonusTier = { mode: string; cost: number; maxWin: number; spins: number };
 
@@ -77,7 +82,7 @@ export const betModeMeta: BetModeMeta = {
 				type: 'buy',
 				parent: '',
 				children: '',
-				assets: { ...EMPTY_ASSETS, dialogImage: bonusIllustration },
+				assets: { ...EMPTY_ASSETS, dialogImage: bonusIllustration[tier.spins] },
 				text: {
 					title: `${tier.spins} Free Spins`,
 					dialog: social

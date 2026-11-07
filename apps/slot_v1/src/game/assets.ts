@@ -264,10 +264,6 @@ export default {
 		type: 'sprites',
 		src: new URL('../../assets/sprites/symbolsStatic/symbolsStatic.json', import.meta.url).href,
 	},
-	coins: {
-		type: 'spriteSheet',
-		src: new URL('../../assets/sprites/coin/SD2_Coin.json', import.meta.url).href,
-	},
 	sound: {
 		type: 'audio',
 		src: new URL('../../assets/audio/sounds.json', import.meta.url).href,
@@ -324,6 +320,7 @@ export default {
 	fx_ring: { type: 'sprite', src: new URL('../../assets/sprites/gemini/fx_ring.png', import.meta.url).href },
 	fx_rays: { type: 'sprite', src: new URL('../../assets/sprites/gemini/fx_rays.png', import.meta.url).href },
 	fx_beam: { type: 'sprite', src: new URL('../../assets/sprites/gemini/fx_beam.png', import.meta.url).href },
+	fx_coin: { type: 'sprite', src: new URL('../../assets/sprites/gemini/fx_coin.png', import.meta.url).href },
 	mascot_idle: {
 		type: 'sprite',
 		src: new URL('../../assets/sprites/gemini/mascot_idle.png', import.meta.url).href,
@@ -387,9 +384,5 @@ export default {
 	title_hero: {
 		type: 'sprite',
 		src: new URL('../../assets/sprites/gemini/title_hero.png', import.meta.url).href,
-	},
-	bonus_illustration: {
-		type: 'sprite',
-		src: new URL('../../assets/sprites/gemini/bonus_illustration.png', import.meta.url).href,
 	},
 } as const;

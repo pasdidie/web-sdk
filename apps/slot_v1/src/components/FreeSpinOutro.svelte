@@ -8,8 +8,9 @@
 </script>
 
 <script lang="ts">
-	import { BitmapText } from 'pixi-svelte';
-	import { FadeContainer, WinCountUpProvider, ResponsiveBitmapText } from 'components-pixi';
+	import { Text } from 'pixi-svelte';
+	import { FadeContainer, WinCountUpProvider } from 'components-pixi';
+	import { stateI18nDerived } from 'state-shared';
 	import { bookEventAmountToCurrencyString } from 'utils-shared/amount';
 	import { waitForResolve } from 'utils-shared/wait';
 	import { CanvasSizeRectangle } from 'components-layout';
@@ -20,6 +21,18 @@
 	import NumberPopSprite from './NumberPopSprite.svelte';
 	import PressToContinue from './PressToContinue.svelte';
 	import WinCoins from './WinCoins.svelte';
+	import WinAmountText from './WinAmountText.svelte';
+
+	const titleStyle = (fontSize: number) => ({
+		fontFamily: 'Cinzel, serif',
+		fontWeight: '700' as const,
+		fontSize,
+		fill: 0xffe2a0,
+		letterSpacing: 3,
+		align: 'center' as const,
+		stroke: { color: 0x1a0d04, width: Math.max(4, fontSize * 0.1) },
+		dropShadow: { color: 0x3fb6ff, blur: 12, distance: 0, alpha: 0.9, angle: 0 },
+	});
 
 	const context = getContext();
 
@@ -52,30 +65,26 @@
 
 				<FreeSpinAnimation>
 					{#snippet children({ sizes })}
-						<BitmapText
+						<Text
 							anchor={{ x: 0.5, y: 1 }}
-							y={-sizes.width * (isBigWin ? 0.18 : 0.12)}
-							text={isBigWin ? 'FREE SPINS COMPLETE' : 'WIN'}
-							style={{ fontFamily: 'gold', fontSize: sizes.width * 0.07, fontWeight: 'bold', align: 'center' }}
+							y={-sizes.width * (isBigWin ? 0.17 : 0.12)}
+							text={stateI18nDerived.translate(isBigWin ? 'FREE SPINS COMPLETE' : 'WIN')}
+							style={titleStyle(sizes.width * 0.06)}
 						/>
 
 						<NumberPopSprite>
-							<ResponsiveBitmapText
-								anchor={0.5}
-								style={{
-									fontFamily: 'gold',
-									fontSize: sizes.width * 0.08,
-								}}
+							<WinAmountText
 								text={bookEventAmountToCurrencyString(countUpAmount)}
-								maxWidth={sizes.width}
+								fontSize={sizes.width * 0.13}
+								maxWidth={sizes.width * 0.62}
 							/>
 						</NumberPopSprite>
 
-						<BitmapText
+						<Text
 							anchor={{ x: 0.5, y: 0 }}
 							y={sizes.width * 0.14}
-							text="TOTAL WIN"
-							style={{ fontFamily: 'gold', fontSize: sizes.width * 0.05, fontWeight: 'bold', align: 'center' }}
+							text={stateI18nDerived.translate('TOTAL WIN')}
+							style={titleStyle(sizes.width * 0.045)}
 						/>
 					{/snippet}
 				</FreeSpinAnimation>
