@@ -392,6 +392,8 @@ export class UiBar {
 	readonly root = new PIXI.Container();
 	private consoleG = new PIXI.Graphics();
 	private consoleArt?: PIXI.NineSliceSprite;
+	/** dedicated two-channel tablet console (upper/lower channel split by a cyan divider at mid height) */
+	private consoleTabletArt?: PIXI.NineSliceSprite;
 	private spin = new SpinButton(72);
 	private plus = new RoundButton('plus', 26);
 	private minus = new RoundButton('minus', 26);
@@ -435,6 +437,11 @@ export class UiBar {
 			this.consoleArt = new PIXI.NineSliceSprite({ texture: tex('ui_console'), leftWidth: 190, rightWidth: 190, topHeight: 110, bottomHeight: 110 });
 			this.root.addChildAt(this.consoleArt, 0);
 		}
+		if (hasArt('ui_console_tablet') && !this.consoleTabletArt) {
+			this.consoleTabletArt = new PIXI.NineSliceSprite({ texture: tex('ui_console_tablet'), leftWidth: 210, rightWidth: 210, topHeight: 100, bottomHeight: 100 });
+			this.consoleTabletArt.visible = false;
+			this.root.addChildAt(this.consoleTabletArt, 0);
+		}
 		for (const b of [this.plus, this.minus, this.turbo, this.auto, this.menu, this.sound, this.info]) b.redraw();
 		this.spin.redraw();
 		this.buy.redraw();
@@ -442,9 +449,23 @@ export class UiBar {
 		this.layoutType = null;
 	}
 
-	private drawConsole(x: number, y: number, w: number, h: number) {
+	private drawConsole(x: number, y: number, w: number, h: number, tablet = false) {
 		const g = this.consoleG;
 		g.clear();
+		const useTablet = tablet && !!this.consoleTabletArt;
+		if (this.consoleTabletArt) this.consoleTabletArt.visible = useTablet;
+		if (this.consoleArt) this.consoleArt.visible = !useTablet;
+		if (useTablet) {
+			// scale so the art height maps 1:1 (no vertical stretch: the divider stays a crisp line);
+			// only the plain middle stretches horizontally
+			const a = this.consoleTabletArt!;
+			const k = h / a.texture.height;
+			a.scale.set(k);
+			a.width = w / k;
+			a.height = h / k;
+			a.position.set(x, y);
+			return;
+		}
 		if (this.consoleArt) {
 			const k = Math.min(1, h / 222);
 			this.consoleArt.scale.set(k);
@@ -508,22 +529,26 @@ export class UiBar {
 			P(this.info, 836, 1360, 0.0001);
 			P(this.msg, 450, 1290, 1.2);
 		} else {
-			// tablet (near square)
-			this.drawConsole(12, 1000, 1176, 192);
-			P(this.buy, 185, 1048, 0.9);
-			P(this.ante, 395, 1048, 0.9);
-			P(this.minus, 765, 1092, 1.1);
-			P(this.spin, 905, 1088, 1.02);
-			P(this.plus, 1045, 1092, 1.1);
-			P(this.turbo, 1138, 1032, 0.95);
-			P(this.auto, 1138, 1158, 0.95);
-			P(this.menu, 58, 1158, 0.95);
-			P(this.sound, 124, 1158, 0.95);
-			P(this.info, 190, 1158, 0.95);
-			P(this.balance, 345, 1158, 0.95);
-			P(this.bet, 535, 1158, 0.95);
-			P(this.win, 705, 1158, 0.9);
-			P(this.msg, 600, 975, 1.05);
+			// tablet (near square): two-channel console 12..1188 x 980..1200 (art 1600x474 scaled 0.464).
+			// Upper channel centre y 1047, divider y 1090, lower channel centre y 1132, inner x 89..1111.
+			// Spin straddles the divider at the right end like a hub.
+			this.drawConsole(12, 980, 1176, 220, true);
+			const up = 1047;
+			const lo = 1132;
+			P(this.buy, 192, up, 0.8);
+			P(this.ante, 378, up, 0.8);
+			P(this.minus, 540, up, 1.0);
+			P(this.plus, 680, up, 1.0);
+			P(this.turbo, 790, up, 0.9);
+			P(this.auto, 870, up, 0.9);
+			P(this.menu, 128, lo, 0.9);
+			P(this.sound, 190, lo, 0.9);
+			P(this.info, 252, lo, 0.9);
+			P(this.balance, 400, lo, 0.92);
+			P(this.bet, 610, lo, 0.92);
+			P(this.win, 812, lo, 0.9);
+			P(this.spin, 1032, 1090, 0.98);
+			P(this.msg, 600, 950, 1.05);
 		}
 	}
 
