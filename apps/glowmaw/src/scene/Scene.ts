@@ -54,7 +54,7 @@ const PLACEMENT: Record<LayoutType, Placement> = {
 	desktop: {
 		board: { x: 665, y: 392, s: 1.1 },
 		mascot: { x: 1272, y: 400, h: 340 },
-		logo: { x: 172, y: 105, s: 0.95 },
+		logo: { x: 150, y: 86, s: 0.74 },
 		banner: { x: 665, y: 722, s: 1 },
 		lure: { x: 1250, y: 165, s: 1 },
 		fsCounter: { x: 172, y: 300, s: 1 },
@@ -63,7 +63,7 @@ const PLACEMENT: Record<LayoutType, Placement> = {
 	landscape: {
 		board: { x: 680, y: 372, s: 1.06 },
 		mascot: { x: 1272, y: 360, h: 330 },
-		logo: { x: 172, y: 100, s: 0.95 },
+		logo: { x: 150, y: 82, s: 0.74 },
 		banner: { x: 680, y: 700, s: 1.05 },
 		lure: { x: 1250, y: 150, s: 1 },
 		fsCounter: { x: 172, y: 290, s: 1.1 },

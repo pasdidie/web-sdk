@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js';
+import { GText } from './theme';
 
 import { anim, ease } from './anim';
 import { COLORS, textStyle } from './theme';
@@ -69,12 +70,12 @@ export const drawIcon = (g: PIXI.Graphics, icon: UiIcon, s: number, color = 0xe9
 };
 
 const label = (text: string, size: number, color = 0x8fe9ff, weight = '700') => {
-	const t = new PIXI.Text({ text, style: { ...textStyle(size, { weight, italic: false, glow: COLORS.cyan, strokeWidth: 0 }), fill: color, letterSpacing: size * 0.18 } as any });
+	const t = new GText({ text, style: { ...textStyle(size, { weight, italic: false, glow: COLORS.cyan, strokeWidth: 0 }), fill: color, letterSpacing: size * 0.18 } as any });
 	t.anchor.set(0.5);
 	return t;
 };
 const valueText = (size: number) => {
-	const t = new PIXI.Text({ text: '', style: textStyle(size, { glow: COLORS.cyan, strokeWidth: size * 0.08 }) });
+	const t = new GText({ text: '', style: textStyle(size, { glow: COLORS.cyan, strokeWidth: size * 0.08 }) });
 	t.anchor.set(0.5);
 	return t;
 };
@@ -294,9 +295,9 @@ export class FeatureButton extends Pressable {
 		this.glow.blendMode = 'add';
 		this.glow.tint = accent;
 		this.art.anchor.set(0.5);
-		this.top = new PIXI.Text({ text: topText, style: textStyle(26, { glow: accent }) });
+		this.top = new GText({ text: topText, style: textStyle(26, { glow: accent }) });
 		this.top.anchor.set(0.5);
-		this.bottom = new PIXI.Text({ text: bottomText, style: textStyle(18, { weight: '700', italic: false, glow: accent, strokeWidth: 3 }) });
+		this.bottom = new GText({ text: bottomText, style: textStyle(18, { weight: '700', italic: false, glow: accent, strokeWidth: 3 }) });
 		this.bottom.anchor.set(0.5);
 		this.addChild(this.glow, this.plate, this.art, this.top, this.bottom, this.pip);
 		this.hitArea = new PIXI.Rectangle(-w / 2, -h / 2, w, h);
@@ -320,8 +321,8 @@ export class FeatureButton extends Pressable {
 		this.glow.scale.set((w * 1.6) / 256, (h * 2) / 256);
 		this.pip.clear();
 		if (this.toggle) {
-			this.pip.roundRect(w / 2 - 46, -h / 2 + 10, 34, 18, 9).fill({ color: this.active ? COLORS.amber : 0x22344a });
-			this.pip.circle(this.active ? w / 2 - 21 : w / 2 - 37, -h / 2 + 19, 7).fill(0xffffff);
+			this.pip.roundRect(w / 2 - 50, h / 2 - 30, 34, 18, 9).fill({ color: this.active ? COLORS.amber : 0x22344a });
+			this.pip.circle(this.active ? w / 2 - 25 : w / 2 - 41, h / 2 - 21, 7).fill(0xffffff);
 		}
 		const fit = (t: PIXI.Text, mw: number) => {
 			t.scale.set(1);
@@ -471,9 +472,9 @@ export class UiBar {
 		};
 		if (type === 'desktop' || type === 'landscape') {
 			const L = type === 'landscape';
-			const y = L ? 838 : 852;
+			const y = L ? 848 : 860;
 			const u = L ? 1.22 : 1;
-			this.drawConsole(14, L ? 778 : 802, 1572, L ? 118 : 94);
+			this.drawConsole(14, L ? 764 : 786, 1572, L ? 134 : 112);
 			P(this.menu, 60, y, u);
 			P(this.sound, 130 * (L ? 1.08 : 1), y, u);
 			P(this.info, 200 * (L ? 1.1 : 1), y, u);

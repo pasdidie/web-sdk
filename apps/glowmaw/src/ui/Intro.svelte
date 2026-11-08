@@ -18,7 +18,7 @@
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="intro" class:ready={props.ready} onclick={go}>
+<div class="intro" class:ready={props.ready} onclick={go} style="--bg: url({assetUrl('bg_far')})">
 	<div class="glow"></div>
 	<img class="logo" src={assetUrl('logo')} alt="Glowmaw" onerror={(e) => ((e.currentTarget as HTMLImageElement).style.display = 'none')} />
 	<div class="cards">
@@ -48,7 +48,7 @@
 		align-items: center;
 		justify-content: center;
 		gap: 2.2vh;
-		background: radial-gradient(ellipse at 50% 30%, #0b3550 0%, #041226 45%, #01040c 100%);
+		background: radial-gradient(ellipse at 50% 40%, rgba(4, 22, 40, 0.35) 0%, rgba(1, 6, 16, 0.85) 75%), var(--bg) center / cover no-repeat, #01040c;
 		font-family: 'Exo 2', sans-serif;
 		color: #e9fbff;
 		overflow: hidden;

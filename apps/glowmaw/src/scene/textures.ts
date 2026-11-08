@@ -116,20 +116,30 @@ export const fx = {
 	rays: () =>
 		canvasTex('fx_rays', 512, 512, (c) => {
 			c.translate(256, 256);
-			const n = 18;
+			const n = 24;
 			for (let i = 0; i < n; i++) {
 				c.rotate((Math.PI * 2) / n);
 				const g = c.createLinearGradient(0, 0, 0, -256);
-				g.addColorStop(0, 'rgba(255,255,255,0.9)');
+				g.addColorStop(0, 'rgba(255,255,255,0.0)');
+				g.addColorStop(0.15, 'rgba(255,255,255,0.7)');
 				g.addColorStop(1, 'rgba(255,255,255,0)');
 				c.fillStyle = g;
 				c.beginPath();
 				c.moveTo(0, 0);
-				c.lineTo(-18 - (i % 3) * 8, -256);
-				c.lineTo(18 + (i % 3) * 8, -256);
+				c.lineTo(-8 - (i % 3) * 6, -256);
+				c.lineTo(8 + (i % 3) * 6, -256);
 				c.closePath();
 				c.fill();
 			}
+			// soften: radial fade so rays dissolve, no hard wedge edges
+			c.setTransform(1, 0, 0, 1, 0, 0);
+			c.globalCompositeOperation = 'destination-in';
+			const r = c.createRadialGradient(256, 256, 0, 256, 256, 256);
+			r.addColorStop(0, 'rgba(0,0,0,1)');
+			r.addColorStop(0.7, 'rgba(0,0,0,0.6)');
+			r.addColorStop(1, 'rgba(0,0,0,0)');
+			c.fillStyle = r;
+			c.fillRect(0, 0, 512, 512);
 		}),
 	vignette: () =>
 		canvasTex('fx_vignette', 512, 512, (c) =>

@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js';
+import { GText } from './theme';
 
 import { anim, ease } from './anim';
 import { C, SYMBOL_STYLE, orbTier, textStyle, COLORS } from './theme';
@@ -72,16 +73,14 @@ export class SymbolView {
 		this.glow.scale.set((C * 1.25) / 256);
 		this.glow.alpha = raw.name === 'S' || raw.name === 'M' ? 0.55 : 0.18;
 		if (raw.name === 'M') {
-			if (!this.value) {
-				this.value = new PIXI.Text({ text: '', style: textStyle(34, { glow: tint }) });
-				this.value.anchor.set(0.5);
-				this.body.addChild(this.value);
-			}
-			this.value.visible = true;
-			this.value.text = `×${raw.multiplier}`;
-			this.value.style.fontSize = (raw.multiplier ?? 2) >= 100 ? 30 : 36;
-			(this.value.style as any).dropShadow = { color: tint, blur: 10, distance: 0, alpha: 0.95, angle: 0 };
+			// rebuild the Text with its final style: mutating style after creation left the
+			// glyphs offset by the padding (Pixi 8.8)
+			this.value?.destroy();
+			const big = (raw.multiplier ?? 2) >= 100;
+			this.value = new GText({ text: `×${raw.multiplier}`, style: { ...textStyle(big ? 30 : 36, { glow: tint }), dropShadow: { color: tint, blur: 10, distance: 0, alpha: 0.95, angle: 0 } } as any });
+			this.value.anchor.set(0.5);
 			this.value.y = 2;
+			this.body.addChild(this.value);
 		} else if (this.value) this.value.visible = false;
 	}
 
@@ -180,7 +179,7 @@ export class SymbolView {
 		a.scale.set(this.baseScale);
 		c.addChild(g, a);
 		if (this.value) {
-			const v = new PIXI.Text({ text: this.value.text, style: this.value.style.clone() });
+			const v = new GText({ text: this.value.text, style: this.value.style.clone() });
 			v.anchor.set(0.5);
 			v.y = 2;
 			c.addChild(v);

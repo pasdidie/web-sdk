@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js';
+import { GText } from './theme';
 
 import { anim, ease, rand, sleep } from './anim';
 import { ParticleSystem } from './particles';
@@ -26,7 +27,7 @@ export const makeText = (text: string, size: number, opts: Parameters<typeof tex
 	const style = textStyle(size, opts);
 	if (opts.gold) (style as any).fill = gold();
 	if (opts.aqua) (style as any).fill = aqua();
-	const t = new PIXI.Text({ text, style });
+	const t = new GText({ text, style });
 	t.anchor.set(0.5);
 	return t;
 };
@@ -375,8 +376,8 @@ export class BigWin {
 		const k = this.scale;
 		this.rays.scale.set((1100 * k) / 512);
 		this.rays2.scale.set((800 * k) / 512);
-		this.rays.alpha = 0.45;
-		this.rays2.alpha = 0.25;
+		this.rays.alpha = 0.22;
+		this.rays2.alpha = 0.12;
 		this.halo.scale.set((900 * k) / 256);
 		this.halo.alpha = 0.35;
 		if (Math.random() < dt * 0.02)
@@ -395,8 +396,8 @@ export class FsPanel {
 	private halo = new PIXI.Sprite(fx.glow());
 	private rays = new PIXI.Sprite(fx.rays());
 	private plaque = new Plaque(COLORS.magenta, 'ui_plaque');
-	private title = makeText('', 70, { gold: true, glow: COLORS.magenta });
-	private big = makeText('', 120, { aqua: true, glow: COLORS.cyan });
+	private title = makeText('', 62, { gold: true, glow: COLORS.magenta });
+	private big = makeText('', 150, { gold: true, glow: COLORS.amber });
 	private sub = makeText('', 30, { weight: '800', glow: COLORS.magenta });
 	private hint = makeText('', 22, { weight: '700', italic: false, glow: COLORS.cyan });
 	private amount: CountText;
@@ -411,8 +412,9 @@ export class FsPanel {
 			s.blendMode = 'add';
 		}
 		this.halo.tint = COLORS.magenta;
-		this.rays.tint = COLORS.magenta;
-		this.plaque.resize(700, 460);
+		this.rays.tint = 0xff7ad0;
+		this.rays.alpha = 0.16;
+		this.plaque.resize(820, 520);
 		this.root.addChild(this.veil, this.halo, this.rays, this.plaque, this.title, this.big, this.amount.text, this.sub, this.hint);
 		this.root.visible = false;
 		this.root.eventMode = 'static';
@@ -432,11 +434,11 @@ export class FsPanel {
 			c.scale.set(k);
 		};
 		place(this.plaque, 0);
-		place(this.title, -150);
-		place(this.big, -10);
-		place(this.amount.text, -10);
-		place(this.sub, 110);
-		place(this.hint, 180);
+		place(this.title, -175);
+		place(this.big, -20);
+		place(this.amount.text, -20);
+		place(this.sub, 105);
+		place(this.hint, 175);
 		this.halo.position.set(cx, cy);
 		this.rays.position.set(cx, cy);
 		this.halo.scale.set((1000 * k) / 256);

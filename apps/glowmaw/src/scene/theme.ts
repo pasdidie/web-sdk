@@ -1,3 +1,5 @@
+import * as PIXI from 'pixi.js';
+
 export const C = 100; // cell size in board units
 export const REELS = 6;
 export const ROWS = 5;
@@ -54,3 +56,16 @@ export const textStyle = (size: number, opts: Partial<{ fill: any; stroke: numbe
 
 /** Vertical gradient fill helper for big numbers. */
 export const gradientFill = (stops: [number, number][]) => ({ stops, kind: 'linear' });
+
+/**
+ * Text with glow padding. Pixi 8.8 draws the padded canvas shifted by -padding
+ * (glyphs land up-left of the anchor); the pivot puts them back. Without padding the
+ * glow is clipped into a visible rectangle, so the padding has to stay.
+ */
+export class GText extends PIXI.Text {
+	constructor(opts: PIXI.TextOptions) {
+		super(opts);
+		const pad = (this.style as PIXI.TextStyle).padding ?? 0;
+		this.pivot.set(-pad, -pad);
+	}
+}

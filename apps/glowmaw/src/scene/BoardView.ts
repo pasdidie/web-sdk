@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js';
+import { GText } from './theme';
 
 import { anim, ease, sleep, rand } from './anim';
 import { ParticleSystem } from './particles';
@@ -46,6 +47,7 @@ export class BoardView {
 	cells: SymbolView[][] = [];
 	private labels: PIXI.Container[] = [];
 	private preSpinPromise: Promise<void> | null = null;
+	private reelOut: Promise<void>[] = [];
 	private quick = false;
 	spinning = false;
 
@@ -116,8 +118,7 @@ export class BoardView {
 		this.clearWins();
 		this.hooks.sfx('sfx_spin_start');
 		const turbo = this.hooks.turbo();
-		this.preSpinPromise = Promise.all(
-			this.cells.map(async (reel, r) => {
+		this.reelOut = this.cells.map(async (reel, r) => {
 				if (!turbo) await sleep(r * 45);
 				await Promise.all(
 					reel.map(async (s, row) => {
@@ -131,8 +132,8 @@ export class BoardView {
 						s.stretch = 0;
 					}),
 				);
-			}),
-		).then(() => {});
+			});
+		this.preSpinPromise = Promise.all(this.reelOut).then(() => {});
 		return this.preSpinPromise;
 	}
 
@@ -144,17 +145,20 @@ export class BoardView {
 
 	async spin(reveal: RevealEvent) {
 		this.spinning = true;
-		await this.preSpin();
+		this.preSpin();
+		const out = this.reelOut;
 		this.preSpinPromise = null;
-		// new symbols, parked above the board
-		for (let r = 0; r < REELS; r++) {
-			for (let row = 0; row < PAD_ROWS; row++) {
-				const s = this.cells[r][row];
-				s.set(reveal.board[r][row]);
-				s.root.visible = false;
-				s.root.y = cellY(row) - BOARD_H - C * 1.5;
-			}
-		}
+		// each reel takes its new symbols as soon as its old ones have dropped away
+		const parked = out.map((p, r) =>
+			p.then(() => {
+				for (let row = 0; row < PAD_ROWS; row++) {
+					const s = this.cells[r][row];
+					s.set(reveal.board[r][row]);
+					s.root.visible = false;
+					s.root.y = cellY(row) - BOARD_H - C * 1.5;
+				}
+			}),
+		);
 		const landed: Promise<void>[] = [];
 		let anticipating = false;
 		for (let r = 0; r < REELS; r++) {
@@ -165,8 +169,9 @@ export class BoardView {
 				anticipating = true;
 				await this.anticipate(r);
 			} else if (r > 0 && !this.turbo) {
-				await sleep(85, 'spin');
+				await sleep(70, 'spin');
 			}
+			await parked[r];
 			landed.push(this.dropReel(r, anticipated));
 		}
 		await Promise.all(landed);
@@ -283,7 +288,7 @@ export class BoardView {
 
 	private addLabel(w: WinEntry) {
 		const c = new PIXI.Container();
-		const t = new PIXI.Text({ text: this.hooks.formatWin(w.win), style: textStyle(30, { glow: COLORS.cyan }) });
+		const t = new GText({ text: this.hooks.formatWin(w.win), style: textStyle(30, { glow: COLORS.cyan }) });
 		t.anchor.set(0.5);
 		const bg = new PIXI.Sprite(fx.softGlow());
 		bg.anchor.set(0.5);

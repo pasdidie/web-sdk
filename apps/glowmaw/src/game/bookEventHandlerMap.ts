@@ -93,6 +93,7 @@ export const bookEventHandlerMap: BookEventHandlerMap<BookEvent, BookEventContex
 		const lure = find('lureCollect');
 		const total = find('setTotalWin');
 		if (total) stateBet.winBookEventAmount = total.amount;
+		if (!trig) return; // resumed before the trigger: the remaining events replay it
 		stateGame.gameType = 'freegame';
 		scene.restoreFreeSpins(fs ? fs.amount : 0, fs ? fs.total : trig?.totalFs ?? 0, lure?.lure ?? 0);
 	},
