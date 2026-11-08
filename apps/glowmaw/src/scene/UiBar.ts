@@ -490,38 +490,39 @@ export class UiBar {
 			P(this.ante, 172, L ? 590 : 600, L ? 1.05 : 1);
 			P(this.msg, 665, L ? 760 : 785, 1);
 		} else if (type === 'portrait') {
-			this.drawConsole(12, 1236, 876, 352);
-			P(this.buy, 228, 1300, 1.1);
-			P(this.ante, 672, 1300, 1.1);
-			P(this.minus, 270, 1425, 1.35);
-			P(this.spin, 450, 1425, 1.2);
-			P(this.plus, 630, 1425, 1.35);
-			P(this.turbo, 100, 1425, 1.2);
-			P(this.auto, 800, 1425, 1.2);
-			P(this.menu, 60, 1540, 1.1);
-			P(this.balance, 240, 1540, 1.1);
-			P(this.bet, 450, 1540, 1.15);
-			P(this.win, 660, 1540, 1.1);
-			P(this.sound, 842, 1540, 1.1);
-			P(this.info, 842, 1360, 0.0001);
-			P(this.msg, 450, 1222, 1.2);
+			// console strip only for the readout row; spin row and feature row float above it
+			this.drawConsole(10, 1470, 880, 128);
+			P(this.buy, 228, 1238, 1.05);
+			P(this.ante, 672, 1238, 1.05);
+			P(this.turbo, 96, 1362, 1.2);
+			P(this.minus, 262, 1362, 1.3);
+			P(this.spin, 450, 1356, 1.18);
+			P(this.plus, 638, 1362, 1.3);
+			P(this.auto, 804, 1362, 1.2);
+			P(this.menu, 64, 1538, 1.05);
+			P(this.balance, 245, 1538, 1.05);
+			P(this.bet, 450, 1538, 1.1);
+			P(this.win, 655, 1538, 1.05);
+			P(this.sound, 836, 1538, 1.05);
+			P(this.info, 836, 1360, 0.0001);
+			P(this.msg, 450, 1290, 1.2);
 		} else {
 			// tablet (near square)
-			this.drawConsole(12, 1010, 1176, 180);
-			P(this.buy, 190, 1060, 0.95);
-			P(this.ante, 410, 1060, 0.95);
-			P(this.minus, 760, 1100, 1.1);
-			P(this.spin, 905, 1100, 1.05);
-			P(this.plus, 1050, 1100, 1.1);
-			P(this.turbo, 1140, 1040, 1);
-			P(this.auto, 1140, 1160, 1);
-			P(this.menu, 60, 1155, 1);
-			P(this.sound, 130, 1155, 1);
-			P(this.info, 200, 1155, 1);
-			P(this.balance, 360, 1155, 1);
-			P(this.bet, 560, 1155, 1);
-			P(this.win, 560, 1060, 0.0001);
-			P(this.msg, 600, 990, 1.1);
+			this.drawConsole(12, 1000, 1176, 192);
+			P(this.buy, 185, 1048, 0.9);
+			P(this.ante, 395, 1048, 0.9);
+			P(this.minus, 765, 1092, 1.1);
+			P(this.spin, 905, 1088, 1.02);
+			P(this.plus, 1045, 1092, 1.1);
+			P(this.turbo, 1138, 1032, 0.95);
+			P(this.auto, 1138, 1158, 0.95);
+			P(this.menu, 58, 1158, 0.95);
+			P(this.sound, 124, 1158, 0.95);
+			P(this.info, 190, 1158, 0.95);
+			P(this.balance, 345, 1158, 0.95);
+			P(this.bet, 535, 1158, 0.95);
+			P(this.win, 705, 1158, 0.9);
+			P(this.msg, 600, 975, 1.05);
 		}
 	}
 

@@ -70,23 +70,24 @@ const PLACEMENT: Record<LayoutType, Placement> = {
 		maxWin: { x: 172, y: 300, s: 1.05 },
 	},
 	portrait: {
-		board: { x: 450, y: 770, s: 1.4 },
+		board: { x: 450, y: 765, s: 1.3 },
 		mascot: { x: 505, y: 278, h: 320 },
 		logo: { x: 450, y: 72, s: 0.85 },
-		banner: { x: 450, y: 1162, s: 1.15 },
+		banner: { x: 450, y: 1132, s: 1.05 },
 		lure: { x: 118, y: 268, s: 0.8 },
 		fsCounter: { x: 770, y: 150, s: 0.85 },
 		maxWin: { x: 128, y: 262, s: 0.72 },
 	},
 	tablet: {
-		board: { x: 600, y: 600, s: 1.3 },
-		mascot: { x: 880, y: 165, h: 250 },
-		logo: { x: 215, y: 85, s: 0.8 },
-		banner: { x: 600, y: 958, s: 1 },
-		lure: { x: 470, y: 150, s: 0.8 },
-		fsCounter: { x: 215, y: 205, s: 0.95 },
-		maxWin: { x: 215, y: 215, s: 0.8 },
+		board: { x: 600, y: 548, s: 1.15 },
+		mascot: { x: 935, y: 112, h: 185 },
+		logo: { x: 205, y: 70, s: 0.68 },
+		banner: { x: 600, y: 912, s: 0.95 },
+		lure: { x: 560, y: 92, s: 0.62 },
+		fsCounter: { x: 205, y: 172, s: 0.8 },
+		maxWin: { x: 560, y: 92, s: 0.6 },
 	},
+
 };
 
 export class Scene {

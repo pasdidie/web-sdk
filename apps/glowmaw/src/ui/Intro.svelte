@@ -109,6 +109,16 @@
 		.art { aspect-ratio: 16 / 7; }
 		p { font-size: 10px; }
 	}
+	@media (max-height: 300px) {
+		.intro { gap: 4px; justify-content: space-evenly; }
+		.logo { max-height: 16vh; }
+		.card { padding: 4px 6px; }
+		.card p { display: none; }
+		.art { aspect-ratio: 16 / 6; }
+		h3 { margin: 3px 0 0; font-size: 11px; }
+		.maxwin { font-size: 10px; }
+		.tap { font-size: 13px; }
+	}
 	@keyframes rise { to { opacity: 1; transform: translateY(0); } }
 	@keyframes pulse { 50% { opacity: 0.45; transform: scale(0.96); } }
 	@keyframes float { 50% { transform: translateY(-8px); } }
