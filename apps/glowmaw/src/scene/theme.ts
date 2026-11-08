@@ -22,7 +22,7 @@ export const SYMBOL_STYLE: Record<string, { tint: number; scale: number }> = {
 	H1: { tint: 0xffb84a, scale: 1.0 },
 	H2: { tint: 0xff3b5c, scale: 1.0 },
 	H3: { tint: 0xb07bff, scale: 1.0 },
-	H4: { tint: 0x2fe0b0, scale: 1.0 },
+	H4: { tint: 0x2fe0b0, scale: 1.07 },
 	L1: { tint: 0xff4d8d, scale: 0.92 },
 	L2: { tint: 0x5dff8a, scale: 0.92 },
 	L3: { tint: 0x4db2ff, scale: 0.92 },

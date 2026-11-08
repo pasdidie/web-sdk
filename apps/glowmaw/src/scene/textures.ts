@@ -71,6 +71,18 @@ export const fx = {
 			c.ellipse(16, 64, 7, 64, 0, 0, Math.PI * 2);
 			c.fill();
 		}),
+	/** Soft vertical light band, rotated and swept across symbol art (masked) on wins. */
+	shine: () =>
+		canvasTex('fx_shine', 64, 256, (c) => {
+			const g = c.createLinearGradient(0, 0, 64, 0);
+			g.addColorStop(0, 'rgba(255,255,255,0)');
+			g.addColorStop(0.42, 'rgba(255,255,255,0.55)');
+			g.addColorStop(0.5, 'rgba(255,255,255,1)');
+			g.addColorStop(0.58, 'rgba(255,255,255,0.55)');
+			g.addColorStop(1, 'rgba(255,255,255,0)');
+			c.fillStyle = g;
+			c.fillRect(0, 0, 64, 256);
+		}),
 	ring: () =>
 		canvasTex('fx_ring', 256, 256, (c) => {
 			const g = c.createRadialGradient(128, 128, 80, 128, 128, 128);

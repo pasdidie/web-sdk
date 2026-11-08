@@ -19,6 +19,10 @@ export class SymbolView {
 	private art = new PIXI.Sprite();
 	private flash = new PIXI.Sprite();
 	private value?: PIXI.Text;
+	private shine = new PIXI.Sprite(fx.shine());
+	private shineMask = new PIXI.Sprite();
+	/** ms since the win highlight started, -1 when not winning (drives the per-symbol win motion) */
+	private winT = -1;
 	raw: RawSymbol = { name: 'L5' };
 	private phase = Math.random() * Math.PI * 2;
 	private dimmed = 0; // 0..1 animated
@@ -38,7 +42,15 @@ export class SymbolView {
 		this.flash.anchor.set(0.5);
 		this.flash.blendMode = 'add';
 		this.flash.alpha = 0;
-		this.body.addChild(this.glow, this.art, this.flash);
+		this.shine.anchor.set(0.5);
+		this.shine.blendMode = 'add';
+		this.shine.rotation = 0.42;
+		this.shine.width = C * 0.32;
+		this.shine.height = C * 1.7;
+		this.shine.visible = false;
+		this.shineMask.anchor.set(0.5);
+		this.shine.mask = this.shineMask;
+		this.body.addChild(this.glow, this.art, this.flash, this.shineMask, this.shine);
 		this.root.addChild(this.body);
 		this.set(raw);
 	}
@@ -51,6 +63,7 @@ export class SymbolView {
 		this.raw = raw;
 		this.taken = false;
 		this.highlight = 0;
+		this.winT = -1;
 		this.pop = 1;
 		this.root.alpha = 1;
 		const style = SYMBOL_STYLE[raw.name] ?? SYMBOL_STYLE.L5;
@@ -64,11 +77,13 @@ export class SymbolView {
 		const t = tex(key, raw.name === 'M' ? 'M' : raw.name);
 		this.art.texture = t;
 		this.flash.texture = t;
+		this.shineMask.texture = t;
 		const size = C * style.scale;
 		const s = size / Math.max(t.width, t.height);
 		this.baseScale = s;
 		this.art.scale.set(s);
 		this.flash.scale.set(s);
+		this.shineMask.scale.set(s);
 		this.glow.tint = tint;
 		this.glow.scale.set((C * 1.25) / 256);
 		this.glow.alpha = raw.name === 'S' || raw.name === 'M' ? 0.55 : 0.18;
@@ -104,10 +119,29 @@ export class SymbolView {
 		} else {
 			this.glow.alpha = 0.14 + this.highlight * 0.75;
 		}
+		let wx = 0, wy = 0, wsx = 1, wsy = 1;
+		if (this.winT >= 0) {
+			this.winT += dt * anim.speed;
+			const m = winMotion(this.raw.name, this.winT);
+			const a = Math.min(1, this.winT / 220) * (anim.reducedMotion ? 0.35 : 1);
+			wx = m.x * a;
+			wy = m.y * a;
+			rot += m.rot * a;
+			wsx = 1 + (m.sx - 1) * a;
+			wsy = 1 + (m.sy - 1) * a;
+			// light band sweeping across the art, every 1.1 s
+			const k = (this.winT % 1100) / 480;
+			this.shine.visible = k < 1;
+			if (k < 1) {
+				this.shine.x = (-0.75 + 1.5 * k) * C;
+				this.shine.alpha = 0.85 * Math.sin(k * Math.PI);
+			}
+		} else this.shine.visible = false;
 		const sc = idleS * this.pop;
 		const st = 1 + this.stretch;
-		this.body.scale.set(sc * this.squashX / Math.sqrt(st), sc * this.squashY * st);
+		this.body.scale.set((sc * this.squashX * wsx) / Math.sqrt(st), sc * this.squashY * st * wsy);
 		this.body.rotation = rot;
+		this.body.position.set(wx, wy);
 		this.glow.scale.set(((C * 1.25) / 256) * (1 + this.highlight * 0.35));
 		this.flash.alpha = this.highlight * (0.35 + Math.sin(this.phase * 9) * 0.15);
 		const k = 1 - this.dimmed * 0.62;
@@ -132,6 +166,7 @@ export class SymbolView {
 	/** Win highlight: pop + glow, holds until clearHighlight. */
 	async win() {
 		this.setDim(false);
+		if (this.winT < 0) this.winT = 0;
 		await anim.tween({ duration: 380, ease: ease.outBack }, (t) => {
 			this.highlight = t;
 			this.pop = 1 + 0.16 * Math.sin(t * Math.PI) + 0.06 * t;
@@ -158,6 +193,7 @@ export class SymbolView {
 
 	clearHighlight() {
 		this.highlight = 0;
+		this.winT = -1;
 		this.pop = 1;
 	}
 
@@ -191,5 +227,91 @@ export class SymbolView {
 		this.root.destroy({ children: true });
 	}
 }
+
+const TAU = Math.PI * 2;
+/** pulse 0..1..0 occupying the first `width` fraction of each period */
+const beat = (t: number, period: number, width = 0.35) => {
+	const k = (t % period) / period;
+	return k < width ? Math.sin((k / width) * Math.PI) : 0;
+};
+
+/**
+ * Bespoke win motion per symbol, in cell units (C = 100): each creature moves the way
+ * it would in the water. Returned values are offsets/multipliers applied on top of
+ * the pop/squash/idle transforms.
+ */
+export const winMotion = (name: string, t: number) => {
+	const p = (t / 1000) * TAU;
+	const m = { x: 0, y: 0, rot: 0, sx: 1, sy: 1 };
+	switch (name) {
+		case 'H1': {
+			// nautilus: slow roll of the shell + chamber glow throb
+			m.rot = Math.sin(p * 0.8) * 0.24;
+			m.sx = m.sy = 1 + Math.sin(p * 1.6) * 0.05;
+			m.y = Math.sin(p * 0.8 + 1.2) * -4;
+			break;
+		}
+		case 'H2': {
+			// vampire squid: cloak flares (wide + flat) then jets upward
+			const b = beat(t, 900, 0.4);
+			m.sx = 1 + 0.16 * b;
+			m.sy = 1 - 0.12 * b;
+			const k = (t % 900) / 900;
+			m.y = -10 * Math.sin(Math.min(1, k / 0.75) * Math.PI) ;
+			break;
+		}
+		case 'H3': {
+			// jellyfish: bell contraction pushes it up, then it drifts back down
+			const b = beat(t, 1000, 0.3);
+			m.sy = 1 - 0.14 * b;
+			m.sx = 1 + 0.1 * b;
+			const k = (t % 1000) / 1000;
+			m.y = -12 * Math.sin(Math.pow(k, 0.6) * Math.PI);
+			break;
+		}
+		case 'H4': {
+			// leafy sea dragon: swimming sway
+			m.rot = Math.sin(p * 1.1) * 0.15;
+			m.x = Math.sin(p * 0.55) * 6;
+			m.y = Math.sin(p * 1.1 + 1) * 4;
+			m.sx = 1 + Math.sin(p * 2.2) * 0.03;
+			break;
+		}
+		case 'L1': {
+			// urchin: spiky shiver
+			m.rot = Math.sin(p * 1.4) * 0.3 + Math.sin(p * 9) * 0.04;
+			m.sx = m.sy = 1 + Math.abs(Math.sin(p * 2.8)) * 0.07;
+			break;
+		}
+		case 'L2': {
+			// brittle star: arms twirl
+			m.rot = Math.sin(p * 0.7) * 0.55;
+			m.sx = m.sy = 1 + Math.sin(p * 1.4) * 0.04;
+			break;
+		}
+		case 'L3': {
+			// scallop: double clap
+			const b = beat(t, 900, 0.18) + beat(t + 200, 900, 0.18) * 0.7;
+			m.sy = 1 - 0.18 * b;
+			m.sx = 1 + 0.05 * b;
+			m.y = -6 * b;
+			break;
+		}
+		case 'L4': {
+			// vent crystal: heat shimmer
+			m.sx = 1 + Math.sin(p * 3.2) * 0.035;
+			m.sy = 1 + Math.sin(p * 3.2 + 1.6) * 0.05;
+			m.rot = Math.sin(p * 6) * 0.03;
+			break;
+		}
+		case 'L5': {
+			// sea glass: turns to catch the light (fake 3D)
+			m.sx = 0.82 + 0.18 * Math.abs(Math.cos(p * 0.7));
+			m.rot = Math.sin(p * 0.7) * 0.18;
+			break;
+		}
+	}
+	return m;
+};
 
 export { COLORS };
