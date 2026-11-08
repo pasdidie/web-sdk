@@ -55,6 +55,18 @@
 		eventEmitter.broadcast({ type: 'bet' });
 	};
 
+	// bet stepper inside the buy panel: feature prices follow the bet, so the player can pick the
+	// bet right here instead of closing the panel (levels = every level the RGS offers)
+	const betIndex = $derived(stateConfig.betAmountOptions.findIndex((v) => Math.abs(v - stateBet.betAmount) < 1e-9));
+	const stepBet = (dir: -1 | 1) => {
+		const opts = stateConfig.betAmountOptions;
+		const i = betIndex < 0 ? 0 : betIndex;
+		const next = opts[Math.max(0, Math.min(opts.length - 1, i + dir))];
+		if (next === undefined || next === stateBet.betAmount) return;
+		stateBetDerived.setBetAmount(next);
+		eventEmitter.broadcast({ type: 'soundPressGeneral' });
+	};
+
 	// ---------------------------------------------------------------- autoplay
 	const startAuto = () => {
 		if (!stateBetDerived.isBetCostAvailable()) return;
@@ -111,6 +123,13 @@
 				<button class="x" onclick={close} aria-label="close">✕</button>
 				{#if !confirming}
 					<h2>{W('BUY FEATURE', 'GET FEATURE')}</h2>
+					<div class="betbar">
+						<span class="betbar-label">{W('YOUR BET', 'YOUR PLAY')}</span>
+						<button class="step" aria-label="lower" disabled={betIndex <= 0} onclick={() => stepBet(-1)}>−</button>
+						<span class="betbar-value">{formatCurrency(stateBet.betAmount)}</span>
+						<button class="step" aria-label="higher" disabled={betIndex >= stateConfig.betAmountOptions.length - 1} onclick={() => stepBet(1)}>+</button>
+					</div>
+					<p class="betbar-hint">{W('Feature prices are a multiple of your bet. Change the bet here and the prices update.', 'Feature prices are a multiple of your play amount. Change it here and the prices update.')}</p>
 					<div class="buy-grid">
 						{#each buyCards as c}
 							<button class="buy-card" class:poor={!canAfford(c.mode)} onclick={() => (confirming = c.mode)}>
@@ -118,7 +137,8 @@
 								<h3>{c.name}</h3>
 								<p>{c.text}</p>
 								<div class="price">{formatCurrency(costOf(c.mode))}</div>
-								<div class="mult">{config.betModes[c.mode].cost}× {W('BET', 'PLAY')} · RTP {pct(config.betModes[c.mode].rtp)}</div>
+								<div class="mult">{config.betModes[c.mode].cost} × {formatCurrency(stateBet.betAmount)} {W('bet', 'play')} · RTP {pct(config.betModes[c.mode].rtp)}</div>
+								{#if !canAfford(c.mode)}<div class="poor-note">{W('Balance too low at this bet', 'Balance too low at this amount')}</div>{/if}
 							</button>
 						{/each}
 					</div>
@@ -128,6 +148,12 @@
 						{W('Buy', 'Play')} {confirming === 'bonus' ? 'Feeding Frenzy' : 'Super Frenzy'} {W('for', 'for')}
 						<b class="hot">{formatCurrency(costOf(confirming))}</b> ({config.betModes[confirming].cost}× your {W('bet', 'play')})?
 					</p>
+					<div class="betbar">
+						<span class="betbar-label">{W('YOUR BET', 'YOUR PLAY')}</span>
+						<button class="step" aria-label="lower" disabled={betIndex <= 0} onclick={() => stepBet(-1)}>−</button>
+						<span class="betbar-value">{formatCurrency(stateBet.betAmount)}</span>
+						<button class="step" aria-label="higher" disabled={betIndex >= stateConfig.betAmountOptions.length - 1} onclick={() => stepBet(1)}>+</button>
+					</div>
 					{#if !canAfford(confirming)}<p class="warn">{W('Insufficient balance for this feature.', 'Not enough balance for this feature.')}</p>{/if}
 					<div class="row">
 						<button class="ghost" onclick={() => (confirming = null)}>BACK</button>
@@ -339,6 +365,14 @@
 	.panel.auto { width: min(92vw, 620px); }
 	.chips.fill { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; }
 	.chips.fill button { min-width: 0; padding: 9px 2px; font-size: 14px; }
+	.betbar { display: flex; align-items: center; justify-content: center; gap: 14px; padding: 8px 14px; margin: 0 auto; border-radius: 16px; background: rgba(3, 18, 34, 0.85); border: 1.5px solid rgba(63, 245, 230, 0.45); }
+	.betbar-label { font-weight: 800; letter-spacing: 0.14em; font-size: 13px; color: #8fe9ff; }
+	.betbar-value { min-width: 110px; text-align: center; font-weight: 900; font-style: italic; font-size: clamp(20px, 1.8vw, 26px); color: #fff; text-shadow: 0 0 12px rgba(63, 245, 230, 0.8); }
+	.step { width: 42px; height: 42px; border-radius: 50%; border: 2px solid #3ff5e6; background: rgba(3, 18, 34, 0.95); color: #e9fbff; font-size: 24px; font-weight: 900; line-height: 1; cursor: pointer; transition: transform 0.12s, box-shadow 0.12s; }
+	.step:hover:not(:disabled) { transform: scale(1.08); box-shadow: 0 0 16px rgba(63, 245, 230, 0.7); }
+	.step:disabled { opacity: 0.3; cursor: not-allowed; }
+	.betbar-hint { margin: -4px 0 2px; text-align: center; font-size: 13px; color: #8fb8c8; }
+	.poor-note { margin-top: 6px; font-size: 12px; font-weight: 800; letter-spacing: 0.06em; color: #ff8aa8; }
 	.buy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 	.buy-card {
 		cursor: pointer;
