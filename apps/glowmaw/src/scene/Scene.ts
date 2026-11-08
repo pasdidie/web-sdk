@@ -24,6 +24,7 @@ export type SceneHooks = {
 	autoplay: () => boolean;
 	maxWin: number;
 	wincapX: number;
+	betWord: string;
 };
 
 const STAGE: Record<LayoutType, { w: number; h: number }> = {
@@ -140,7 +141,7 @@ export class Scene {
 			onSpecialLand: (s, r) => this.onSpecialLand(s.raw, r),
 		});
 		this.banner = new WinBanner(hooks.formatCurrency, hooks.sfx);
-		this.maxWin = new MaxWinPlaque(hooks.maxWin);
+		this.maxWin = new MaxWinPlaque(hooks.maxWin, hooks.betWord);
 		this.bigWin = new BigWin(hooks.formatCurrency, {
 			sfx: hooks.sfx,
 			shake: (a, ms) => this.shake(a, ms),

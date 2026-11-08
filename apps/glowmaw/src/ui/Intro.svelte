@@ -8,7 +8,7 @@
 	const max = config.betModes.base.max_win.toLocaleString('en-US');
 	const go = () => props.ready && props.onstart();
 	const cards = [
-		{ img: 'intro_tumble', title: 'PAY ANYWHERE', text: '8 or more matching symbols anywhere pay. Winners dissolve and new ones fall from the dark.' },
+		{ img: 'intro_tumble', title: 'WIN ANYWHERE', text: '8 or more matching symbols anywhere form a win. Winners dissolve and new ones fall from the dark.' },
 		{ img: 'intro_orbs', title: 'GLOW ORBS', text: 'Orbs from ×2 to ×500 add together and multiply the whole tumble win.' },
 		{ img: 'intro_frenzy', title: 'FEEDING FRENZY', text: 'Maw swallows every orb. The Lure never resets and multiplies every winning free spin.' },
 	];

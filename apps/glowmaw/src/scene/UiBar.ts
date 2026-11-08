@@ -367,6 +367,7 @@ export type UiState = {
 	minBet: boolean;
 	maxBet: boolean;
 	message: string;
+	replay: boolean;
 };
 
 export type UiActions = {
@@ -545,8 +546,17 @@ export class UiBar {
 		this.sound.setIcon(s.sound ? 'sound' : 'mute');
 		this.menu.disabled = !s.idle;
 		this.info.disabled = !s.idle;
-		this.buy.visible = !s.hideBuy && s.showFeatures;
-		this.ante.visible = s.showFeatures;
+		this.buy.visible = !s.hideBuy && s.showFeatures && !s.replay;
+		this.ante.visible = s.showFeatures && !s.replay;
+		if (s.replay) {
+			// replay: no way into real play (Engine [171]); spin button = watch again
+			this.plus.visible = this.minus.visible = this.auto.visible = false;
+			this.balance.visible = false;
+			this.spin.disabled = !s.idle;
+		} else {
+			this.plus.visible = this.minus.visible = true;
+			this.balance.visible = true;
+		}
 		this.buy.disabled = this.ante.disabled = !s.idle || s.featureDisabled;
 		this.ante.setActive(s.anteOn);
 		if (this.buy.top.text !== s.buyLabel) {

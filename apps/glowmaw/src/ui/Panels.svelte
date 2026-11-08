@@ -233,7 +233,7 @@
 					{:else if tab === 'rules'}
 						<h4>RETURN TO PLAYER AND MAX WIN</h4>
 						<table>
-							<thead><tr><th>Mode</th><th>Cost</th><th>RTP</th><th>Max win</th></tr></thead>
+							<thead><tr><th>Mode</th><th>{W('Cost', 'Price')}</th><th>RTP</th><th>Max win</th></tr></thead>
 							<tbody>
 								{#each modes as m}
 									<tr><td>{m.name}</td><td>{m.cost}×</td><td>{pct(config.betModes[m.key].rtp)}</td><td>{config.betModes[m.key].max_win.toLocaleString('en-US')}×</td></tr>

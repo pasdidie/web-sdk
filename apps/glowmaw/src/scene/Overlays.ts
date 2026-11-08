@@ -209,7 +209,8 @@ export class MaxWinPlaque {
 	private b = makeText('', 48, { gold: true, glow: COLORS.amber });
 	private c = makeText('YOUR BET', 18, { weight: '700', glow: COLORS.amber });
 	private t = 0;
-	constructor(maxWin: number) {
+	constructor(maxWin: number, betWord = 'BET') {
+		this.c.text = `YOUR ${betWord}`;
 		this.b.text = `${maxWin.toLocaleString('en-US')}×`;
 		this.plaque.resize(250, 150);
 		this.a.y = -42;

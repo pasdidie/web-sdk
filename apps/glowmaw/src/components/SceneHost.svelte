@@ -32,9 +32,19 @@
 	const idle = () => context.stateXstateDerived.isIdle();
 	const press = () => context.eventEmitter.broadcast({ type: 'soundPressGeneral' });
 
+	const isReplay = () => stateUi.config.mode === 'replay';
+	let replayBet: any = null;
 	const spinAction = () => {
 		context.eventEmitter.broadcast({ type: 'soundPressBet' });
 		if (stateUiGame.modal) return;
+		if (isReplay()) {
+			// watch the same event again (Engine [173]); never a wallet call
+			if (idle() && replayBet) {
+				stateBet.betToResume = structuredClone(replayBet);
+				context.eventEmitter.broadcast({ type: 'resumeBet' });
+			}
+			return;
+		}
 		if (idle()) {
 			if (!stateBetDerived.isBetCostAvailable()) {
 				stateUiGame.flashMessage(t.insufficient());
@@ -85,6 +95,15 @@
 		ante: toggleAnte,
 	};
 
+	$effect(() => {
+		if (isReplay() && stateBet.betToResume && !replayBet) replayBet = structuredClone($state.snapshot(stateBet.betToResume));
+	});
+
+	const replayCost = () => {
+		const mode = stateBet.activeBetModeKey.toLowerCase() as keyof typeof config.betModes;
+		return (config.betModes[mode]?.cost ?? 1) as number;
+	};
+
 	const uiState = () => {
 		const opts = stateConfig.betAmountOptions;
 		const min = Math.min(...opts);
@@ -95,8 +114,8 @@
 		return {
 			layout: scene!.layoutType,
 			balance: formatCurrency(stateBet.balanceAmount),
-			bet: formatCurrency(stateUiGame.anteOn ? cost : stateBet.betAmount),
-			betLabel: t.bet(),
+			bet: isReplay() ? formatCurrency(stateBet.betAmount * replayCost()) : formatCurrency(stateUiGame.anteOn ? cost : stateBet.betAmount),
+			betLabel: isReplay() ? (replayCost() > 1 ? `REAL COST · ${replayCost()}×` : t.bet()) : t.bet(),
 			win: formatBook(stateBet.winBookEventAmount),
 			idle: isIdle,
 			canBet: stateBetDerived.isBetCostAvailable(),
@@ -115,7 +134,10 @@
 			hideBuy: stateConfig.jurisdiction.disabledBuyFeature,
 			minBet: stateBet.betAmount <= min + 1e-9,
 			maxBet: stateBet.betAmount >= max - 1e-9,
-			message: stateUiGame.message,
+			message: isReplay()
+				? `REPLAY · ${t.bet()} ${formatCurrency(stateBet.betAmount)}${replayCost() > 1 ? ` · REAL COST ${formatCurrency(stateBet.betAmount * replayCost())}` : ''}`
+				: stateUiGame.message,
+			replay: isReplay(),
 		};
 	};
 
@@ -146,6 +168,7 @@
 			autoplay: () => stateBetDerived.hasAutoBetCounter(),
 			maxWin: config.betModes.base.max_win,
 			wincapX: config.betModes.base.max_win,
+			betWord: t.bet(),
 		});
 		scene.setAssets(context.stateApp.loadedAssets as Record<string, unknown>);
 		bar = new UiBar(actions);
