@@ -244,7 +244,7 @@ export class BigWin {
 	private rays = new PIXI.Sprite(fx.rays());
 	private rays2 = new PIXI.Sprite(fx.rays());
 	private halo = new PIXI.Sprite(fx.glow());
-	private plaque = new Plaque(COLORS.amber, 'ui_bigwin');
+	private plaque = new Plaque(COLORS.amber, 'ui_bigwin', { left: 330, right: 330, top: 150, bottom: 150 });
 	private title = makeText('BIG WIN', 96, { gold: true, glow: COLORS.amber });
 	private amount: CountText;
 	private fountain = new ParticleSystem(240);
@@ -394,7 +394,7 @@ export class FsPanel {
 	private veil = new PIXI.Graphics();
 	private halo = new PIXI.Sprite(fx.glow());
 	private rays = new PIXI.Sprite(fx.rays());
-	private plaque = new Plaque(COLORS.magenta, 'ui_panel');
+	private plaque = new Plaque(COLORS.magenta, 'ui_plaque');
 	private title = makeText('', 70, { gold: true, glow: COLORS.magenta });
 	private big = makeText('', 120, { aqua: true, glow: COLORS.cyan });
 	private sub = makeText('', 30, { weight: '800', glow: COLORS.magenta });

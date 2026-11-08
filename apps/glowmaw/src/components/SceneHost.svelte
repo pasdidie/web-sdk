@@ -155,6 +155,7 @@
 		app.ticker.add(tick);
 		attached = app.ticker;
 		sceneRef.resolve(scene);
+		if (import.meta.env.DEV) (window as any).__scene = scene;
 		stateUiGame.sceneReady = true;
 	});
 

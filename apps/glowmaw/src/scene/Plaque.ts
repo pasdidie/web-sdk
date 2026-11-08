@@ -8,7 +8,7 @@ import { hasArt, tex } from './textures';
  * (`ui_plaque`, slice margins in PLAQUE_SLICE), otherwise a layered vector
  * fallback (deep gradient, inner glow line, bright rim).
  */
-export const PLAQUE_SLICE = { left: 120, right: 120, top: 90, bottom: 90 };
+export const PLAQUE_SLICE = { left: 90, right: 90, top: 80, bottom: 80 };
 
 export class Plaque extends PIXI.Container {
 	private nine?: PIXI.NineSliceSprite;

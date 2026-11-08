@@ -430,7 +430,7 @@ export class UiBar {
 
 	refreshArt() {
 		if (hasArt('ui_console') && !this.consoleArt) {
-			this.consoleArt = new PIXI.NineSliceSprite({ texture: tex('ui_console'), leftWidth: 160, rightWidth: 160, topHeight: 60, bottomHeight: 60 });
+			this.consoleArt = new PIXI.NineSliceSprite({ texture: tex('ui_console'), leftWidth: 190, rightWidth: 190, topHeight: 110, bottomHeight: 110 });
 			this.root.addChildAt(this.consoleArt, 0);
 		}
 		for (const b of [this.plus, this.minus, this.turbo, this.auto, this.menu, this.sound, this.info]) b.redraw();
@@ -444,7 +444,7 @@ export class UiBar {
 		const g = this.consoleG;
 		g.clear();
 		if (this.consoleArt) {
-			const k = Math.min(1, h / 120);
+			const k = Math.min(1, h / 222);
 			this.consoleArt.scale.set(k);
 			this.consoleArt.width = w / k;
 			this.consoleArt.height = h / k;
@@ -485,9 +485,9 @@ export class UiBar {
 			P(this.turbo, L ? 1330 : 1345, y, u);
 			P(this.spin, 1460, L ? 790 : 812, L ? 1.12 : 1);
 			P(this.auto, L ? 1562 : 1556, y, u);
-			P(this.buy, L ? 170 : 190, L ? 520 : 520, L ? 1.05 : 1);
-			P(this.ante, L ? 170 : 190, L ? 640 : 640, L ? 1.05 : 1);
-			P(this.msg, 800, L ? 760 : 785, 1);
+			P(this.buy, 172, L ? 470 : 480, L ? 1.05 : 1);
+			P(this.ante, 172, L ? 590 : 600, L ? 1.05 : 1);
+			P(this.msg, 665, L ? 760 : 785, 1);
 		} else if (type === 'portrait') {
 			this.drawConsole(12, 1236, 876, 352);
 			P(this.buy, 228, 1300, 1.1);

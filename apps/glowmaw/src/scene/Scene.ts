@@ -52,40 +52,40 @@ export type Placement = {
 
 const PLACEMENT: Record<LayoutType, Placement> = {
 	desktop: {
-		board: { x: 760, y: 400, s: 1.18 },
-		mascot: { x: 1335, y: 430, h: 560 },
-		logo: { x: 190, y: 120, s: 1 },
-		banner: { x: 760, y: 748, s: 1 },
-		lure: { x: 1330, y: 150, s: 1 },
-		fsCounter: { x: 190, y: 300, s: 1 },
-		maxWin: { x: 190, y: 330, s: 1 },
+		board: { x: 665, y: 392, s: 1.1 },
+		mascot: { x: 1272, y: 400, h: 340 },
+		logo: { x: 172, y: 105, s: 0.95 },
+		banner: { x: 665, y: 722, s: 1 },
+		lure: { x: 1250, y: 165, s: 1 },
+		fsCounter: { x: 172, y: 300, s: 1 },
+		maxWin: { x: 172, y: 300, s: 1 },
 	},
 	landscape: {
-		board: { x: 700, y: 380, s: 1.12 },
-		mascot: { x: 1250, y: 400, h: 470 },
-		logo: { x: 170, y: 110, s: 1 },
-		banner: { x: 700, y: 712, s: 1.05 },
-		lure: { x: 1240, y: 150, s: 1 },
-		fsCounter: { x: 170, y: 290, s: 1.1 },
-		maxWin: { x: 170, y: 310, s: 1.05 },
+		board: { x: 680, y: 372, s: 1.06 },
+		mascot: { x: 1272, y: 360, h: 330 },
+		logo: { x: 172, y: 100, s: 0.95 },
+		banner: { x: 680, y: 700, s: 1.05 },
+		lure: { x: 1250, y: 150, s: 1 },
+		fsCounter: { x: 172, y: 290, s: 1.1 },
+		maxWin: { x: 172, y: 300, s: 1.05 },
 	},
 	portrait: {
-		board: { x: 450, y: 760, s: 1.4 },
-		mascot: { x: 640, y: 255, h: 330 },
-		logo: { x: 245, y: 95, s: 0.9 },
-		banner: { x: 450, y: 1158, s: 1.15 },
-		lure: { x: 250, y: 270, s: 1 },
-		fsCounter: { x: 250, y: 245, s: 1.05 },
-		maxWin: { x: 230, y: 255, s: 0.95 },
+		board: { x: 450, y: 770, s: 1.4 },
+		mascot: { x: 505, y: 278, h: 320 },
+		logo: { x: 450, y: 72, s: 0.85 },
+		banner: { x: 450, y: 1162, s: 1.15 },
+		lure: { x: 118, y: 268, s: 0.8 },
+		fsCounter: { x: 770, y: 150, s: 0.85 },
+		maxWin: { x: 128, y: 262, s: 0.72 },
 	},
 	tablet: {
-		board: { x: 600, y: 560, s: 1.3 },
-		mascot: { x: 930, y: 205, h: 300 },
-		logo: { x: 230, y: 90, s: 0.85 },
-		banner: { x: 600, y: 935, s: 1 },
-		lure: { x: 640, y: 150, s: 0.85 },
-		fsCounter: { x: 230, y: 200, s: 1 },
-		maxWin: { x: 230, y: 215, s: 0.85 },
+		board: { x: 600, y: 600, s: 1.3 },
+		mascot: { x: 880, y: 165, h: 250 },
+		logo: { x: 215, y: 85, s: 0.8 },
+		banner: { x: 600, y: 958, s: 1 },
+		lure: { x: 470, y: 150, s: 0.8 },
+		fsCounter: { x: 215, y: 205, s: 0.95 },
+		maxWin: { x: 215, y: 215, s: 0.8 },
 	},
 };
 
@@ -197,10 +197,15 @@ export class Scene {
 		this.boardWrap.scale.set(p.board.s);
 		this.frame.position.set(p.board.x, p.board.y);
 		if (this.frameArt.texture !== PIXI.Texture.EMPTY) {
-			// frame art: opening ~ 80 % of its width (tuned when the art arrives)
-			const k = (BOARD_W * p.board.s * FRAME_FIT.w) / this.frameArt.texture.width;
-			this.frameArt.scale.set(k);
-			this.frameArt.y = FRAME_FIT.dy * p.board.s;
+			// align the art's transparent opening (measured from frame.png) on the board, plus a small gap
+			const f = FRAME_FIT;
+			const bw = BOARD_W * p.board.s + f.pad * 2;
+			const bh = BOARD_H * p.board.s + f.pad * 2;
+			const sx = bw / f.holeW;
+			const sy = bh / f.holeH;
+			this.frameArt.anchor.set(0, 0);
+			this.frameArt.scale.set(sx, sy);
+			this.frameArt.position.set(-bw / 2 - f.holeX * sx, -bh / 2 - f.holeY * sy);
 		}
 		this.frameFallback.resize(BOARD_W * p.board.s + 34, BOARD_H * p.board.s + 34);
 		this.mascot.root.position.set(p.mascot.x, p.mascot.y);
@@ -572,6 +577,6 @@ export class Scene {
 	}
 }
 
-/** Frame art fit: frame width relative to the board width and vertical offset (board units). */
-export const FRAME_FIT = { w: 1.28, dy: 0 };
+/** Opening of frame.png in its own pixels (tools: measured after keying). */
+export const FRAME_FIT = { holeX: 125, holeY: 177, holeW: 1350, holeH: 1006, pad: 10 };
 export { cellX, cellY, C };

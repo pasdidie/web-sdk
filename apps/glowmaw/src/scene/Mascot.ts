@@ -13,13 +13,13 @@ import { fx, tex, hasArt } from './textures';
  * Rig coordinates are normalised texture coordinates of `mascot` art.
  */
 export const RIG = {
-	hinge: { u: 0.37, v: 0.6 }, // jaw pivot
+	hinge: { u: 0.37, v: 0.62 }, // jaw pivot
 	jawBlend: 0.05,
-	mouth: { u: 0.2, v: 0.62 }, // where orbs are swallowed
-	bulb: { u: 0.16, v: 0.13 }, // lure bulb centre
-	stalkFrom: { u: 0.42, v: 0.32 }, // where the stalk leaves the head
-	eye: { u: 0.42, v: 0.47 },
-	tailStart: 0.62,
+	mouth: { u: 0.25, v: 0.58 }, // where orbs are swallowed
+	bulb: { u: 0.065, v: 0.35 }, // lure bulb centre
+	stalkFrom: { u: 0.33, v: 0.27 }, // where the stalk leaves the head
+	eye: { u: 0.295, v: 0.41 },
+	tailStart: 0.72,
 };
 
 const smooth = (a: number, b: number, x: number) => {
@@ -38,8 +38,8 @@ export class Mascot {
 	private eyeGlow = new PIXI.Sprite(fx.spark());
 	private sparks = new ParticleSystem(80);
 	private t = Math.random() * 10;
-	jaw = 0.04; // 0 closed .. 1 wide
-	private jawTarget = 0.04;
+	jaw = 0; // art is drawn half open: <0 closes, >0 opens wider
+	private jawTarget = 0;
 	private lunge = 0;
 	private lureX = 0;
 	private lureV = 0;
@@ -109,15 +109,16 @@ export class Mascot {
 		this.jawTarget = amount;
 	}
 	close() {
-		this.jawTarget = 0.04;
+		this.jawTarget = 0;
 	}
 	async chomp() {
 		this.jawTarget = 0.9;
 		await anim.wait(120);
-		this.jawTarget = 0;
+		this.jawTarget = -0.55;
 		this.lureV -= 260;
 		await anim.tween({ duration: 160, ease: ease.outQuad }, (t) => (this.lunge = -26 * Math.sin(t * Math.PI)));
-		this.jawTarget = 0.04;
+		await anim.wait(140);
+		this.jawTarget = 0;
 		this.spark(14);
 	}
 	flare(strength = 1) {
@@ -129,7 +130,7 @@ export class Mascot {
 		this.flare(1.5);
 		this.spark(30);
 		await anim.tween({ duration: ms, ease: ease.linear }, (t) => (this.lunge = Math.sin(t * Math.PI * 14) * 4 * (1 - t)));
-		this.jawTarget = 0.04;
+		this.jawTarget = 0;
 	}
 	spark(n: number) {
 		const p = this.local(RIG.bulb.u, RIG.bulb.v);
@@ -163,7 +164,7 @@ export class Mascot {
 		const W = this.texW;
 		const H = this.texH;
 		const amp = this.reduced ? 0.3 : 1;
-		const jawA = -this.jaw * 0.42;
+		const jawA = -(this.jaw + Math.sin(t * 1.7) * 0.06 * amp) * 0.42;
 		const hx = RIG.hinge.u * W;
 		const hy = RIG.hinge.v * H;
 		const cos = Math.cos(jawA);
@@ -183,7 +184,7 @@ export class Mascot {
 				y = y + (hy + dx * sin + dy * cos - y) * wj;
 			}
 			// lure stalk sway (upper-left region)
-			const wl = smooth(RIG.stalkFrom.v + 0.06, RIG.bulb.v - 0.05, v) * smooth(RIG.stalkFrom.u + 0.05, RIG.bulb.u, u);
+			const wl = Math.max(smooth(RIG.stalkFrom.v + 0.02, RIG.stalkFrom.v - 0.12, v), smooth(0.2, 0.12, u) * smooth(0.5, 0.42, v)) * smooth(RIG.stalkFrom.u + 0.02, RIG.bulb.u + 0.04, u);
 			if (wl > 0) {
 				x += this.lureX * wl;
 				y += Math.sin(t * 2.1) * 6 * wl * amp;
