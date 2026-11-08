@@ -71,7 +71,7 @@ const PLACEMENT: Record<LayoutType, Placement> = {
 		maxWin: { x: 172, y: 300, s: 1.05 },
 	},
 	portrait: {
-		board: { x: 450, y: 765, s: 1.3 },
+		board: { x: 450, y: 765, s: 1.22 }, // frame art (1600 wide for a 1350 hole) must fit the 900 stage
 		mascot: { x: 505, y: 278, h: 320 },
 		logo: { x: 450, y: 72, s: 0.85 },
 		banner: { x: 450, y: 1132, s: 1.05 },

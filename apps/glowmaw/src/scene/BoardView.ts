@@ -103,7 +103,15 @@ export class BoardView {
 	}
 
 	update(dt: number) {
-		for (const reel of this.cells) for (const s of reel) s.update(dt);
+		// the off-board pad rows sit just outside the mask; their glow and squash used to peek a few px
+		// past the frame rim. Only render symbols whose cell overlaps the visible board.
+		const top = -C * 0.5 + 1;
+		const bottom = BOARD_H + C * 0.5 - 1;
+		for (const reel of this.cells)
+			for (const s of reel) {
+				s.update(dt);
+				s.root.renderable = s.root.y > top && s.root.y < bottom;
+			}
 		this.particles.update(dt);
 	}
 

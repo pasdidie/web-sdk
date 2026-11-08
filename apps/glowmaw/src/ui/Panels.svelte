@@ -136,23 +136,23 @@
 				{/if}
 			</div>
 		{:else if stateUiGame.modal === 'auto'}
-			<div class="panel small">
+			<div class="panel small auto">
 				<button class="x" onclick={close} aria-label="close">✕</button>
 				<h2>AUTOPLAY</h2>
 				<h4>NUMBER OF SPINS</h4>
-				<div class="chips">
+				<div class="chips fill">
 					{#each AUTO_SPINS_TEXT_OPTIONS as o}
 						<button class:on={stateUi.autoSpinsText === o} onclick={() => (stateUi.autoSpinsText = o)}>{o}</button>
 					{/each}
 				</div>
 				<h4>STOP IF LOSS EXCEEDS ({W('× BET', '× PLAY')})</h4>
-				<div class="chips">
+				<div class="chips fill">
 					{#each LOSS_LIMIT_TEXT_OPTIONS as o}
 						<button class:on={stateUi.autoSpinsLossLimitText === o} onclick={() => (stateUi.autoSpinsLossLimitText = o)}>{o}</button>
 					{/each}
 				</div>
 				<h4>STOP IF A SINGLE WIN EXCEEDS ({W('× BET', '× PLAY')})</h4>
-				<div class="chips">
+				<div class="chips fill">
 					{#each SINGLE_WIN_LIMIT_TEXT_OPTIONS as o}
 						<button class:on={stateUi.autoSpinsSingleWinLimitText === o} onclick={() => (stateUi.autoSpinsSingleWinLimitText = o)}>{o}</button>
 					{/each}
@@ -163,8 +163,9 @@
 			<div class="panel small">
 				<button class="x" onclick={close} aria-label="close">✕</button>
 				<h2>{W('BET', 'PLAY AMOUNT')}</h2>
+				<!-- every level the RGS offers (betMenuOptions is the shared "most used" subset) -->
 				<div class="chips bets">
-					{#each stateConfig.betMenuOptions as v}
+					{#each stateConfig.betAmountOptions as v}
 						<button class:on={Math.abs(stateBet.betAmount - v) < 1e-9} disabled={v * stateBetDerived.betCost() / Math.max(stateBet.betAmount, 1e-9) > stateBet.balanceAmount} onclick={() => pickBet(v)}>{formatCurrency(v)}</button>
 					{/each}
 				</div>
@@ -290,7 +291,7 @@
 	}
 	.panel {
 		position: relative;
-		width: min(92vw, 760px);
+		width: min(92vw, 820px);
 		max-height: 90vh;
 		display: flex;
 		flex-direction: column;
@@ -306,10 +307,10 @@
 	.panel.small { width: min(92vw, 520px); }
 	.panel.wide { width: min(96vw, 940px); height: min(90vh, 760px); }
 	h2 { margin: 0; text-align: center; font-weight: 900; font-style: italic; letter-spacing: 0.08em; font-size: clamp(20px, 3vw, 30px); color: #9ffcf3; text-shadow: 0 0 14px rgba(63, 245, 230, 0.9); }
-	h3 { margin: 6px 0 2px; font-weight: 900; font-style: italic; color: #ffd27a; text-shadow: 0 0 10px rgba(255, 184, 74, 0.7); }
-	h4 { margin: 12px 0 4px; font-weight: 800; letter-spacing: 0.12em; font-size: 13px; color: #8fe9ff; }
-	p, li, td { font-size: 14px; line-height: 1.45; font-weight: 600; color: #d4ecf4; }
-	.lead { text-align: center; font-size: 15px; }
+	h3 { margin: 8px 0 4px; font-size: clamp(16px, 1.5vw, 22px); letter-spacing: 0.06em; font-weight: 900; font-style: italic; color: #ffd27a; text-shadow: 0 0 10px rgba(255, 184, 74, 0.7); }
+	h4 { margin: 14px 0 6px; font-weight: 800; letter-spacing: 0.12em; font-size: 14px; color: #8fe9ff; }
+	p, li, td { text-wrap: pretty; font-size: clamp(14px, 1.05vw, 16px); line-height: 1.45; font-weight: 600; color: #d4ecf4; }
+	.lead { text-align: center; font-size: clamp(15px, 1.15vw, 17px); }
 	.hot { color: #ffd27a; font-size: 1.2em; }
 	.warn, .err { color: #ff8aa8; text-align: center; }
 	.x { position: absolute; right: 12px; top: 10px; width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid rgba(63, 245, 230, 0.6); background: rgba(3, 18, 34, 0.9); color: #e9fbff; font-size: 18px; cursor: pointer; }
@@ -332,7 +333,12 @@
 	.chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
 	.chips button { min-width: 64px; padding: 9px 10px; font-size: 15px; background: rgba(3, 18, 34, 0.9); border-color: rgba(63, 245, 230, 0.45); }
 	.chips button.on { background: linear-gradient(180deg, #23d8cf, #0a6f87); border-color: #bff9ff; box-shadow: 0 0 16px rgba(63, 245, 230, 0.7); }
-	.bets button { min-width: 92px; }
+	.chips.bets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+	.bets button { min-width: 0; }
+	/* autoplay: each option group is one even row across the panel (no orphan second row) */
+	.panel.auto { width: min(92vw, 620px); }
+	.chips.fill { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; }
+	.chips.fill button { min-width: 0; padding: 9px 2px; font-size: 14px; }
 	.buy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 	.buy-card {
 		cursor: pointer;
@@ -347,37 +353,41 @@
 	}
 	.buy-card:hover { transform: translateY(-4px); box-shadow: 0 0 36px rgba(255, 63, 180, 0.55); }
 	.buy-card.poor { opacity: 0.55; }
-	.buy-card p { font-size: 13px; min-height: 3.6em; }
+	.buy-card { font-size: 14px; display: flex; flex-direction: column; }
+	.buy-card p { font-size: clamp(13px, 1.05vw, 15px); min-height: 3.6em; margin: 4px 0 10px; flex: 1; }
 	.buy-art { width: 100%; aspect-ratio: 16 / 10; border-radius: 12px; background: #120420 center / cover no-repeat; }
-	.price { font-size: 26px; font-weight: 900; font-style: italic; color: #fff; text-shadow: 0 0 12px #ff3fb4; }
-	.mult { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; color: #ffb3e1; }
+	.price { font-size: clamp(24px, 2.2vw, 32px); font-weight: 900; font-style: italic; color: #fff; text-shadow: 0 0 12px #ff3fb4; }
+	.mult { font-size: 13px; font-weight: 700; letter-spacing: 0.1em; color: #ffb3e1; }
 	.tabs { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
-	.tabs button { padding: 8px 14px; font-size: 13px; background: rgba(3, 18, 34, 0.9); border-color: rgba(63, 245, 230, 0.4); }
+	.tabs button { padding: 9px 16px; font-size: 14px; background: rgba(3, 18, 34, 0.9); border-color: rgba(63, 245, 230, 0.4); }
 	.tabs button.on { background: linear-gradient(180deg, #23d8cf, #0a6f87); border-color: #bff9ff; }
 	.scroll { overflow-y: auto; padding-right: 6px; flex: 1; min-height: 0; }
+	.scroll h4 + p, .scroll h4 + ul { margin-top: 0; } /* keep each rule title glued to its text */
+	.scroll p { margin: 0 0 8px; }
 	.scroll::-webkit-scrollbar { width: 6px; }
 	.scroll::-webkit-scrollbar-thumb { background: rgba(63, 245, 230, 0.5); border-radius: 6px; }
-	.pays { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+	.pays { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; } /* 9 symbols: 3x3 on desktop, no orphan row */
 	.pay { display: grid; grid-template-columns: 64px 1fr; grid-template-rows: auto 1fr; gap: 0 8px; padding: 8px; border-radius: 14px; background: rgba(4, 22, 40, 0.8); border: 1px solid rgba(63, 245, 230, 0.25); }
 	.pay .sym { grid-row: span 2; }
 	.sym { width: 64px; height: 64px; background: center / contain no-repeat; filter: drop-shadow(0 0 6px rgba(63, 245, 230, 0.4)); }
-	.nm { font-weight: 800; font-size: 12px; letter-spacing: 0.06em; color: #8fe9ff; }
-	.lines { display: grid; grid-template-columns: auto 1fr; gap: 0 8px; font-size: 13px; }
+	.nm { font-weight: 800; font-size: 13px; letter-spacing: 0.06em; color: #8fe9ff; }
+	.lines { display: grid; grid-template-columns: auto 1fr; gap: 0 8px; font-size: 14px; }
 	.lines span { color: #8fb8c8; font-weight: 700; }
 	.lines b { color: #fff; text-align: right; }
 	.special { display: flex; gap: 12px; align-items: center; margin-top: 10px; padding: 8px; border-radius: 14px; background: rgba(4, 22, 40, 0.8); border: 1px solid rgba(255, 63, 180, 0.3); }
 	.special .sym { flex: none; }
 	table { width: 100%; border-collapse: collapse; }
-	th { text-align: left; font-size: 12px; letter-spacing: 0.1em; color: #8fe9ff; padding: 6px; border-bottom: 1px solid rgba(63, 245, 230, 0.3); }
+	th { text-align: left; font-size: 13px; letter-spacing: 0.1em; color: #8fe9ff; padding: 6px; border-bottom: 1px solid rgba(63, 245, 230, 0.3); }
 	td { padding: 6px; border-bottom: 1px solid rgba(63, 245, 230, 0.12); }
 	.controls td:first-child { font-weight: 900; color: #9ffcf3; white-space: nowrap; width: 1%; }
-	.slider { display: grid; grid-template-columns: 90px 1fr; align-items: center; font-weight: 800; font-size: 13px; letter-spacing: 0.1em; color: #8fe9ff; }
+	.slider { padding: 5px 0; display: grid; grid-template-columns: 100px 1fr; align-items: center; font-weight: 800; font-size: 14px; letter-spacing: 0.1em; color: #8fe9ff; }
 	input[type='range'] { accent-color: #3ff5e6; }
-	.toggle { display: flex; gap: 10px; align-items: center; font-weight: 700; font-size: 13px; }
+	.toggle { display: flex; gap: 10px; align-items: center; font-weight: 700; font-size: 14px; }
 	input[type='checkbox'] { width: 20px; height: 20px; accent-color: #3ff5e6; }
-	.ver { text-align: center; font-size: 11px; color: #5d8796; margin: 0; }
+	.ver { text-align: center; font-size: 12px; color: #5d8796; margin: 0; }
 	@media (max-width: 560px) {
 		.panel { padding: 16px 14px; }
+		.chips.fill { grid-auto-flow: row; grid-template-columns: repeat(auto-fill, minmax(58px, 1fr)); }
 		.buy-grid { grid-template-columns: 1fr; }
 		.buy-card { display: grid; grid-template-columns: 38% 1fr; gap: 0 10px; text-align: left; align-items: center; }
 		.buy-art { grid-row: span 4; aspect-ratio: 1; }

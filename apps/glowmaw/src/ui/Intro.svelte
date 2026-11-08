@@ -89,7 +89,7 @@
 	}
 	.art { width: 100%; aspect-ratio: 16 / 10; border-radius: 12px; background: #04101e center / cover no-repeat; box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6); }
 	h3 { margin: 1vh 0 0.4vh; font-weight: 900; font-style: italic; letter-spacing: 0.06em; font-size: clamp(13px, 1.6vw, 22px); color: #9ffcf3; text-shadow: 0 0 12px rgba(63, 245, 230, 0.8); }
-	p { margin: 0; font-size: clamp(10px, 1.05vw, 15px); line-height: 1.35; color: #cfe9f2; font-weight: 600; }
+	p { margin: 0; text-wrap: pretty; font-size: clamp(10px, 1.05vw, 15px); line-height: 1.35; color: #cfe9f2; font-weight: 600; }
 	.maxwin { position: relative; font-weight: 800; letter-spacing: 0.15em; font-size: clamp(12px, 1.4vw, 20px); color: #ffd27a; text-shadow: 0 0 10px rgba(255, 184, 74, 0.7); }
 	.maxwin b { font-size: 1.5em; font-style: italic; }
 	.tap { position: relative; font-weight: 900; font-style: italic; letter-spacing: 0.2em; font-size: clamp(16px, 2vw, 28px); color: #fff; text-shadow: 0 0 16px #3ff5e6; animation: pulse 1.4s ease-in-out infinite; }

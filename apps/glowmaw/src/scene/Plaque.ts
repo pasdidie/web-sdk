@@ -8,14 +8,18 @@ import { hasArt, tex } from './textures';
  * (`ui_plaque`, slice margins in PLAQUE_SLICE), otherwise a layered vector
  * fallback (deep gradient, inner glow line, bright rim).
  */
-export const PLAQUE_SLICE = { left: 90, right: 90, top: 80, bottom: 80 };
+export type Slice = { left: number; right: number; top: number; bottom: number; rim?: number; uniform?: boolean };
+/** ui_plaque (1000x481): visible ornate rim ~50 px all round, slices a bit larger to keep the corner pearls whole */
+export const PLAQUE_SLICE: Slice = { left: 90, right: 90, top: 80, bottom: 80, rim: 50 };
+/** Rim never takes more than this share of the plaque height, so small plaques keep room for text. */
+const MAX_RIM_SHARE = 0.17;
 
 export class Plaque extends PIXI.Container {
 	private nine?: PIXI.NineSliceSprite;
 	private g = new PIXI.Graphics();
 	private w = 100;
 	private h = 50;
-	constructor(private accent = COLORS.cyan, private artKey = 'ui_plaque', private slice = PLAQUE_SLICE) {
+	constructor(private accent = COLORS.cyan, private artKey = 'ui_plaque', private slice: Slice = PLAQUE_SLICE) {
 		super();
 		this.addChild(this.g);
 		this.refreshArt();
@@ -33,8 +37,20 @@ export class Plaque extends PIXI.Container {
 	resize(w: number, h: number) {
 		this.w = w;
 		this.h = h;
+		if (this.nine && this.slice.uniform) {
+			// ornate art that must not be sliced: fit the width, keep the aspect, centre vertically
+			const t = this.nine.texture;
+			const k = w / t.width;
+			this.nine.scale.set(k);
+			this.nine.width = t.width;
+			this.nine.height = t.height;
+			this.nine.x = -w / 2;
+			this.nine.y = (-t.height * k) / 2;
+			return;
+		}
 		if (this.nine) {
-			const k = Math.min(1, h / (this.slice.top + this.slice.bottom), w / (this.slice.left + this.slice.right));
+			const rim = this.slice.rim ?? Math.max(this.slice.top, this.slice.bottom);
+			const k = Math.min(1, h / (this.slice.top + this.slice.bottom), w / (this.slice.left + this.slice.right), (h * MAX_RIM_SHARE) / rim);
 			this.nine.scale.set(k);
 			this.nine.width = w / k;
 			this.nine.height = h / k;

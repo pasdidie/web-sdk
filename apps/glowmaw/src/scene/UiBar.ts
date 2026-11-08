@@ -388,6 +388,9 @@ export type UiActions = {
  * Bespoke console: a carved abyssal-glass bar with bio-cyan inlay, the pearl
  * spin button, readouts and round glass buttons, and the two feature buttons.
  */
+/** design-space scale of the desktop/landscape/portrait console art: rims ~26 px, end caps ~71 px */
+const CONSOLE_K = 0.3;
+
 export class UiBar {
 	readonly root = new PIXI.Container();
 	private consoleG = new PIXI.Graphics();
@@ -434,7 +437,7 @@ export class UiBar {
 
 	refreshArt() {
 		if (hasArt('ui_console') && !this.consoleArt) {
-			this.consoleArt = new PIXI.NineSliceSprite({ texture: tex('ui_console'), leftWidth: 190, rightWidth: 190, topHeight: 110, bottomHeight: 110 });
+			this.consoleArt = new PIXI.NineSliceSprite({ texture: tex('ui_console'), leftWidth: 236, rightWidth: 236, topHeight: 88, bottomHeight: 86 });
 			this.root.addChildAt(this.consoleArt, 0);
 		}
 		if (hasArt('ui_console_tablet') && !this.consoleTabletArt) {
@@ -467,7 +470,10 @@ export class UiBar {
 			return;
 		}
 		if (this.consoleArt) {
-			const k = Math.min(1, h / 222);
+			// slices measured on the art (1600x444): rims 88/86 px, ornate end caps 236 px. Fixed scale so
+			// the rims stay slim and only the plain channel stretches (a height-derived scale crushed the
+			// channel to a few px and pushed the readouts onto the inlay lines).
+			const k = CONSOLE_K;
 			this.consoleArt.scale.set(k);
 			this.consoleArt.width = w / k;
 			this.consoleArt.height = h / k;
@@ -494,20 +500,25 @@ export class UiBar {
 		};
 		if (type === 'desktop' || type === 'landscape') {
 			const L = type === 'landscape';
-			const y = L ? 848 : 860;
+			// console channel (inner dark area) spans y+26 .. y+h-26; the control row sits on its centre
+			const cy = L ? 764 : 772;
+			const ch = L ? 136 : 126;
+			const y = cy + ch / 2;
 			const u = L ? 1.22 : 1;
-			this.drawConsole(14, L ? 764 : 786, 1572, L ? 134 : 112);
-			P(this.menu, 60, y, u);
-			P(this.sound, 130 * (L ? 1.08 : 1), y, u);
-			P(this.info, 200 * (L ? 1.1 : 1), y, u);
-			P(this.balance, L ? 420 : 390, y, u);
+			this.drawConsole(14, cy, 1572, ch);
+			// left cap ends at x ~85: icon buttons start inside the channel
+			P(this.menu, L ? 118 : 112, y, u);
+			P(this.sound, L ? 200 : 180, y, u);
+			P(this.info, L ? 282 : 248, y, u);
+			P(this.balance, L ? 450 : 420, y, u);
 			P(this.minus, L ? 640 : 655, y, u);
 			P(this.bet, 800, y, u);
 			P(this.plus, L ? 960 : 945, y, u);
-			P(this.win, L ? 1150 : 1135, y, u);
-			P(this.turbo, L ? 1330 : 1345, y, u);
-			P(this.spin, 1460, L ? 790 : 812, L ? 1.12 : 1);
-			P(this.auto, L ? 1562 : 1556, y, u);
+			P(this.win, L ? 1108 : 1130, y, u);
+			P(this.turbo, L ? 1270 : 1285, y, u);
+			P(this.auto, L ? 1356 : 1362, y, u);
+			// spin hub at the right end, rising above the console
+			P(this.spin, 1474, L ? 806 : 820, L ? 1.12 : 1);
 			P(this.buy, 172, L ? 470 : 480, L ? 1.05 : 1);
 			P(this.ante, 172, L ? 590 : 600, L ? 1.05 : 1);
 			P(this.msg, 665, L ? 760 : 785, 1);
@@ -521,20 +532,20 @@ export class UiBar {
 			P(this.spin, 450, 1356, 1.18);
 			P(this.plus, 638, 1362, 1.3);
 			P(this.auto, 804, 1362, 1.2);
-			P(this.menu, 64, 1538, 1.05);
-			P(this.balance, 245, 1538, 1.05);
-			P(this.bet, 450, 1538, 1.1);
-			P(this.win, 655, 1538, 1.05);
-			P(this.sound, 836, 1538, 1.05);
+			P(this.menu, 116, 1534, 1.05);
+			P(this.balance, 272, 1534, 1.05);
+			P(this.bet, 450, 1534, 1.1);
+			P(this.win, 628, 1534, 1.05);
+			P(this.sound, 784, 1534, 1.05);
 			P(this.info, 836, 1360, 0.0001);
 			P(this.msg, 450, 1290, 1.2);
 		} else {
 			// tablet (near square): two-channel console 12..1188 x 980..1200 (art 1600x474 scaled 0.464).
-			// Upper channel centre y 1047, divider y 1090, lower channel centre y 1132, inner x 89..1111.
+			// Upper channel centre y 1047, divider y 1094, lower channel centre y 1143, inner x 89..1111 (measured).
 			// Spin straddles the divider at the right end like a hub.
 			this.drawConsole(12, 980, 1176, 220, true);
 			const up = 1047;
-			const lo = 1132;
+			const lo = 1143;
 			P(this.buy, 192, up, 0.8);
 			P(this.ante, 378, up, 0.8);
 			P(this.minus, 540, up, 1.0);
@@ -547,7 +558,7 @@ export class UiBar {
 			P(this.balance, 400, lo, 0.92);
 			P(this.bet, 610, lo, 0.92);
 			P(this.win, 812, lo, 0.9);
-			P(this.spin, 1032, 1090, 0.98);
+			P(this.spin, 1032, 1094, 0.98);
 			P(this.msg, 600, 950, 1.05);
 		}
 	}

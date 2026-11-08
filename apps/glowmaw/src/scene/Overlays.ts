@@ -66,9 +66,9 @@ export class WinBanner {
 	constructor(fmt: (v: number) => string, private sfx: (n: string) => void) {
 		this.amount = new CountText(44, fmt, { aqua: true });
 		this.root.addChild(this.plaque, this.label, this.amount.text, this.mult);
-		this.plaque.resize(340, 84);
-		this.label.y = -27;
-		this.amount.text.y = 8;
+		this.plaque.resize(340, 96);
+		this.label.y = -22;
+		this.amount.text.y = 10;
 		this.mult.alpha = 0;
 		this.root.alpha = 0;
 	}
@@ -183,9 +183,9 @@ export class FsCounter {
 	private text = makeText('', 30, { glow: COLORS.magenta });
 	private small = makeText('FREE SPINS', 16, { weight: '700', glow: COLORS.magenta });
 	constructor() {
-		this.plaque.resize(230, 74);
-		this.small.y = -20;
-		this.text.y = 10;
+		this.plaque.resize(230, 84);
+		this.small.y = -14;
+		this.text.y = 11;
 		this.root.addChild(this.plaque, this.small, this.text);
 		this.root.visible = false;
 	}
@@ -212,10 +212,10 @@ export class MaxWinPlaque {
 	constructor(maxWin: number, betWord = 'BET') {
 		this.c.text = `YOUR ${betWord}`;
 		this.b.text = `${maxWin.toLocaleString('en-US')}×`;
-		this.plaque.resize(250, 150);
-		this.a.y = -42;
+		this.plaque.resize(250, 160);
+		this.a.y = -38;
 		this.b.y = 2;
-		this.c.y = 44;
+		this.c.y = 40;
 		this.root.addChild(this.plaque, this.a, this.b, this.c);
 	}
 	refreshArt() {
@@ -246,7 +246,7 @@ export class BigWin {
 	private rays = new PIXI.Sprite(fx.rays());
 	private rays2 = new PIXI.Sprite(fx.rays());
 	private halo = new PIXI.Sprite(fx.glow());
-	private plaque = new Plaque(COLORS.amber, 'ui_bigwin', { left: 330, right: 330, top: 150, bottom: 150 });
+	private plaque = new Plaque(COLORS.amber, 'ui_bigwin', { left: 330, right: 330, top: 150, bottom: 150, uniform: true });
 	private title = makeText('BIG WIN', 96, { gold: true, glow: COLORS.amber });
 	private amount: CountText;
 	private fountain = new ParticleSystem(240);
@@ -343,7 +343,7 @@ export class BigWin {
 				const local = ease.outQuad(seg - i);
 				const x = lo + (hi - lo) * Math.min(1, local);
 				this.amount.set((amountCurrency * Math.min(x, amountX)) / amountX);
-				this.amount.fitWidth(680 * this.scale, this.scale);
+				this.amount.fitWidth(470 * this.scale, this.scale);
 				for (let k = finalTier; k >= 0; k--) if (x >= thresholds[k] - 1e-9) {
 					setTier(k);
 					break;
@@ -355,7 +355,7 @@ export class BigWin {
 			});
 		});
 		this.amount.set(amountCurrency);
-		this.amount.fitWidth(680 * this.scale, this.scale);
+		this.amount.fitWidth(470 * this.scale, this.scale);
 		this.hooks.sfx('sfx_bigwin_end');
 		this.burst(60);
 		this.hooks.shake(8, 400);
@@ -429,24 +429,45 @@ export class FsPanel {
 		this.cx = cx;
 		this.cy = cy;
 		this.k = k;
-		const place = (c: PIXI.Container, dy: number) => {
-			c.x = cx;
-			c.y = cy + dy * k;
-			c.scale.set(k);
-		};
-		place(this.plaque, 0);
-		place(this.title, -175);
-		place(this.big, -20);
-		place(this.amount.text, -20);
-		place(this.sub, 105);
-		place(this.hint, 175);
+		this.arrange(this.withHint);
 		this.halo.position.set(cx, cy);
 		this.rays.position.set(cx, cy);
 		this.halo.scale.set((1000 * k) / 256);
 		this.rays.scale.set((1200 * k) / 512);
 	}
+	private withHint = true;
+	/**
+	 * Vertical rhythm of the panel. With a hint line the plaque is taller (520) and the four lines
+	 * share it; without (retrigger, outro) a shorter plaque (440) keeps the three lines centred instead
+	 * of leaving the lower third empty. Offsets keep every line inside the art's inner window (rim ~50).
+	 */
+	private arrange(hint: boolean) {
+		this.withHint = hint;
+		const { cx, cy, k } = this;
+		const place = (c: PIXI.Container, dy: number) => {
+			c.x = cx;
+			c.y = cy + dy * k;
+			c.scale.set(k);
+		};
+		this.plaque.resize(820, hint ? 520 : 440);
+		place(this.plaque, 0);
+		if (hint) {
+			place(this.title, -158);
+			place(this.big, -32);
+			place(this.amount.text, -32);
+			place(this.sub, 78);
+			place(this.hint, 152);
+		} else {
+			place(this.title, -128);
+			place(this.big, -8);
+			place(this.amount.text, -8);
+			place(this.sub, 96);
+			place(this.hint, 160);
+		}
+	}
 	private async open() {
 		this.skip = false;
+		this.arrange(!!this.hint.text);
 		this.root.visible = true;
 		this.root.alpha = 0;
 		const p = anim.tween({ duration: 300 }, (t) => (this.root.alpha = t));
