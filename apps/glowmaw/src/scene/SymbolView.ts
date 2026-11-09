@@ -34,6 +34,7 @@ export class SymbolView {
 	squashY = 1;
 	pop = 1; // multiplicative scale used by animations
 	stretch = 0; // motion stretch while falling
+	bounceY = 0; // small hop after landing
 
 	constructor(raw: RawSymbol) {
 		this.glow.anchor.set(0.5);
@@ -141,7 +142,7 @@ export class SymbolView {
 		const st = 1 + this.stretch;
 		this.body.scale.set((sc * this.squashX * wsx) / Math.sqrt(st), sc * this.squashY * st * wsy);
 		this.body.rotation = rot;
-		this.body.position.set(wx, wy);
+		this.body.position.set(wx, wy + this.bounceY);
 		this.glow.scale.set(((C * 1.25) / 256) * (1 + this.highlight * 0.35));
 		this.flash.alpha = this.highlight * (0.35 + Math.sin(this.phase * 9) * 0.15);
 		const k = 1 - this.dimmed * 0.62;
@@ -156,11 +157,15 @@ export class SymbolView {
 	async land(strength = 1) {
 		this.squashX = 1 + 0.16 * strength;
 		this.squashY = 1 - 0.2 * strength;
-		await anim.tween({ duration: 260, ease: ease.outElastic }, (t) => {
-			this.squashX = 1 + 0.16 * strength * (1 - t);
-			this.squashY = 1 - 0.2 * strength * (1 - t);
+		// squash recovers elastically while the symbol makes one small damped hop
+		await anim.tween({ duration: 300, ease: ease.linear }, (t) => {
+			const e = ease.outElastic(Math.min(1, t * 1.15));
+			this.squashX = 1 + 0.16 * strength * (1 - e);
+			this.squashY = 1 - 0.2 * strength * (1 - e);
+			this.bounceY = -9 * strength * Math.sin(t * Math.PI) * (1 - t);
 		});
 		this.squashX = this.squashY = 1;
+		this.bounceY = 0;
 	}
 
 	/** Win highlight: pop + glow, holds until clearHighlight. */

@@ -320,7 +320,11 @@ export class Scene {
 	async updateTumbleWin(amount: number) {
 		this.lastSpinWin = amount;
 		this.banner.setLabel(this.inFreeSpins ? 'SPIN WIN' : 'WIN');
-		await this.banner.setAmount(this.hooks.bookToCurrency(amount), true);
+		// the swarm values fly into the banner while it counts up
+		const target = this.board.topLayer.toLocal(this.banner.root.toGlobal(new PIXI.Point(0, 0)));
+		const fly = this.board.flyLabels(target, this.hooks.turbo() ? 220 : 340);
+		await sleep(this.hooks.turbo() ? 120 : 200);
+		await Promise.all([fly, this.banner.setAmount(this.hooks.bookToCurrency(amount), true)]);
 	}
 
 	async tumbleBoard(ev: { explodingSymbols: Position[]; newSymbols: RawSymbol[][] }) {
@@ -466,11 +470,13 @@ export class Scene {
 		this.mascot.roar(1200);
 		this.board.visible((s) => s.setDim(s.raw.name !== 'S'));
 		await Promise.all(ev.positions.map((p) => this.board.symbolAt(p)?.pulse(3)));
-		this.flash(0xbff9ff, 0.7, 600);
+		// softer, tinted flash (a 70 % white flash read as a glitch) leading into the dive
+		this.flash(0xff7ad0, 0.32, 500);
 		this.bg.erupt(2);
-		this.shake(8, 500);
+		this.shake(6, 420);
 		this.banner.hide();
 		this.hooks.sfx('sfx_fs_dive');
+		let intro: Promise<void> = Promise.resolve();
 		await this.transition.play(() => {
 			this.board.clearWins();
 			this.enterFreeSpinsVisual();
@@ -479,9 +485,13 @@ export class Scene {
 			this.fsCounter.set(0, ev.totalFs);
 			this.lure.set(0);
 			this.hooks.music('bgm_freespin');
+			// the intro panel rises while the dark clears, instead of a second after the board is back
+			intro = sleep(180).then(() => {
+				this.hooks.sfx('sfx_fs_intro');
+				return this.fsPanel.intro(ev.totalFs, superMode, this.hooks.autoplay());
+			});
 		}, COLORS.magenta);
-		this.hooks.sfx('sfx_fs_intro');
-		await this.fsPanel.intro(ev.totalFs, superMode, this.hooks.autoplay());
+		await intro;
 	}
 
 	async freeSpinRetrigger(ev: { totalFs: number; positions: Position[] }) {

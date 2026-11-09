@@ -539,7 +539,8 @@ export class Transition {
 	private w = 1;
 	private h = 1;
 	constructor() {
-		this.root.addChild(this.bubbles.container, this.dark);
+		// bubbles above the veil: under it the dive was just a black screen
+		this.root.addChild(this.dark, this.bubbles.container);
 		this.root.visible = false;
 	}
 	layout(w: number, h: number) {
@@ -555,11 +556,11 @@ export class Transition {
 			for (let i = 0; i < 3; i++)
 				this.bubbles.spawn({ texture: fx.bubble(), x: rand(0, this.w), y: this.h + 20, count: 1, angle: -Math.PI / 2, cone: 0.3, speed: [600, 1300], life: [900, 1400], size: [20, 70], endSizeRatio: 1.3, alpha: 0.8, blend: 'normal', tint: [0xffffff, tint] });
 		});
-		await anim.tween({ duration: 550, ease: ease.inQuad }, (t) => (this.dark.alpha = t));
+		await anim.tween({ duration: 520, ease: ease.inOutQuad }, (t) => (this.dark.alpha = 0.92 * t));
 		await midpoint();
-		await sleep(150);
-		await anim.tween({ duration: 650, ease: ease.outQuad }, (t) => (this.dark.alpha = 1 - t));
-		await sleep(500);
+		await sleep(120);
+		await anim.tween({ duration: 600, ease: ease.outQuad }, (t) => (this.dark.alpha = 0.92 * (1 - t)));
+		await sleep(350);
 		stop();
 		this.bubbles.clear();
 		this.root.visible = false;

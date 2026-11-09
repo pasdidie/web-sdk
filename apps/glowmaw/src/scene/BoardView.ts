@@ -5,7 +5,7 @@ import { anim, ease, sleep, rand } from './anim';
 import { ParticleSystem } from './particles';
 import { SymbolView, type RawSymbol } from './SymbolView';
 import { C, REELS, ROWS, BOARD_W, BOARD_H, COLORS, textStyle } from './theme';
-import { fx } from './textures';
+import { fx, tex } from './textures';
 
 export type Position = { reel: number; row: number };
 export type RevealEvent = { board: RawSymbol[][]; anticipation: number[]; gameType: string };
@@ -127,12 +127,13 @@ export class BoardView {
 		this.hooks.sfx('sfx_spin_start');
 		const turbo = this.hooks.turbo();
 		this.reelOut = this.cells.map(async (reel, r) => {
-				if (!turbo) await sleep(r * 45);
+				if (!turbo) await sleep(r * 40);
 				await Promise.all(
 					reel.map(async (s, row) => {
 						const fromY = s.root.y;
-						const delay = turbo ? 0 : (PAD_ROWS - row) * 16;
-						await anim.tween({ duration: turbo ? 140 : 230, delay, ease: ease.inQuad, group: 'spin' }, (t) => {
+						// bottom symbols leave first, the column empties top-down in ~0.26 s
+						const delay = turbo ? 0 : (PAD_ROWS - row) * 9;
+						await anim.tween({ duration: turbo ? 130 : 190, delay, ease: ease.inQuad, group: 'spin' }, (t) => {
 							s.root.y = fromY + t * (BOARD_H + C * 2);
 							s.stretch = t * 0.25;
 						});
@@ -177,7 +178,7 @@ export class BoardView {
 				anticipating = true;
 				await this.anticipate(r);
 			} else if (r > 0 && !this.turbo) {
-				await sleep(70, 'spin');
+				await sleep(55, 'spin');
 			}
 			await parked[r];
 			landed.push(this.dropReel(r, anticipated));
@@ -208,11 +209,50 @@ export class BoardView {
 					tint: [COLORS.cyan, COLORS.white],
 				});
 		});
-		await anim.tween({ duration: 1150, ease: ease.linear, group: 'spin' }, (t) => {
+		// the column keeps spinning as a blurred stream of symbols that speeds up, then brakes just
+		// before the real symbols land (an empty column with only a glow read as a dead pause)
+		const stream = new PIXI.Container();
+		this.symbolsLayer.addChild(stream);
+		const names = ['H1', 'H2', 'H3', 'H4', 'L1', 'L2', 'L3', 'L4', 'L5', 'S'];
+		const strip: PIXI.Sprite[] = [];
+		const gap = C * 1.05;
+		for (let i = 0; i < ROWS + 2; i++) {
+			const sp = new PIXI.Sprite(tex(`sym_${names[(Math.random() * names.length) | 0]}`));
+			sp.anchor.set(0.5);
+			const k = (C * 0.86) / Math.max(sp.texture.width, sp.texture.height, 1);
+			sp.scale.set(k);
+			(sp as any).k = k;
+			sp.x = cellX(r);
+			sp.y = -C * 0.5 + i * gap - gap;
+			stream.addChild(sp);
+			strip.push(sp);
+		}
+		const total = strip.length * gap;
+		let speed = 0.9; // board units per ms
+		let lastT = 0;
+		const dur = 1050;
+		await anim.tween({ duration: dur, ease: ease.linear, group: 'spin' }, (t) => {
+			const dms = (t - lastT) * dur;
+			lastT = t;
 			g.alpha = 0.35 + 0.35 * Math.sin(t * Math.PI * 6) ** 2;
 			g.height = BOARD_H * (1.1 + 0.15 * Math.sin(t * Math.PI * 3));
+			// accelerate for 75 % of the tease, then brake hard
+			speed = t < 0.75 ? 0.9 + t * 1.6 : 2.1 * (1 - (t - 0.75) / 0.25) + 0.35;
+			const blur = Math.min(1.6, speed * 0.55);
+			for (const sp of strip) {
+				sp.y += speed * dms;
+				if (sp.y > BOARD_H + gap * 0.5) {
+					sp.y -= total;
+					sp.texture = tex(`sym_${names[(Math.random() * names.length) | 0]}`);
+				}
+				const k = (sp as any).k as number;
+				sp.scale.set(k / Math.sqrt(blur), k * blur);
+				sp.alpha = 0.35 + 0.25 * (1 - blur / 1.6);
+			}
 		});
 		stopSparks();
+		await anim.tween({ duration: 90, ease: ease.linear }, (t) => (stream.alpha = 1 - t));
+		stream.destroy({ children: true });
 	}
 
 	private async dropReel(r: number, anticipated: boolean) {
@@ -220,14 +260,17 @@ export class BoardView {
 		const turbo = this.turbo;
 		const promises = reel.map(async (s, row) => {
 			const targetY = cellY(row);
-			const startY = targetY - BOARD_H - C * 1.5;
-			const delay = turbo ? 0 : (PAD_ROWS - 1 - row) * 32;
-			const duration = turbo ? 150 : anticipated ? 300 : 340;
+			// the column falls in as one stack that starts right above the frame: the bottom symbol is
+			// visible from the first frame (the old start, 6.5 cells up with a slow ease-in, left the board
+			// empty for ~0.35 s and read as a loading pause)
+			const startY = targetY - BOARD_H - C * 0.6;
+			const delay = turbo ? 0 : (PAD_ROWS - 1 - row) * 14;
+			const duration = turbo ? 150 : anticipated ? 260 : 300;
 			s.root.y = startY;
 			s.root.visible = true;
-			await anim.tween({ duration, delay, ease: ease.inQuad, group: 'spin' }, (t) => {
+			await anim.tween({ duration, delay, ease: ease.inCubic, group: 'spin' }, (t) => {
 				s.root.y = startY + (targetY - startY) * t;
-				s.stretch = 0.22 * t;
+				s.stretch = 0.18 * t;
 			});
 			s.stretch = 0;
 			s.root.y = targetY;
@@ -291,7 +334,30 @@ export class BoardView {
 		}
 		this.hooks.sfx('sfx_win_swarm');
 		await Promise.all(pops);
-		await sleep(this.turbo ? 260 : 620);
+		// short hold: the labels then fly into the win banner (Scene.updateTumbleWin), so the
+		// highlight never sits frozen for a second and a half
+		await sleep(this.turbo ? 160 : 360);
+	}
+
+	/** Swarm value labels fly into the win banner (target in topLayer coordinates). */
+	async flyLabels(to: PIXI.Point, ms = 360) {
+		const labels = this.labels;
+		this.labels = [];
+		await Promise.all(
+			labels.map((c, i) => {
+				const fx0 = c.x;
+				const fy0 = c.y;
+				// arc: rise a little first, then dive into the banner
+				return anim
+					.tween({ duration: ms, delay: i * 50, ease: ease.inCubic }, (t) => {
+						c.x = fx0 + (to.x - fx0) * t;
+						c.y = fy0 + (to.y - fy0) * t - Math.sin(t * Math.PI) * C * 0.6;
+						c.scale.set(1 - 0.45 * t);
+						c.alpha = t > 0.85 ? (1 - t) / 0.15 : 1;
+					})
+					.then(() => c.destroy({ children: true }));
+			}),
+		);
 	}
 
 	private addLabel(w: WinEntry) {

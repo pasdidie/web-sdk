@@ -178,7 +178,7 @@
 		app.ticker.add(tick);
 		attached = app.ticker;
 		sceneRef.resolve(scene);
-		if (import.meta.env.DEV) (window as any).__scene = scene;
+		if (import.meta.env.DEV) Object.assign(window as any, { __scene: scene, __app: app, __anim: anim });
 		stateUiGame.sceneReady = true;
 	});
 
