@@ -250,6 +250,9 @@ export class BigWin {
 	private title = makeText('BIG WIN', 96, { gold: true, glow: COLORS.amber });
 	private amount: CountText;
 	private fountain = new ParticleSystem(240);
+	/** Maw swims across the screen behind the plaque during the count */
+	private maw = new PIXI.Sprite();
+	private mawGlow = new PIXI.Sprite(fx.glow());
 	private w = 1;
 	private h = 1;
 	private active = false;
@@ -267,13 +270,41 @@ export class BigWin {
 		this.plaque.resize(760, 220);
 		this.title.y = -150;
 		this.amount.text.y = 10;
-		this.root.addChild(this.veil, this.halo, this.rays, this.rays2, this.fountain.container, this.plaque, this.title, this.amount.text);
+		this.maw.anchor.set(0.5);
+		this.maw.alpha = 0;
+		this.mawGlow.anchor.set(0.5);
+		this.mawGlow.blendMode = 'add';
+		this.mawGlow.tint = COLORS.magenta;
+		this.mawGlow.alpha = 0;
+		this.root.addChild(this.veil, this.halo, this.rays, this.rays2, this.maw, this.mawGlow, this.fountain.container, this.plaque, this.title, this.amount.text);
 		this.root.visible = false;
 		this.root.eventMode = 'static';
 		this.root.on('pointertap', () => (this.skip = true));
 	}
 	refreshArt() {
 		this.plaque.refreshArt();
+		if (hasArt('mascot')) this.maw.texture = tex('mascot');
+	}
+	/** Maw crosses right to left behind the plaque, jaws towards the coins, lure glowing. */
+	private swim(ms: number) {
+		if (this.maw.texture === PIXI.Texture.EMPTY) return;
+		const k = (this.h * 0.42) / this.maw.texture.height;
+		const fromX = this.w + this.maw.texture.width * k * 0.6;
+		const toX = -this.maw.texture.width * k * 0.6;
+		anim.tween({ duration: ms, ease: ease.linear }, (t) => {
+			// eases in and out so Maw lingers behind the plaque mid-count
+			this.maw.x = fromX + (toX - fromX) * (t * 0.15 + ease.inOutQuad(t) * 0.85);
+			this.maw.y = this.cy + Math.sin(t * Math.PI * 3) * this.h * 0.03 - this.h * 0.02;
+			this.maw.rotation = Math.cos(t * Math.PI * 3) * 0.05;
+			this.maw.scale.set(k * (1 + 0.04 * Math.sin(t * Math.PI * 8)), k);
+			this.maw.alpha = Math.min(1, t * 6, (1 - t) * 6) * 0.75;
+			this.mawGlow.position.set(this.maw.x - this.maw.texture.width * k * 0.43, this.maw.y - this.maw.texture.height * k * 0.2);
+			this.mawGlow.scale.set((this.h * 0.25) / 256);
+			this.mawGlow.alpha = this.maw.alpha * (0.7 + 0.3 * Math.sin(t * 40));
+		}).then(() => {
+			this.maw.alpha = 0;
+			this.mawGlow.alpha = 0;
+		});
 	}
 	layout(w: number, h: number, cx: number, cy: number, scale: number) {
 		this.w = w;
@@ -327,6 +358,7 @@ export class BigWin {
 			this.burst(28 + i * 10);
 		};
 		setTier(0);
+		this.swim(total + 900);
 		this.hooks.sfx('sfx_bigwin_loop');
 		// count with tier thresholds evenly spaced in time
 		const stop = anim.onFrame((dt) => this.tick(dt));

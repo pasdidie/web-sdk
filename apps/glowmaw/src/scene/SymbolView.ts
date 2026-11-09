@@ -6,6 +6,9 @@ import { C, SYMBOL_STYLE, orbTier, textStyle, COLORS } from './theme';
 import { fx, tex } from './textures';
 
 export type RawSymbol = { name: string; multiplier?: number; scatter?: boolean };
+export type ExplodeStyle = 'pop' | 'shatter' | 'jet' | 'pulse' | 'dart' | 'spin';
+/** explosion style per symbol */
+export const EXPLODE_STYLE: Record<string, ExplodeStyle> = { H1: 'shatter', H2: 'jet', H3: 'pulse', H4: 'dart', L1: 'pop', L2: 'spin', L3: 'shatter', L4: 'shatter', L5: 'shatter' };
 
 /**
  * One symbol on the board: soft additive back-glow, the art, an additive
@@ -35,6 +38,9 @@ export class SymbolView {
 	pop = 1; // multiplicative scale used by animations
 	stretch = 0; // motion stretch while falling
 	bounceY = 0; // small hop after landing
+	exX = 0; // explode motion offsets / spin
+	exY = 0;
+	exRot = 0;
 
 	constructor(raw: RawSymbol) {
 		this.glow.anchor.set(0.5);
@@ -141,8 +147,8 @@ export class SymbolView {
 		const sc = idleS * this.pop;
 		const st = 1 + this.stretch;
 		this.body.scale.set((sc * this.squashX * wsx) / Math.sqrt(st), sc * this.squashY * st * wsy);
-		this.body.rotation = rot;
-		this.body.position.set(wx, wy + this.bounceY);
+		this.body.rotation = rot + this.exRot;
+		this.body.position.set(wx + this.exX, wy + this.bounceY + this.exY);
 		this.glow.scale.set(((C * 1.25) / 256) * (1 + this.highlight * 0.35));
 		this.flash.alpha = this.highlight * (0.35 + Math.sin(this.phase * 9) * 0.15);
 		const k = 1 - this.dimmed * 0.62;
@@ -178,12 +184,63 @@ export class SymbolView {
 		});
 	}
 
-	async explode() {
-		await anim.tween({ duration: 220, ease: ease.inCubic }, (t) => {
-			this.pop = 1.06 + 0.3 * t;
-			this.root.alpha = 1 - t;
-			this.highlight = 1;
-		});
+	get artTexture() {
+		return this.art.texture;
+	}
+
+	/**
+	 * Body motion of the explosion, per creature (the matching particles are spawned by
+	 * BoardView.explodeFx): shells and crystals shatter (body hidden, shards fly), the squid
+	 * jets away, the jelly contracts then bursts, the sea dragon darts off, the star spins out.
+	 */
+	async explode(style: ExplodeStyle = 'pop') {
+		this.highlight = 1;
+		switch (style) {
+			case 'shatter':
+				this.root.alpha = 0;
+				await anim.wait(220);
+				return;
+			case 'jet':
+				await anim.tween({ duration: 120, ease: ease.outQuad }, (t) => {
+					this.squashX = 1 + 0.25 * t;
+					this.squashY = 1 - 0.25 * t;
+				});
+				await anim.tween({ duration: 200, ease: ease.inCubic }, (t) => {
+					this.squashX = 1.25 - 0.45 * t;
+					this.squashY = 0.75 + 0.6 * t;
+					this.exY = -C * 0.9 * t;
+					this.root.alpha = 1 - t;
+				});
+				this.squashX = this.squashY = 1;
+				return;
+			case 'pulse':
+				await anim.tween({ duration: 130, ease: ease.outQuad }, (t) => (this.pop = 1 - 0.18 * t));
+				await anim.tween({ duration: 170, ease: ease.outCubic }, (t) => {
+					this.pop = 0.82 + 0.75 * t;
+					this.root.alpha = 1 - t;
+				});
+				return;
+			case 'dart':
+				await anim.tween({ duration: 280, ease: ease.inCubic }, (t) => {
+					this.exX = -C * 0.8 * t;
+					this.exY = -C * 0.35 * t;
+					this.exRot = -0.4 * t;
+					this.root.alpha = 1 - t * t;
+				});
+				return;
+			case 'spin':
+				await anim.tween({ duration: 280, ease: ease.inQuad }, (t) => {
+					this.exRot = Math.PI * 2 * t;
+					this.pop = 1.1 - 0.7 * t;
+					this.root.alpha = 1 - t * t;
+				});
+				return;
+			default:
+				await anim.tween({ duration: 220, ease: ease.inCubic }, (t) => {
+					this.pop = 1.06 + 0.3 * t;
+					this.root.alpha = 1 - t;
+				});
+		}
 	}
 
 	/** Scatter / orb celebration pulse */

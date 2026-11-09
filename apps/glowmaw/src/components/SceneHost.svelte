@@ -170,6 +170,9 @@
 			wincapX: config.betModes.base.max_win,
 			betWord: t.bet(),
 		});
+		// phones report devicePixelRatio 3: rendering every additive layer at 3x is the classic cause of
+		// mobile stutter. 2x is visually identical at slot-UI sizes and ~44 % fewer pixels.
+		if (app.renderer.resolution > 2) app.renderer.resize(app.screen.width, app.screen.height, 2);
 		scene.setAssets(context.stateApp.loadedAssets as Record<string, unknown>);
 		bar = new UiBar(actions);
 		bar.refreshArt();

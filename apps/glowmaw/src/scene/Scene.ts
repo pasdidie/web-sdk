@@ -49,26 +49,30 @@ export type Placement = {
 	lure: { x: number; y: number; s: number };
 	fsCounter: { x: number; y: number; s: number };
 	maxWin: { x: number; y: number; s: number } | null;
+	/** WIN readout of the console (stage coords): target of the win transfer */
+	winReadout: { x: number; y: number };
 };
 
 const PLACEMENT: Record<LayoutType, Placement> = {
 	desktop: {
 		board: { x: 665, y: 392, s: 1.1 },
-		mascot: { x: 1272, y: 400, h: 340 },
+		mascot: { x: 1338, y: 400, h: 322 }, // lure bulb lands on the frame rim, never over a cell
 		logo: { x: 150, y: 86, s: 0.74 },
 		banner: { x: 665, y: 722, s: 1 },
 		lure: { x: 1250, y: 165, s: 1 },
 		fsCounter: { x: 172, y: 300, s: 1 },
 		maxWin: { x: 172, y: 300, s: 1 },
+		winReadout: { x: 1130, y: 835 },
 	},
 	landscape: {
 		board: { x: 680, y: 372, s: 1.06 },
-		mascot: { x: 1272, y: 360, h: 330 },
+		mascot: { x: 1336, y: 360, h: 312 },
 		logo: { x: 150, y: 82, s: 0.74 },
 		banner: { x: 680, y: 700, s: 1.05 },
 		lure: { x: 1250, y: 150, s: 1 },
 		fsCounter: { x: 172, y: 290, s: 1.1 },
 		maxWin: { x: 172, y: 300, s: 1.05 },
+		winReadout: { x: 1108, y: 832 },
 	},
 	portrait: {
 		board: { x: 450, y: 765, s: 1.22 }, // frame art (1600 wide for a 1350 hole) must fit the 900 stage
@@ -78,6 +82,7 @@ const PLACEMENT: Record<LayoutType, Placement> = {
 		lure: { x: 118, y: 268, s: 0.8 },
 		fsCounter: { x: 770, y: 150, s: 0.85 },
 		maxWin: { x: 128, y: 262, s: 0.72 },
+		winReadout: { x: 628, y: 1534 },
 	},
 	tablet: {
 		board: { x: 600, y: 548, s: 1.15 },
@@ -87,6 +92,7 @@ const PLACEMENT: Record<LayoutType, Placement> = {
 		lure: { x: 560, y: 92, s: 0.62 },
 		fsCounter: { x: 205, y: 172, s: 0.8 },
 		maxWin: { x: 560, y: 92, s: 0.6 },
+		winReadout: { x: 812, y: 1143 },
 	},
 
 };
@@ -138,7 +144,7 @@ export class Scene {
 			formatWin: (v) => hooks.formatAmount(v),
 			turbo: hooks.turbo,
 			reducedMotion: hooks.reducedMotion,
-			onSpecialLand: (s, r) => this.onSpecialLand(s.raw, r),
+			onSpecialLand: (s, r, row) => this.onSpecialLand(s.raw, r, row),
 		});
 		this.banner = new WinBanner(hooks.formatCurrency, hooks.sfx);
 		this.maxWin = new MaxWinPlaque(hooks.maxWin, hooks.betWord);
@@ -157,7 +163,8 @@ export class Scene {
 		this.frame.addChild(this.frameFallback, this.frameArt);
 		this.boardWrap.addChild(this.board.root);
 		this.frameLayer.addChild(this.frame);
-		this.stage.addChild(this.frameLayer, this.mascot.root, this.boardWrap, this.logoFallback, this.logo, this.maxWin.root, this.lure.root, this.fsCounter.root, this.banner.root, this.uiLayer);
+		// Maw above the board: its lure rests on the frame rim (it used to slip under the board's edge)
+		this.stage.addChild(this.frameLayer, this.boardWrap, this.mascot.root, this.logoFallback, this.logo, this.maxWin.root, this.lure.root, this.fsCounter.root, this.banner.root, this.uiLayer);
 		this.orbSumText.alpha = 0;
 		this.flyLayer.addChild(this.flyFx.container, this.orbSumText);
 		this.root.addChild(this.bg.root, this.stage, this.flyLayer, this.bigWin.root, this.fsPanel.root, this.transition.root, this.flashG);
@@ -277,14 +284,17 @@ export class Scene {
 		return this.root.toLocal(this.board.root.toGlobal(new PIXI.Point(p.x, p.y)));
 	}
 
-	private onSpecialLand(raw: RawSymbol, reel: number) {
+	private onSpecialLand(raw: RawSymbol, reel: number, row: number) {
 		if (raw.name === 'S') {
 			this.hooks.sfx('sfx_scatter_land');
 			this.board.columnFlash(reel, 0xbff9ff);
+			this.board.specialImpact(reel, row, 'pearl');
 			this.mascot.flare(0.6);
 		} else if (raw.name === 'M') {
 			this.hooks.sfx('sfx_orb_land');
 			this.board.columnFlash(reel, COLORS.violet);
+			this.board.specialImpact(reel, row, 'orb');
+			this.shake(1.6, 140);
 		}
 	}
 
@@ -464,12 +474,35 @@ export class Scene {
 		this.mascot.excitement = 0.1;
 	}
 
+	/** Maw lunges a fifth of the way toward the grid, grows, roars, and shakes the screen. */
+	private async mawCharge() {
+		const p = this.place.mascot;
+		const m = this.mascot.root;
+		const dx = (this.place.board.x - p.x) * 0.2;
+		const dy = (this.place.board.y - p.y) * 0.12;
+		this.mascot.excitement = 1;
+		this.mascot.roar(1300);
+		this.hooks.sfx('sfx_fs_dive');
+		await anim.tween({ duration: 420, ease: ease.outBack }, (t) => {
+			m.position.set(p.x + dx * t, p.y + dy * t);
+			this.mascot.setHeight(p.h * (1 + 0.2 * t));
+		});
+		this.shake(7, 450);
+		this.bg.erupt(1.5);
+		await sleep(480);
+	}
+	private mawSettle() {
+		const p = this.place.mascot;
+		this.mascot.root.position.set(p.x, p.y);
+		this.mascot.setHeight(p.h);
+	}
+
 	async freeSpinTrigger(ev: { totalFs: number; positions: Position[] }, superMode: boolean) {
 		this.superMode = superMode;
 		this.hooks.sfx('sfx_scatter_win');
-		this.mascot.roar(1200);
 		this.board.visible((s) => s.setDim(s.raw.name !== 'S'));
-		await Promise.all(ev.positions.map((p) => this.board.symbolAt(p)?.pulse(3)));
+		// pearls pulse while Maw charges at the grid, jaws wide, and roars
+		await Promise.all([...ev.positions.map((p) => this.board.symbolAt(p)?.pulse(3)), this.mawCharge()]);
 		// softer, tinted flash (a 70 % white flash read as a glitch) leading into the dive
 		this.flash(0xff7ad0, 0.32, 500);
 		this.bg.erupt(2);
@@ -479,6 +512,7 @@ export class Scene {
 		let intro: Promise<void> = Promise.resolve();
 		await this.transition.play(() => {
 			this.board.clearWins();
+			this.mawSettle();
 			this.enterFreeSpinsVisual();
 			this.fsTotal = ev.totalFs;
 			this.fsCurrent = 0;
@@ -551,7 +585,49 @@ export class Scene {
 		}
 		this.mascot.flare(1);
 		this.hooks.sfx(x >= 5 ? 'sfx_win_medium' : 'sfx_win_small');
-		await sleep(this.hooks.turbo() ? 150 : x >= 5 ? 700 : 400);
+		// the win streams from the banner into the console WIN readout (filled a static pause)
+		await this.winTransfer(x >= 5 ? 22 : 12);
+		await sleep(this.hooks.turbo() ? 60 : x >= 5 ? 220 : 80);
+	}
+
+	/** A stream of sparks along an arc from the win banner to the console WIN readout. */
+	private async winTransfer(n: number) {
+		const fromS = this.banner.root.position;
+		const toS = this.place.winReadout;
+		const from = this.root.toLocal(this.stage.toGlobal(new PIXI.Point(fromS.x, fromS.y)));
+		const to = this.root.toLocal(this.stage.toGlobal(new PIXI.Point(toS.x, toS.y)));
+		const ctrl = new PIXI.Point((from.x + to.x) / 2, Math.min(from.y, to.y) - 120 * this.k);
+		const turbo = this.hooks.turbo();
+		const count = this.hooks.reducedMotion() ? Math.ceil(n / 3) : n;
+		const dur = turbo ? 260 : 440;
+		const jobs: Promise<void>[] = [];
+		this.banner.root.scale.set(this.place.banner.s * 1.08);
+		anim.tween({ duration: 260, ease: ease.outQuad }, (t) => this.banner.root.scale.set(this.place.banner.s * (1.08 - 0.08 * t)));
+		for (let i = 0; i < count; i++) {
+			const sp = new PIXI.Sprite(i % 3 ? fx.spark() : fx.glow());
+			sp.anchor.set(0.5);
+			sp.blendMode = 'add';
+			sp.tint = i % 2 ? COLORS.cyan : 0xffd27a;
+			const jx = rand(-60, 60) * this.k;
+			const jy = rand(-12, 12) * this.k;
+			const size = (i % 3 ? rand(18, 30) : rand(40, 60)) * this.k;
+			this.flyLayer.addChild(sp);
+			sp.alpha = 0;
+			jobs.push(
+				anim
+					.tween({ duration: dur, delay: i * (turbo ? 8 : 16), ease: ease.inOutQuad }, (t) => {
+						const u = 1 - t;
+						sp.x = u * u * (from.x + jx) + 2 * u * t * ctrl.x + t * t * to.x;
+						sp.y = u * u * (from.y + jy) + 2 * u * t * ctrl.y + t * t * to.y;
+						sp.alpha = Math.min(1, t * 5) * (t > 0.85 ? (1 - t) / 0.15 : 1);
+						sp.width = sp.height = size * (1 - 0.5 * t);
+					})
+					.then(() => sp.destroy()),
+			);
+		}
+		await Promise.all(jobs);
+		// arrival flash on the readout
+		this.flyFx.spawn({ texture: fx.spark(), x: to.x, y: to.y, count: 10, speed: [60, 180], life: [250, 450], size: [10, 20].map((v) => v * this.k) as [number, number], tint: [COLORS.cyan, 0xffffff] });
 	}
 
 	private async bigWinFor(bookAmount: number, isMax: boolean) {

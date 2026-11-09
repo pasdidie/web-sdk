@@ -3,7 +3,7 @@ import { GText } from './theme';
 
 import { anim, ease, sleep, rand } from './anim';
 import { ParticleSystem } from './particles';
-import { SymbolView, type RawSymbol } from './SymbolView';
+import { SymbolView, EXPLODE_STYLE, type RawSymbol } from './SymbolView';
 import { C, REELS, ROWS, BOARD_W, BOARD_H, COLORS, textStyle } from './theme';
 import { fx, tex } from './textures';
 
@@ -48,6 +48,7 @@ export class BoardView {
 	private labels: PIXI.Container[] = [];
 	private preSpinPromise: Promise<void> | null = null;
 	private reelOut: Promise<void>[] = [];
+	private reelReady: Promise<void>[] = [];
 	private quick = false;
 	spinning = false;
 
@@ -126,6 +127,9 @@ export class BoardView {
 		this.clearWins();
 		this.hooks.sfx('sfx_spin_start');
 		const turbo = this.hooks.turbo();
+		// a reel may take its new symbols once its old ones are ~half way out (fresh SymbolViews fall
+		// in while the old ones are still leaving: no empty-board beat, which showed in free spins)
+		this.reelReady = this.cells.map((_, r) => sleep((turbo ? 0 : r * 40) + (turbo ? 60 : 110), 'spin'));
 		this.reelOut = this.cells.map(async (reel, r) => {
 				if (!turbo) await sleep(r * 40);
 				await Promise.all(
@@ -156,16 +160,21 @@ export class BoardView {
 		this.spinning = true;
 		this.preSpin();
 		const out = this.reelOut;
+		const ready = this.reelReady;
 		this.preSpinPromise = null;
-		// each reel takes its new symbols as soon as its old ones have dropped away
-		const parked = out.map((p, r) =>
+		const outgoing = this.cells.map((reel) => reel.slice());
+		// old symbols are destroyed once they have left the board
+		out.forEach((p, r) => p.then(() => outgoing[r].forEach((s) => s.destroy())));
+		const parked = ready.map((p, r) =>
 			p.then(() => {
-				for (let row = 0; row < PAD_ROWS; row++) {
-					const s = this.cells[r][row];
-					s.set(reveal.board[r][row]);
-					s.root.visible = false;
+				this.cells[r] = reveal.board[r].slice(0, PAD_ROWS).map((raw, row) => {
+					const s = new SymbolView(raw);
+					s.root.x = cellX(r);
 					s.root.y = cellY(row) - BOARD_H - C * 1.5;
-				}
+					s.root.visible = false;
+					this.symbolsLayer.addChild(s.root);
+					return s;
+				});
 			}),
 		);
 		const landed: Promise<void>[] = [];
@@ -397,8 +406,9 @@ export class BoardView {
 		await Promise.all(
 			exploding.map(async (p) => {
 				const s = this.cells[p.reel][p.row];
-				this.burst(cellX(p.reel), cellY(p.row), s.tint);
-				await s.explode();
+				const style = EXPLODE_STYLE[s.raw.name] ?? 'pop';
+				this.explodeFx(s, cellX(p.reel), cellY(p.row));
+				await s.explode(style);
 			}),
 		);
 		for (const l of this.labels) l.destroy({ children: true });
@@ -448,6 +458,131 @@ export class BoardView {
 		}
 		await Promise.all(moves);
 		this.hooks.sfx('sfx_tumble_land', { volume: 0.6 });
+	}
+
+	/** Quarter textures of a symbol's art, cached per texture (shatter shards). */
+	private shardCache = new Map<PIXI.Texture, PIXI.Texture[]>();
+	private shards(t: PIXI.Texture) {
+		let q = this.shardCache.get(t);
+		if (q) return q;
+		const f = t.frame;
+		const w = f.width / 2;
+		const h = f.height / 2;
+		q = [0, 1, 2, 3].map((i) => new PIXI.Texture({ source: t.source, frame: new PIXI.Rectangle(f.x + (i % 2) * w, f.y + Math.floor(i / 2) * h, w, h) }));
+		this.shardCache.set(t, q);
+		return q;
+	}
+
+	/** The art breaks into four pieces that fly apart, spin and fall. */
+	private shatter(s: SymbolView, x: number, y: number) {
+		const reduced = this.hooks.reducedMotion();
+		const parts = this.shards(s.artTexture);
+		const k = s.baseScale;
+		const fw = s.artTexture.frame.width * k;
+		const fh = s.artTexture.frame.height * k;
+		parts.forEach((tx, i) => {
+			const sp = new PIXI.Sprite(tx);
+			sp.anchor.set(0.5);
+			sp.scale.set(k);
+			const dx = (i % 2 ? 1 : -1) * fw * 0.25;
+			const dy = (i < 2 ? -1 : 1) * fh * 0.25;
+			sp.position.set(x + dx, y + dy);
+			this.fxLayer.addChild(sp);
+			const vx = (dx / (fw * 0.25)) * rand(110, 220) * (reduced ? 0.4 : 1);
+			const vy = (dy / (fh * 0.25)) * rand(60, 140) - rand(140, 240);
+			const spin = rand(-7, 7);
+			anim.tween({ duration: 520, ease: ease.linear }, (t) => {
+				const sec = t * 0.52;
+				sp.x = x + dx + vx * sec;
+				sp.y = y + dy + vy * sec + 900 * sec * sec;
+				sp.rotation = spin * sec;
+				sp.alpha = 1 - t * t;
+				sp.scale.set(k * (1 - 0.35 * t));
+			}).then(() => sp.destroy());
+		});
+	}
+
+	/** Per-creature explosion particles (body motion lives in SymbolView.explode). */
+	explodeFx(s: SymbolView, x: number, y: number) {
+		const reduced = this.hooks.reducedMotion();
+		const n = (v: number) => (reduced ? Math.ceil(v / 3) : v);
+		const tint = s.tint;
+		this.ring(x, y, tint, 0.9);
+		switch (s.raw.name) {
+			case 'H1': // nautilus: gold chips + spiralling sparks
+				this.shatter(s, x, y);
+				this.particles.spawn({ texture: fx.spark(), x, y, count: n(16), speed: [160, 360], drag: 0.06, spin: [-6, 6], life: [500, 900], size: [8, 18], endSizeRatio: 0.1, tint: [0xffd27a, 0xffb84a, 0xffffff] });
+				break;
+			case 'H2': // squid: ink cloud
+				this.particles.spawn({ texture: fx.softGlow(), x, y: y + C * 0.1, spreadX: 14, spreadY: 14, count: n(7), speed: [20, 70], drag: 0.2, life: [700, 1100], size: [50, 90], endSizeRatio: 2.2, alpha: 0.85, blend: 'normal', tint: [0x14031f, 0x2a0a2e] });
+				this.particles.spawn({ texture: fx.spark(), x, y, count: n(10), speed: [120, 300], drag: 0.08, life: [400, 700], size: [6, 14], tint: [0xff3b5c, 0xffffff] });
+				break;
+			case 'H3': // jelly: burst of bubbles rising
+				this.particles.spawn({ texture: fx.bubble(), x, y, spreadX: 22, spreadY: 18, count: n(14), angle: -Math.PI / 2, cone: 1.6, speed: [60, 200], gravity: -120, life: [700, 1200], size: [8, 22], endSizeRatio: 0.9, alpha: 0.85, blend: 'normal', tint: [0xd9b8ff, 0xffffff] });
+				this.particles.spawn({ texture: fx.glow(), x, y, count: 1, speed: 0, life: 380, size: C * 1.6, endSizeRatio: 1.6, alpha: 0.7, tint: 0xb07bff });
+				break;
+			case 'H4': // sea dragon: leafy fronds left behind
+				this.particles.spawn({ texture: fx.streak(), x: x + C * 0.1, y, spreadX: 18, spreadY: 24, count: n(12), angle: 0.3, cone: 1.4, speed: [40, 140], gravity: 60, drag: 0.3, spin: [-4, 4], life: [700, 1100], size: [14, 26], endSizeRatio: 0.6, alpha: 0.9, tint: [0x2fe0b0, 0x7dffb0, 0x1ea37a] });
+				break;
+			case 'L1': // urchin: spikes shoot out radially
+				this.particles.spawn({ texture: fx.streak(), x, y, count: n(18), speed: [320, 560], drag: 0.02, life: [260, 420], size: [10, 16], alignToVelocity: true, stretch: 2.6, endSizeRatio: 0.4, tint: [0xff4d8d, 0xffb3d0] });
+				break;
+			case 'L2': // star: green star sparks thrown by the spin
+				this.particles.spawn({ texture: fx.spark(), x, y, count: n(14), speed: [180, 340], drag: 0.05, spin: [-8, 8], life: [450, 750], size: [8, 16], tint: [0x5dff8a, 0xe9fbff] });
+				break;
+			case 'L3': // scallop: shell pieces + a pearl of light
+				this.shatter(s, x, y);
+				this.particles.spawn({ texture: fx.bubble(), x, y, count: n(6), angle: -Math.PI / 2, cone: 1.2, speed: [50, 130], gravity: -80, life: [600, 1000], size: [10, 18], alpha: 0.8, blend: 'normal', tint: [0xbfe4ff, 0xffffff] });
+				break;
+			case 'L4': // vent crystal: orange shards falling with gravity
+			case 'L5': // sea glass: purple glints
+				this.shatter(s, x, y);
+				this.particles.spawn({ texture: fx.streak(), x, y, count: n(12), speed: [180, 360], gravity: 700, life: [400, 700], size: [6, 11], alignToVelocity: true, stretch: 1.8, endSizeRatio: 0.5, tint: s.raw.name === 'L4' ? [0xffa040, 0xffe0a0] : [0xc77dff, 0xf0d8ff] });
+				break;
+			default:
+				this.burst(x, y, tint);
+		}
+	}
+
+	/** Landing impact: a Glow Orb thumps (double ring + sparks), an Abyss Pearl opens with rays of light. */
+	specialImpact(reel: number, row: number, kind: 'orb' | 'pearl') {
+		const x = cellX(reel);
+		const y = cellY(row);
+		const s = this.cells[reel]?.[row];
+		const tint = s?.tint ?? COLORS.cyan;
+		if (kind === 'orb') {
+			this.ring(x, y, tint, 1.3);
+			setTimeout(() => this.ring(x, y, 0xffffff, 0.9), 70);
+			this.particles.spawn({ texture: fx.spark(), x, y, count: this.hooks.reducedMotion() ? 4 : 12, speed: [140, 320], drag: 0.08, life: [350, 650], size: [8, 16], tint: [tint, 0xffffff] });
+			s?.pulse(1);
+		} else {
+			const rays = new PIXI.Sprite(fx.rays());
+			rays.anchor.set(0.5);
+			rays.blendMode = 'add';
+			rays.tint = 0xbff9ff;
+			rays.position.set(x, y);
+			this.fxLayer.addChild(rays);
+			anim.tween({ duration: 700, ease: ease.outCubic }, (t) => {
+				rays.scale.set(((C * 2.4) / 512) * (0.3 + 0.7 * t));
+				rays.rotation = t * 0.8;
+				rays.alpha = Math.sin(t * Math.PI) * 0.9;
+			}).then(() => rays.destroy());
+			this.ring(x, y, 0xbff9ff, 1.4);
+			s?.pulse(1);
+		}
+	}
+
+	private ring(x: number, y: number, tint: number, size = 1) {
+		const ring = new PIXI.Sprite(fx.ring());
+		ring.anchor.set(0.5);
+		ring.blendMode = 'add';
+		ring.tint = tint;
+		ring.position.set(x, y);
+		this.fxLayer.addChild(ring);
+		anim.tween({ duration: 400, ease: ease.outCubic }, (t) => {
+			ring.scale.set((0.2 + t * 0.75) * (C / 140) * size);
+			ring.alpha = 1 - t;
+		}).then(() => ring.destroy());
 	}
 
 	burst(x: number, y: number, tint: number) {
