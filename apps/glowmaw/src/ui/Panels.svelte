@@ -137,7 +137,7 @@
 								<h3>{c.name}</h3>
 								<p>{c.text}</p>
 								<div class="price">{formatCurrency(costOf(c.mode))}</div>
-								<div class="mult">{config.betModes[c.mode].cost} × {formatCurrency(stateBet.betAmount)} {W('bet', 'play')} · RTP {pct(config.betModes[c.mode].rtp)}</div>
+								<div class="mult">{config.betModes[c.mode].cost} × {formatCurrency(stateBet.betAmount)} {W('bet', 'play')}</div>
 								{#if !canAfford(c.mode)}<div class="poor-note">{W('Balance too low at this bet', 'Balance too low at this amount')}</div>{/if}
 							</button>
 						{/each}
