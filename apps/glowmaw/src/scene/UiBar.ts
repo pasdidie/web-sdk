@@ -411,6 +411,8 @@ export class UiBar {
 	private buy = new FeatureButton('ui_feature', 'BUY', 'FEATURE');
 	private ante = new FeatureButton('ui_feature', 'LURE BAIT', '', 210, 92, COLORS.cyan, true);
 	private msg = valueText(22);
+	/** dark pill behind the message: it sits on the console rim like a tab */
+	private msgTab = new PIXI.Graphics();
 	private layoutType: LayoutType | null = null;
 
 	constructor(private actions: UiActions) {
@@ -432,7 +434,8 @@ export class UiBar {
 		betHit.onPress = actions.betMenu;
 		this.bet.addChild(betHit);
 		this.msg.alpha = 0;
-		this.root.addChild(this.consoleG, this.balance, this.bet, this.win, this.minus, this.plus, this.menu, this.sound, this.info, this.turbo, this.auto, this.buy, this.ante, this.spin, this.msg);
+		this.msgTab.alpha = 0;
+		this.root.addChild(this.consoleG, this.balance, this.bet, this.win, this.minus, this.plus, this.menu, this.sound, this.info, this.turbo, this.auto, this.buy, this.ante, this.spin, this.msgTab, this.msg);
 	}
 
 	refreshArt() {
@@ -521,7 +524,7 @@ export class UiBar {
 			P(this.spin, 1474, L ? 806 : 820, L ? 1.12 : 1);
 			P(this.buy, 172, L ? 470 : 480, L ? 1.05 : 1);
 			P(this.ante, 172, L ? 590 : 600, L ? 1.05 : 1);
-			P(this.msg, 665, L ? 760 : 785, 1);
+			P(this.msg, 665, L ? 777 : 785, 1); // on the console rim, over its own dark tab
 		} else if (type === 'portrait') {
 			// console strip only for the readout row; spin row and feature row float above it
 			this.drawConsole(10, 1470, 880, 128);
@@ -608,8 +611,14 @@ export class UiBar {
 		if (s.message !== this.lastMsg) {
 			this.lastMsg = s.message;
 			this.msg.text = s.message;
+			const w = this.msg.width / Math.max(this.msg.scale.x, 1e-6) + 36;
+			const h = 34;
+			this.msgTab.clear().roundRect(-w / 2, -h / 2, w, h, h / 2).fill({ color: 0x02060f, alpha: 0.92 }).stroke({ color: 0x3ff5e6, width: 1.5, alpha: 0.6 });
 		}
 		this.msg.alpha += ((s.message ? 1 : 0) - this.msg.alpha) * 0.2;
+		this.msgTab.alpha = this.msg.alpha;
+		this.msgTab.position.copyFrom(this.msg.position);
+		this.msgTab.scale.copyFrom(this.msg.scale);
 		for (const b of [this.plus, this.minus, this.turbo, this.auto, this.menu, this.sound, this.info]) b.update();
 		this.spin.update(dt);
 		this.buy.update(dt);
