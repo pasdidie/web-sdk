@@ -174,7 +174,7 @@ export class SpinButton extends Pressable {
 	private orbit = new PIXI.Container();
 	private glyph = new PIXI.Graphics();
 	private counter = valueText(34);
-	private angle = 0;
+	private spinAngle = 0;
 	private speed = 0.4;
 	playing = false;
 	mode: 'spin' | 'stop' = 'spin';
@@ -240,15 +240,15 @@ export class SpinButton extends Pressable {
 		this.t += dt / 1000;
 		const target = this.playing ? 9 : 0.5;
 		this.speed += (target - this.speed) * Math.min(1, dt * (this.playing ? 0.004 : 0.002));
-		this.angle += (this.speed * dt) / 1000;
-		this.ring.rotation = this.angle;
-		this.orbit.rotation = this.angle * 1.4;
+		this.spinAngle += (this.speed * dt) / 1000;
+		this.ring.rotation = this.spinAngle;
+		this.orbit.rotation = this.spinAngle * 1.4;
 		this.orbit.children.forEach((c) => {
 			c.x = Math.cos(c.rotation) * this.r * 1.02;
 			c.y = Math.sin(c.rotation) * this.r * 1.02;
 			c.scale.set((this.r * 0.42) / 64);
 		});
-		this.art.rotation = this.playing ? this.angle * 0.15 : 0;
+		this.art.rotation = this.playing ? this.spinAngle * 0.15 : 0;
 		const breathe = 0.5 + 0.5 * Math.sin(this.t * 2.4);
 		this.halo.alpha = this.disabled ? 0.05 : this.playing ? 0.55 : 0.25 + breathe * 0.25;
 		this.ring.alpha = this.disabled ? 0.1 : 0.55 + breathe * 0.2;
