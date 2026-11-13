@@ -19,21 +19,109 @@ import { fx, tex, hasArt } from './textures';
  * mascot's own clock: none of them blocks the game flow (only `chomp` is awaited, by the Scene).
  * Faces left (towards the grid). Rig coordinates are normalised texture coordinates of `mascot`.
  */
-export const RIG = {
-	hinge: { u: 0.37, v: 0.62 }, // jaw pivot
-	jawBlend: 0.05,
-	mouth: { u: 0.25, v: 0.58 }, // where orbs are swallowed
-	bulb: { u: 0.065, v: 0.35 }, // lure bulb centre
-	stalkFrom: { u: 0.33, v: 0.27 }, // where the stalk leaves the head
-	eye: { u: 0.2945, v: 0.41 },
-	gill: { u: 0.41, v: 0.52 },
-	pecRoot: { u: 0.5, v: 0.585 }, // pectoral fin attachment
-	tailStart: 0.72,
+type UV = { u: number; v: number };
+type W2 = (u: number, v: number) => number;
+/**
+ * Per-art rig. UV = normalised texture coordinates; px values are texture pixels.
+ * `contentH` = share of the texture height the fish covers (setHeight sizes the fish, not the canvas).
+ */
+export type Rig = {
+	pivot: UV;
+	contentH: number;
+	hinge: UV; // lower-jaw pivot
+	jawBlend: number;
+	jawFront: number; // jaw weight fades in from hinge.u + jawFront ...
+	jawBack: number; // ... to full at hinge.u - jawBack
+	mouth: UV; // where orbs are swallowed
+	bulb: UV; // lure bulb centre
+	eye: UV; // iris centre
+	iris: { rx: number; ry: number };
+	/** the art's own pupil slit, painted over with iris colour so the moving pupil replaces it */
+	artPupil: { dx: number; dy: number; rx: number; ry: number; color: number; edge: number } | null;
+	pupil: { rx: number; ry: number; tx: number; ty: number };
+	glint: { dx: number; dy: number; s: number };
+	lid: { fill: number; rim: number; lash: number };
+	gill: UV;
+	/** in-mesh pectoral flap (single-image art); null when the fin is a separate sprite */
+	pecRoot: UV | null;
+	/** separate fin layer: texture key, its bbox in the canvas and its root (px) */
+	fin: { key: string; x: number; y: number; w: number; h: number; rootX: number; rootY: number } | null;
+	tailStart: number;
+	tailU: number;
+	hit: { x: number; y: number; rx: number; ry: number }; // px, relative to the pivot
+	stalkW: W2;
+	dorsalW: W2;
+	ventralW: W2;
+	pelvicW: W2;
 };
 
 const smooth = (a: number, b: number, x: number) => {
 	const t = clamp((x - a) / (b - a));
 	return t * t * (3 - 2 * t);
+};
+
+/** v1: the painted single-image Maw (1400x731, fin baked in). */
+const RIG_V1: Rig = {
+	pivot: { u: 0.5, v: 0.55 },
+	contentH: 1,
+	hinge: { u: 0.37, v: 0.62 },
+	jawBlend: 0.05,
+	jawFront: 0.04,
+	jawBack: 0.06,
+	mouth: { u: 0.25, v: 0.58 },
+	bulb: { u: 0.065, v: 0.35 },
+	eye: { u: 0.2945, v: 0.41 },
+	iris: { rx: 15, ry: 13 },
+	artPupil: null,
+	pupil: { rx: 4.2, ry: 8, tx: 7.5, ty: 4 },
+	glint: { dx: -5, dy: -5, s: 5 },
+	lid: { fill: 0x2c4558, rim: 0x7fa6bb, lash: 0x050a16 },
+	gill: { u: 0.41, v: 0.52 },
+	pecRoot: { u: 0.5, v: 0.585 },
+	fin: null,
+	tailStart: 0.72,
+	tailU: 0.8,
+	hit: { x: -84, y: 22, rx: 476, ry: 263 },
+	stalkW: (u, v) => Math.max(smooth(0.29, 0.15, v), smooth(0.2, 0.12, u) * smooth(0.5, 0.42, v)) * smooth(0.35, 0.105, u),
+	dorsalW: (u, v) => smooth(0.34, 0.12, v) * smooth(0.42, 0.48, u) * smooth(0.8, 0.72, u),
+	ventralW: (u, v) => smooth(0.62, 0.8, v) * smooth(0.6, 0.66, u) * smooth(0.8, 0.74, u),
+	pelvicW: (u, v) => smooth(0.78, 0.9, v) * smooth(0.44, 0.48, u) * smooth(0.62, 0.56, u),
+};
+
+/**
+ * v2: 3D-render Maw matching the v2 symbols. 1400x782 canvas, untrimmed; body (fin removed, skin
+ * painted under it) + fin cut on the same canvas. Measured on assets/processed/mascot_v2*.png:
+ * fish bbox x 196-1270 / y 77-690, bulb (235,350), iris (534,322) 86x70 with its own slit at
+ * (514,323) ~12x55, mouth corner ~(575,468), fin bbox x 660-872 / y 328-574, root ~(672,430).
+ */
+const RIG_V2: Rig = {
+	pivot: { u: 733 / 1400, v: 383 / 782 },
+	contentH: 613 / 782,
+	hinge: { u: 575 / 1400, v: 468 / 782 },
+	jawBlend: 0.04,
+	jawFront: 0.03,
+	jawBack: 0.06,
+	mouth: { u: 480 / 1400, v: 470 / 782 },
+	bulb: { u: 235 / 1400, v: 350 / 782 },
+	eye: { u: 534 / 1400, v: 322 / 782 },
+	iris: { rx: 43, ry: 35 },
+	artPupil: { dx: -20, dy: 1, rx: 10, ry: 31, color: 0x2ae6f6, edge: 0x22d4f0 },
+	pupil: { rx: 6.5, ry: 23, tx: 20, ty: 5 },
+	glint: { dx: -16, dy: -14, s: 11 },
+	lid: { fill: 0x2b3d5c, rim: 0x6f8fc0, lash: 0x070b18 },
+	gill: { u: 640 / 1400, v: 430 / 782 },
+	pecRoot: null,
+	fin: { key: 'mascot_v2_fincut', x: 652, y: 320, w: 228, h: 262, rootX: 672, rootY: 430 },
+	tailStart: 0.72,
+	tailU: 0.77,
+	hit: { x: -33, y: 37, rx: 375, ry: 262 },
+	// stalk: arc above the head (v < 0.22) + the hanging part left of the snout; 0 at the stalk base
+	stalkW: (u, v) => Math.max(smooth(0.25, 0.15, v), smooth(0.235, 0.2, u) * smooth(0.56, 0.5, v)) * smooth(0.37, 0.3, u),
+	// main dorsal (u .44-.61, v < .29) + rear dorsal (u .64-.72, v .29-.40)
+	dorsalW: (u, v) =>
+		Math.max(smooth(0.3, 0.16, v) * smooth(0.43, 0.47, u) * smooth(0.63, 0.6, u), smooth(0.41, 0.33, v) * smooth(0.63, 0.66, u) * smooth(0.74, 0.72, u)),
+	ventralW: (u, v) => smooth(0.6, 0.68, v) * smooth(0.65, 0.67, u) * smooth(0.74, 0.72, u),
+	pelvicW: () => 0,
 };
 
 /** Critically-ish damped spring toward `target`; impulses go into `v`. */
@@ -63,6 +151,12 @@ export class Mascot {
 	/** rig container (springs), the Scene only moves/scales `root` */
 	private body = new PIXI.Container();
 	private mesh: PIXI.MeshPlane;
+	private rig: Rig = RIG_V1;
+	/** separate pectoral fin (v2 art), parented to the body, follows the swim wave */
+	private fin = new PIXI.Sprite();
+	private irisPatch = new PIXI.Graphics();
+	private finPhase = 0;
+	private lastDt = 16;
 	private base!: Float32Array;
 	private VX = 44;
 	private VY = 24;
@@ -127,8 +221,7 @@ export class Mascot {
 	onTap: (kind: 'snap' | 'wiggle' | 'bubbles') => void = () => {};
 
 	constructor() {
-		const texture = hasArt('mascot') ? tex('mascot') : placeholderFish();
-		this.mesh = new PIXI.MeshPlane({ texture, verticesX: this.VX, verticesY: this.VY });
+		this.mesh = new PIXI.MeshPlane({ texture: this.pickArt(), verticesX: this.VX, verticesY: this.VY });
 		this.captureBase();
 		for (const s of [this.bulbGlow, this.bulbCore, this.eyeGlow, this.glint]) {
 			s.anchor.set(0.5);
@@ -138,10 +231,8 @@ export class Mascot {
 		this.bulbCore.tint = 0xfff0c0;
 		this.eyeGlow.tint = COLORS.cyan;
 		this.glint.tint = 0xffffff;
-		// pupil: dark vertical slit drawn once, moved/scaled per frame
-		this.pupil.ellipse(0, 0, 4.2, 8).fill({ color: 0x01101c, alpha: 0.9 });
-		this.pupil.ellipse(0, 0, 2, 5.5).fill({ color: 0x000000, alpha: 0.9 });
-		this.body.addChild(this.mesh, this.eyeGlow, this.pupil, this.glint, this.lid, this.bulbGlow, this.bulbCore);
+		this.body.addChild(this.mesh, this.fin, this.irisPatch, this.eyeGlow, this.pupil, this.glint, this.lid, this.bulbGlow, this.bulbCore);
+		this.applyRig();
 		this.root.addChild(this.body, this.sparks.container);
 		// interaction: hover notice, tap reactions, gaze follows the pointer. The hit area is the body
 		// only (no lure / tail), and nothing here stops propagation, so the spin input is untouched.
@@ -162,39 +253,75 @@ export class Mascot {
 		this.base = new Float32Array(buf.data as Float32Array);
 		this.texW = this.mesh.texture.width;
 		this.texH = this.mesh.texture.height;
-		this.mesh.pivot.set(this.texW * 0.5, this.texH * 0.55);
+		this.mesh.pivot.set(this.texW * this.rig.pivot.u, this.texH * this.rig.pivot.v);
+	}
+
+	/** v2 (body + separate fin) when loaded, else the v1 single image, else a placeholder. */
+	private pickArt() {
+		if (hasArt('mascot_v2_body') && hasArt('mascot_v2_fincut')) {
+			this.rig = RIG_V2;
+			return tex('mascot_v2_body');
+		}
+		this.rig = RIG_V1;
+		return hasArt('mascot') ? tex('mascot') : placeholderFish();
+	}
+
+	/** rig-dependent pieces: fin layer, iris patch over the art's pupil, pupil shape, hit area */
+	private applyRig() {
+		const r = this.rig;
+		const f = r.fin;
+		if (f && hasArt(f.key)) {
+			const src = tex(f.key);
+			this.fin.texture = new PIXI.Texture({ source: src.source, frame: new PIXI.Rectangle(src.frame.x + f.x, src.frame.y + f.y, f.w, f.h) });
+			this.fin.anchor.set((f.rootX - f.x) / f.w, (f.rootY - f.y) / f.h);
+			this.fin.visible = true;
+		} else this.fin.visible = false;
+		const g = this.irisPatch;
+		g.clear();
+		if (r.artPupil) {
+			const a = r.artPupil;
+			g.ellipse(0, 0, a.rx * 1.35, a.ry * 1.12).fill({ color: a.edge, alpha: 0.45 });
+			g.ellipse(0, 0, a.rx, a.ry).fill({ color: a.color });
+		}
+		const p = this.pupil;
+		p.clear();
+		p.ellipse(0, 0, r.pupil.rx, r.pupil.ry).fill({ color: 0x01202c, alpha: 0.92 });
+		p.ellipse(0, 0, r.pupil.rx * 0.5, r.pupil.ry * 0.7).fill({ color: 0x000000, alpha: 0.9 });
+		this.lidDrawn = -1;
+		this.updateHitArea();
 	}
 
 	private updateHitArea() {
-		// ellipse over head + body, in root space (root scale = height / texH)
-		const W = this.texW;
-		const H = this.texH;
-		this.root.hitArea = new PIXI.Ellipse(-W * 0.06, H * 0.03, W * 0.34, H * 0.36);
+		// ellipse over head + body (no lure / tail), in root space = texture px around the pivot
+		const h = this.rig.hit;
+		this.root.hitArea = new PIXI.Ellipse(h.x, h.y, h.rx, h.ry);
 	}
 
 	refreshArt() {
-		if (!hasArt('mascot')) return;
+		const texture = this.pickArt();
+		if (texture === this.mesh.texture) return;
 		this.body.removeChild(this.mesh);
 		this.mesh.destroy();
-		this.mesh = new PIXI.MeshPlane({ texture: tex('mascot'), verticesX: this.VX, verticesY: this.VY });
+		this.mesh = new PIXI.MeshPlane({ texture, verticesX: this.VX, verticesY: this.VY });
 		this.body.addChildAt(this.mesh, 0);
 		this.captureBase();
-		this.updateHitArea();
+		this.applyRig();
 		this.setHeight(this.height);
 	}
 
+	/** h = on-screen height of the fish itself (the canvas margins are excluded) */
 	setHeight(h: number) {
 		this.height = h;
-		this.root.scale.set(h / this.texH);
+		this.root.scale.set(h / (this.texH * this.rig.contentH));
 	}
 
 	/** Mouth position in global space. */
 	mouthPoint() {
-		return this.body.toGlobal(this.local(RIG.mouth.u, RIG.mouth.v));
+		return this.body.toGlobal(this.local(this.rig.mouth.u, this.rig.mouth.v));
 	}
 
 	lurePoint() {
-		return this.body.toGlobal(this.local(RIG.bulb.u + this.lureX / this.texW, RIG.bulb.v));
+		return this.body.toGlobal(this.local(this.rig.bulb.u + this.lureX / this.texW, this.rig.bulb.v));
 	}
 
 	private local(u: number, v: number, out = new PIXI.Point()) {
@@ -432,7 +559,7 @@ export class Mascot {
 
 	// --- fx ---------------------------------------------------------------------
 	spark(n: number) {
-		const p = this.toRoot(RIG.bulb.u, RIG.bulb.v, this.lureX);
+		const p = this.toRoot(this.rig.bulb.u, this.rig.bulb.v, this.lureX);
 		this.sparks.spawn({
 			texture: fx.spark(),
 			x: p.x,
@@ -447,7 +574,7 @@ export class Mascot {
 	}
 	bubbles(n: number, power = 1) {
 		if (this.reduced) n = Math.ceil(n / 3);
-		const p = this.toRoot(RIG.mouth.u - 0.04, RIG.mouth.v - 0.02, 0);
+		const p = this.toRoot(this.rig.mouth.u - 0.04, this.rig.mouth.v - 0.02, 0);
 		this.sparks.spawn({
 			texture: fx.bubble(),
 			x: p.x,
@@ -526,6 +653,7 @@ export class Mascot {
 
 	update(dt: number) {
 		this.now += dt;
+		this.lastDt = dt;
 		const now = this.now;
 		const amp = this.reduced ? 0.3 : 1;
 		const speed = (1 + this.excitement * 1.2) * (1 - this.boredom * 0.35);
@@ -589,55 +717,66 @@ export class Mascot {
 		this.face(t, amp, dt);
 
 		if (Math.random() < dt * 0.002 * (1 + this.excitement * 3)) {
-			const p = this.toRoot(RIG.bulb.u, RIG.bulb.v, this.lureX);
+			const p = this.toRoot(this.rig.bulb.u, this.rig.bulb.v, this.lureX);
 			this.sparks.spawn({ texture: fx.spark(), x: p.x, y: p.y, count: 1, speed: [10, 40], angle: -Math.PI / 2, life: [800, 1400], size: [6, 14], tint: [COLORS.magenta, 0xffd27a] });
 		}
 		if (!this.reduced && Math.random() < dt * 0.00025 * (1 + this.excitement)) this.bubbles(1, 0.4);
 		this.sparks.update(dt);
 	}
 
+	/** vertical swim / undulation offset at (u, v) — shared by the mesh and the fin layer */
+	private waveY(u: number, t: number, swimA: number, amp: number) {
+		const H = this.texH;
+		const wt = smooth(this.rig.tailStart - 0.3, 1.0, u);
+		return Math.sin(t * 2.6 - u * 5.5) * H * 0.04 * wt * wt * swimA + Math.sin(t * 1.1 + u * 2) * H * 0.006 * amp;
+	}
+
 	private deform(t: number, amp: number) {
+		const r = this.rig;
 		const buf = this.mesh.geometry.getAttribute('aPosition').buffer;
 		const data = buf.data as Float32Array;
 		const W = this.texW;
 		const H = this.texH;
 		const jawA = -(this.jaw + Math.sin(t * 1.7) * 0.06 * amp) * 0.42;
-		const hx = RIG.hinge.u * W;
-		const hy = RIG.hinge.v * H;
+		const hx = r.hinge.u * W;
+		const hy = r.hinge.v * H;
 		const cos = Math.cos(jawA);
 		const sin = Math.sin(jawA);
 		const breathe = 1 + Math.sin(t * 1.8) * 0.012 * amp;
+		const cy = r.pivot.v * H;
 		const swimA = amp * this.swim * (1 + this.excitement * 0.4);
 		const tailSweep = Math.sin(t * 3.1) * 0.15 * Math.min(swimA, 1.6);
 		const fin = 1 + this.finBoost;
-		// pectoral fin rotation about its root
+		// in-mesh pectoral flap (v1 art only)
 		const pecA = (Math.sin(t * 3.6) * 0.16 + Math.sin(t * 7.1) * 0.03) * amp * fin;
 		const pcos = Math.cos(pecA);
 		const psin = Math.sin(pecA);
-		const px = RIG.pecRoot.u * W;
-		const py = RIG.pecRoot.v * H;
-		const gx = RIG.gill.u * W;
-		const gy = RIG.gill.v * H;
+		const pr = r.pecRoot;
+		const px = pr ? pr.u * W : 0;
+		const py = pr ? pr.v * H : 0;
+		const gx = r.gill.u * W;
+		const gy = r.gill.v * H;
 		const gill = Math.sin(t * 2.3) * 0.045 * amp;
-		const tailU = 0.8;
+		const tailU = r.tailU;
+		const lureBob = Math.sin(t * 2.1) * 6 * amp;
 		for (let i = 0; i < data.length; i += 2) {
 			let x = this.base[i];
 			let y = this.base[i + 1];
 			const u = x / W;
 			const v = y / H;
 			// jaw hinge
-			const wj = smooth(RIG.hinge.v - RIG.jawBlend, RIG.hinge.v + RIG.jawBlend, v) * smooth(RIG.hinge.u + 0.04, RIG.hinge.u - 0.06, u);
+			const wj = smooth(r.hinge.v - r.jawBlend, r.hinge.v + r.jawBlend, v) * smooth(r.hinge.u + r.jawFront, r.hinge.u - r.jawBack, u);
 			if (wj > 0) {
 				const dx = x - hx;
 				const dy = y - hy;
 				x = x + (hx + dx * cos - dy * sin - x) * wj;
 				y = y + (hy + dx * sin + dy * cos - y) * wj;
 			}
-			// lure stalk sway (upper-left region)
-			const wl = Math.max(smooth(RIG.stalkFrom.v + 0.02, RIG.stalkFrom.v - 0.12, v), smooth(0.2, 0.12, u) * smooth(0.5, 0.42, v)) * smooth(RIG.stalkFrom.u + 0.02, RIG.bulb.u + 0.04, u);
+			// lure stalk sway
+			const wl = r.stalkW(u, v);
 			if (wl > 0) {
 				x += this.lureX * wl;
-				y += Math.sin(t * 2.1) * 6 * wl * amp;
+				y += lureBob * wl;
 			}
 			// gill plate breathing: radial pulse around the gill
 			const gdx = x - gx;
@@ -648,49 +787,61 @@ export class Mascot {
 				x += gdx * gill * w;
 				y += gdy * gill * w;
 			}
-			// pectoral fin flap (rotates about its root, fades into the body)
-			const wp = smooth(RIG.pecRoot.u - 0.005, RIG.pecRoot.u + 0.05, u) * smooth(0.66, 0.6, u) * smooth(0.5, 0.56, v) * smooth(0.8, 0.72, v);
-			if (wp > 0) {
-				const dx = x - px;
-				const dy = y - py;
-				x += (px + dx * pcos - dy * psin - x) * wp;
-				y += (py + dx * psin + dy * pcos - y) * wp;
+			if (pr) {
+				const wp = smooth(pr.u - 0.005, pr.u + 0.05, u) * smooth(0.66, 0.6, u) * smooth(0.5, 0.56, v) * smooth(0.8, 0.72, v);
+				if (wp > 0) {
+					const dx = x - px;
+					const dy = y - py;
+					x += (px + dx * pcos - dy * psin - x) * wp;
+					y += (py + dx * psin + dy * pcos - y) * wp;
+				}
 			}
-			// dorsal + rear fins ripple (top edge and rear-bottom fins)
-			const wd = smooth(0.34, 0.12, v) * smooth(0.42, 0.48, u) * smooth(0.8, 0.72, u);
+			// dorsal + rear fins ripple
+			const wd = r.dorsalW(u, v);
 			if (wd > 0) {
 				y += Math.sin(t * 3.4 - u * 22) * H * 0.018 * wd * amp * fin;
 				x += Math.sin(t * 2.2) * W * 0.008 * wd * amp;
 			}
-			const wv = smooth(0.62, 0.8, v) * smooth(0.6, 0.66, u) * smooth(0.8, 0.74, u);
+			const wv = r.ventralW(u, v);
 			if (wv > 0) y += Math.sin(t * 3.9 - u * 18) * H * 0.016 * wv * amp * fin;
-			const wpel = smooth(0.78, 0.9, v) * smooth(0.44, 0.48, u) * smooth(0.62, 0.56, u);
+			const wpel = r.pelvicW(u, v);
 			if (wpel > 0) {
 				x += Math.sin(t * 3.2 + 1) * W * 0.008 * wpel * amp * fin;
 				y += Math.sin(t * 3.2) * H * 0.012 * wpel * amp * fin;
 			}
 			// swimming wave toward the tail + tail fin sweep
-			const wt = smooth(RIG.tailStart - 0.3, 1.0, u);
-			y += Math.sin(t * 2.6 - u * 5.5) * H * 0.04 * wt * wt * swimA;
+			y += this.waveY(u, t, swimA, amp);
 			if (u > tailU) {
 				const d = (u - tailU) * W;
 				y += d * tailSweep * ((u - tailU) / (1 - tailU));
 				x -= d * Math.abs(tailSweep) * 0.18;
 			}
-			// whole body gentle undulation + breathing
-			y += Math.sin(t * 1.1 + u * 2) * H * 0.006 * amp;
-			y = H * 0.55 + (y - H * 0.55) * breathe;
+			y = cy + (y - cy) * breathe;
 			data[i] = x + this.lunge;
 			data[i + 1] = y;
 		}
 		buf.update();
+
+		// separate pectoral fin: rides the body wave at its root, flaps about the root
+		const f = r.fin;
+		if (f && this.fin.visible) {
+			const ru = f.rootX / W;
+			const ry = cy + (f.rootY + this.waveY(ru, t, swimA, amp) - cy) * breathe;
+			this.fin.position.set(f.rootX - this.mesh.pivot.x + this.lunge, ry - this.mesh.pivot.y);
+			const rate = 3.2 * (1 + this.excitement * 0.6 + this.finBoost * 0.6);
+			this.finPhase += rate * this.lastDt * 0.001 * (this.reduced ? 0.5 : 1);
+			const ph = this.finPhase;
+			this.fin.rotation = (Math.sin(ph) * 0.2 + Math.sin(ph * 2.1 + 0.6) * 0.04) * amp * fin - 0.03;
+			// the fin folds toward the body on the up-stroke (foreshortening)
+			this.fin.scale.set(1 - 0.14 * (0.5 + 0.5 * Math.sin(ph + 1.2)) * amp * Math.min(fin, 1.6), 1);
+		}
 	}
 
 	private face(t: number, amp: number, dt: number) {
 		const H = this.texH;
 		const fl = this.flareLevel;
 		// lure bulb
-		const bulb = this.local(RIG.bulb.u, RIG.bulb.v, this.tmp);
+		const bulb = this.local(this.rig.bulb.u, this.rig.bulb.v, this.tmp);
 		const bx = bulb.x + this.lureX;
 		const by = bulb.y + Math.sin(t * 2.1) * 6 * amp;
 		const pulse = 0.5 + 0.5 * Math.sin(t * 3.2);
@@ -703,7 +854,7 @@ export class Mascot {
 		this.bulbCore.alpha = 0.85;
 
 		// eye: rest point follows the head (jaw/lunge are tiny there)
-		const eye = this.local(RIG.eye.u, RIG.eye.v, this.tmp);
+		const eye = this.local(this.rig.eye.u, this.rig.eye.v, this.tmp);
 		const ex = eye.x;
 		const ey = eye.y;
 		// gaze target: event gaze > pointer (recent) > idle wander
@@ -731,16 +882,18 @@ export class Mascot {
 		dx = (dx / d) * reach;
 		dy = (dy / d) * reach;
 		const k = Math.min(1, dt * 0.012);
-		this.pupilX += (dx * 7.5 - this.pupilX) * k;
-		this.pupilY += (dy * 4 - this.pupilY) * k;
+		const r = this.rig;
+		this.pupilX += (dx * r.pupil.tx - this.pupilX) * k;
+		this.pupilY += (dy * r.pupil.ty - this.pupilY) * k;
 		const dil = 1 + this.eyeWide * 0.35 - this.excitement * 0.15;
 		this.pupil.position.set(ex + this.pupilX, ey + this.pupilY + 1);
-		this.pupil.scale.set(dil * (1 - Math.abs(this.pupilX) * 0.03), dil);
-		this.glint.position.set(ex - 5, ey - 5);
-		this.glint.scale.set((5 + this.eyeWide * 2) / 32);
+		this.pupil.scale.set(dil * (1 - (Math.abs(this.pupilX) / r.pupil.tx) * 0.2), dil);
+		if (r.artPupil) this.irisPatch.position.set(ex + r.artPupil.dx, ey + r.artPupil.dy);
+		this.glint.position.set(ex + r.glint.dx, ey + r.glint.dy);
+		this.glint.scale.set((r.glint.s * (1 + this.eyeWide * 0.4)) / 32);
 		this.glint.alpha = 0.9;
 		this.eyeGlow.position.set(ex, ey);
-		this.eyeGlow.scale.set((H * (0.09 + this.eyeWide * 0.06)) / 256);
+		this.eyeGlow.scale.set((r.iris.rx * (3.2 + this.eyeWide * 2)) / 256);
 		this.eyeGlow.alpha = 0.35 + this.eyeWide * 0.45 + 0.15 * Math.sin(t * 5.1) * Math.sin(t * 0.7);
 
 		// eyelid: rest level (sleepy / yawning) + blink
@@ -758,8 +911,9 @@ export class Mascot {
 		const g = this.lid;
 		g.clear();
 		if (b < 0.02) return;
-		const rx = 21;
-		const ry = 17;
+		const rx = this.rig.iris.rx + 5;
+		const ry = this.rig.iris.ry + 4;
+		const curve = ry * 0.18;
 		const edge = -ry + 2 * ry * b;
 		const n = 14;
 		const pts: number[] = [];
@@ -772,16 +926,18 @@ export class Mascot {
 		for (let i = n; i >= 0; i--) {
 			const x = -rx + (2 * rx * i) / n;
 			const s = Math.sqrt(Math.max(0, 1 - (x / rx) ** 2));
-			edgePts.push(x, Math.min(edge + 3 * s, ry * s));
+			edgePts.push(x, Math.min(edge + curve * s, ry * s));
 		}
 		// skin-toned lid (matches the brow plates), a lit rim just above its edge, dark lash line
-		g.poly([...pts, ...edgePts]).fill({ color: 0x2c4558 });
-		g.moveTo(edgePts[0], edgePts[1] - 3);
-		for (let i = 2; i < edgePts.length; i += 2) g.lineTo(edgePts[i], edgePts[i + 1] - 3);
-		g.stroke({ color: 0x7fa6bb, width: 2, alpha: 0.45 });
+		const c = this.rig.lid;
+		const lw = Math.max(2, ry * 0.12);
+		g.poly([...pts, ...edgePts]).fill({ color: c.fill });
+		g.moveTo(edgePts[0], edgePts[1] - lw);
+		for (let i = 2; i < edgePts.length; i += 2) g.lineTo(edgePts[i], edgePts[i + 1] - lw);
+		g.stroke({ color: c.rim, width: lw * 0.8, alpha: 0.45 });
 		g.moveTo(edgePts[0], edgePts[1]);
 		for (let i = 2; i < edgePts.length; i += 2) g.lineTo(edgePts[i], edgePts[i + 1]);
-		g.stroke({ color: 0x050a16, width: 3.5, alpha: 0.95 });
+		g.stroke({ color: c.lash, width: lw * 1.2, alpha: 0.95 });
 	}
 }
 

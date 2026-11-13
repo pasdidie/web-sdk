@@ -56,7 +56,7 @@ export type Placement = {
 const PLACEMENT: Record<LayoutType, Placement> = {
 	desktop: {
 		board: { x: 665, y: 392, s: 1.1 },
-		mascot: { x: 1338, y: 400, h: 322 }, // lure bulb lands on the frame rim, never over a cell
+		mascot: { x: 1322, y: 400, h: 312 }, // v2 art: lure bulb on the frame rim, never over a cell; tail tip inside 1600
 		logo: { x: 150, y: 86, s: 0.74 },
 		banner: { x: 665, y: 722, s: 1 },
 		lure: { x: 1250, y: 165, s: 1 },
@@ -66,7 +66,7 @@ const PLACEMENT: Record<LayoutType, Placement> = {
 	},
 	landscape: {
 		board: { x: 680, y: 372, s: 1.06 },
-		mascot: { x: 1336, y: 360, h: 312 },
+		mascot: { x: 1320, y: 360, h: 304 },
 		logo: { x: 150, y: 82, s: 0.74 },
 		banner: { x: 680, y: 700, s: 1.05 },
 		lure: { x: 1250, y: 150, s: 1 },

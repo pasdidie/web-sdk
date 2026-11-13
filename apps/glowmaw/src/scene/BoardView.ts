@@ -294,7 +294,7 @@ export class BoardView {
 		const kMax = Math.floor((dMax - delta) / C + 1e-6);
 		let k = kMin;
 		if (mode === 'antic') {
-			const want = (v0 * (this.turbo ? 800 : 1200)) / n - over;
+			const want = (v0 * (this.turbo ? 650 : 900)) / n - over;
 			k = Math.max(kMin, Math.min(kMax, Math.round((want - delta) / C)));
 		}
 		let cruise = 0;
