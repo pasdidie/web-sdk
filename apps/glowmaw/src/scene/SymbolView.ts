@@ -3,7 +3,7 @@ import { GText } from './theme';
 
 import { anim, ease } from './anim';
 import { C, SYMBOL_STYLE, orbTier, textStyle, COLORS } from './theme';
-import { fx, tex } from './textures';
+import { fx, tex, motionBlurTex } from './textures';
 
 export type RawSymbol = { name: string; multiplier?: number; scatter?: boolean };
 export type ExplodeStyle = 'pop' | 'shatter' | 'jet' | 'pulse' | 'dart' | 'spin';
@@ -20,6 +20,8 @@ export class SymbolView {
 	private body = new PIXI.Container();
 	private glow = new PIXI.Sprite(fx.glow());
 	private art = new PIXI.Sprite();
+	/** vertical motion-blur copy of the art, crossfaded in while the reel moves fast */
+	private blurArt = new PIXI.Sprite();
 	private flash = new PIXI.Sprite();
 	private value?: PIXI.Text;
 	private shine = new PIXI.Sprite(fx.shine());
@@ -41,11 +43,15 @@ export class SymbolView {
 	exX = 0; // explode motion offsets / spin
 	exY = 0;
 	exRot = 0;
+	/** 0 crisp .. 1 fully motion-blurred (set by the reel while it spins) */
+	motionBlur = 0;
 
 	constructor(raw: RawSymbol) {
 		this.glow.anchor.set(0.5);
 		this.glow.blendMode = 'add';
 		this.art.anchor.set(0.5);
+		this.blurArt.anchor.set(0.5);
+		this.blurArt.visible = false;
 		this.flash.anchor.set(0.5);
 		this.flash.blendMode = 'add';
 		this.flash.alpha = 0;
@@ -57,7 +63,7 @@ export class SymbolView {
 		this.shine.visible = false;
 		this.shineMask.anchor.set(0.5);
 		this.shine.mask = this.shineMask;
-		this.body.addChild(this.glow, this.art, this.flash, this.shineMask, this.shine);
+		this.body.addChild(this.glow, this.art, this.blurArt, this.flash, this.shineMask, this.shine);
 		this.root.addChild(this.body);
 		this.set(raw);
 	}
@@ -89,6 +95,9 @@ export class SymbolView {
 		const s = size / Math.max(t.width, t.height);
 		this.baseScale = s;
 		this.art.scale.set(s);
+		const mb = motionBlurTex(t);
+		this.blurArt.texture = mb.tex;
+		this.blurArt.scale.set(s * mb.k);
 		this.flash.scale.set(s);
 		this.shineMask.scale.set(s);
 		this.glow.tint = tint;
@@ -154,9 +163,15 @@ export class SymbolView {
 		const k = 1 - this.dimmed * 0.62;
 		const tint = (Math.round(255 * k) << 16) | (Math.round(255 * k) << 8) | Math.round(255 * (k * 0.9 + 0.1));
 		this.art.tint = tint;
+		const mb = this.motionBlur;
 		if (this.taken) this.art.alpha = 0.28;
-		else this.art.alpha = 1;
-		if (this.value) this.value.alpha = this.taken ? 0 : 1 - this.dimmed * 0.5;
+		else this.art.alpha = 1 - mb;
+		this.blurArt.visible = mb > 0.01;
+		if (this.blurArt.visible) {
+			this.blurArt.alpha = mb;
+			this.blurArt.tint = tint;
+		}
+		if (this.value) this.value.alpha = (this.taken ? 0 : 1 - this.dimmed * 0.5) * (1 - mb);
 	}
 
 	/** Squash on landing. */

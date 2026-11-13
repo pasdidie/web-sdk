@@ -195,3 +195,39 @@ export const tex = (key: string, label?: string): PIXI.Texture => {
 		c.fillText(name, 128, 134);
 	});
 };
+
+const blurCache = new Map<PIXI.Texture, { tex: PIXI.Texture; k: number }>();
+/**
+ * Vertical motion-blur variant of a texture, drawn once on a canvas and cached: N copies
+ * offset along Y, summed with 'lighter' at alpha 1/N (= an exact box average of the
+ * premultiplied pixels). Downscaled (blur hides the detail). `k` multiplies the sprite
+ * scale used for the original texture so both cover the same width.
+ */
+export const motionBlurTex = (t: PIXI.Texture): { tex: PIXI.Texture; k: number } => {
+	const hit = blurCache.get(t);
+	if (hit) return hit;
+	const res = t.source.resolution || 1;
+	const src = t.source.resource as CanvasImageSource | undefined;
+	const f = t.frame;
+	const sw = f.width * res;
+	const sh = f.height * res;
+	if (!src || !sw || !sh) return { tex: t, k: 1 };
+	const ds = Math.min(1, 200 / Math.max(sw, sh));
+	const w = Math.max(1, Math.ceil(sw * ds));
+	const h = Math.max(1, Math.ceil(sh * ds));
+	const L = Math.round(h * 0.3);
+	const cv = document.createElement('canvas');
+	cv.width = w;
+	cv.height = h + L * 2;
+	const c = cv.getContext('2d')!;
+	c.globalCompositeOperation = 'lighter';
+	const N = 14;
+	c.globalAlpha = 1 / N;
+	for (let i = 0; i < N; i++) {
+		const off = -L + (2 * L * i) / (N - 1);
+		c.drawImage(src, f.x * res, f.y * res, sw, sh, 0, L + off, w, h);
+	}
+	const out = { tex: PIXI.Texture.from(cv), k: f.width / w };
+	blurCache.set(t, out);
+	return out;
+};

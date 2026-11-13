@@ -135,6 +135,7 @@ export class Scene {
 	private fsCurrent = 0;
 	private lastSpinWin = 0;
 	private deadStreak = 0;
+	private anticipation: number[] = [];
 	private superMode = false;
 
 	constructor(private hooks: SceneHooks) {
@@ -145,14 +146,16 @@ export class Scene {
 			turbo: hooks.turbo,
 			reducedMotion: hooks.reducedMotion,
 			onSpecialLand: (s, r, row) => this.onSpecialLand(s.raw, r, row),
+			onReelStop: (r) => this.onReelStop(r),
 		});
+		this.mascot.onTap = (kind) => hooks.sfx(kind === 'snap' ? 'sfx_maw_chomp' : kind === 'bubbles' ? 'sfx_maw_gulp' : 'sfx_maw_open', { volume: 0.45 });
 		this.banner = new WinBanner(hooks.formatCurrency, hooks.sfx);
 		this.maxWin = new MaxWinPlaque(hooks.maxWin, hooks.betWord);
 		this.bigWin = new BigWin(hooks.formatCurrency, {
 			sfx: hooks.sfx,
 			shake: (a, ms) => this.shake(a, ms),
 			onTier: (i) => {
-				this.mascot.roar(600);
+				this.mascot.celebrate(i);
 				this.bg.erupt(1 + i * 0.5);
 			},
 			flash: (c) => this.flash(c, 0.35),
@@ -219,6 +222,8 @@ export class Scene {
 		this.frameFallback.resize(BOARD_W * p.board.s + 34, BOARD_H * p.board.s + 34);
 		this.mascot.root.position.set(p.mascot.x, p.mascot.y);
 		this.mascot.setHeight(p.mascot.h);
+		// tablet: Maw sits ~14 px under the stage top, so its head (and lure) may barely rise
+		this.mascot.headroom = this.layoutType === 'tablet' ? 0.04 : 0.22;
 		const logoTex = this.logo.texture;
 		if (logoTex !== PIXI.Texture.EMPTY) this.logo.scale.set((300 * p.logo.s) / logoTex.width);
 		this.logo.position.set(p.logo.x, p.logo.y);
@@ -284,7 +289,18 @@ export class Scene {
 		return this.root.toLocal(this.board.root.toGlobal(new PIXI.Point(p.x, p.y)));
 	}
 
+	/** board cell (padded row index) -> global point, for Maw's gaze */
+	private cellGlobal(reel: number, row: number) {
+		return this.board.root.toGlobal(new PIXI.Point(cellX(reel), cellY(row)));
+	}
+
+	private onReelStop(r: number) {
+		const next = (this.anticipation[r + 1] ?? 0) > 0;
+		this.mascot.reelStop(this.cellGlobal(next ? r + 1 : r, 3), next);
+	}
+
 	private onSpecialLand(raw: RawSymbol, reel: number, row: number) {
+		this.mascot.spotted(this.cellGlobal(reel, row), raw.name === 'M' ? 1 : 0.6);
 		if (raw.name === 'S') {
 			this.hooks.sfx('sfx_scatter_land');
 			this.board.columnFlash(reel, 0xbff9ff);
@@ -302,7 +318,7 @@ export class Scene {
 
 	preSpin() {
 		this.banner.hide();
-		this.mascot.close();
+		this.mascot.crouch();
 		return this.board.preSpin();
 	}
 
@@ -315,7 +331,10 @@ export class Scene {
 		this.banner.hide();
 		if (ev.gameType === 'freegame' && !this.inFreeSpins) this.enterFreeSpinsVisual();
 		this.mascot.excitement = ev.anticipation?.some(Boolean) ? 0.8 : this.inFreeSpins ? 0.5 : 0.1;
+		this.anticipation = ev.anticipation ?? [];
 		await this.board.spin(ev);
+		this.anticipation = [];
+		this.mascot.relax();
 		this.mascot.excitement = this.inFreeSpins ? 0.5 : 0.1;
 	}
 
@@ -323,6 +342,9 @@ export class Scene {
 		this.mascot.flare(0.7);
 		const sizes = ev.wins.map((w) => w.positions.length);
 		const isBig = Math.max(...sizes) >= 12;
+		// Maw snaps at the swarm
+		const first = ev.wins[0]?.positions[0];
+		this.mascot.snap(first ? this.cellGlobal(first.reel, first.row) : undefined);
 		if (isBig) this.shake(3, 200);
 		await this.board.showWins(ev.wins);
 	}
@@ -385,6 +407,7 @@ export class Scene {
 			await sleep(i * 160 * k);
 			const s = this.board.symbolAt(p);
 			if (s) s.taken = true;
+			this.mascot.lookAt(this.cellGlobal(p.reel, p.row), 300, 2);
 			await this.flyOrb(p, mouth, 620 * k, true, s);
 			lure += p.multiplier;
 			this.lure.bump(lure);
@@ -481,7 +504,12 @@ export class Scene {
 		const dx = (this.place.board.x - p.x) * 0.2;
 		const dy = (this.place.board.y - p.y) * 0.12;
 		this.mascot.excitement = 1;
-		this.mascot.roar(1300);
+		// rear back (mouth shut, lure blazing), then lunge with the jaws wide
+		this.mascot.rearBack();
+		this.hooks.sfx('sfx_maw_open');
+		await sleep(this.hooks.turbo() ? 140 : 300);
+		this.mascot.lungeWide();
+		this.mascot.roar(1100);
 		this.hooks.sfx('sfx_fs_dive');
 		await anim.tween({ duration: 420, ease: ease.outBack }, (t) => {
 			m.position.set(p.x + dx * t, p.y + dy * t);
@@ -576,14 +604,14 @@ export class Scene {
 		}
 		if (x >= 15 && this.inFreeSpins) {
 			// in free spins keep the round moving: quick flourish, full show at the end
-			this.mascot.roar(500);
+			this.mascot.celebrate(1);
 			this.flash(COLORS.magenta, 0.3);
 			this.shake(5, 300);
 			this.hooks.sfx('sfx_win_medium');
 			await sleep(this.hooks.turbo() ? 300 : 800);
 			return;
 		}
-		this.mascot.flare(1);
+		this.mascot.happy(x >= 5 ? 1 : 0.4, this.stage.toGlobal(new PIXI.Point(this.place.winReadout.x, this.place.winReadout.y)));
 		this.hooks.sfx(x >= 5 ? 'sfx_win_medium' : 'sfx_win_small');
 		// the win streams from the banner into the console WIN readout (filled a static pause)
 		await this.winTransfer(x >= 5 ? 22 : 12);
@@ -641,6 +669,7 @@ export class Scene {
 		this.shake(12, 700);
 		this.bg.erupt(3);
 		this.mascot.roar(1500);
+		this.mascot.celebrate(4);
 		this.hooks.sfx('sfx_maxwin');
 		await sleep(900);
 	}
@@ -648,10 +677,12 @@ export class Scene {
 	finalWin(amount: number) {
 		if (amount === 0) {
 			this.deadStreak++;
-			if (this.deadStreak >= 6 && Math.random() < 0.35) {
-				this.mascot.excitement = 0;
-			}
-		} else this.deadStreak = 0;
+			// a dry spell bores Maw: sleepy lid, sinks a little, yawns more (any win wakes it)
+			if (this.deadStreak >= 5) this.mascot.setBored(Math.min(1, (this.deadStreak - 4) / 4));
+		} else {
+			this.deadStreak = 0;
+			this.mascot.wake();
+		}
 	}
 
 	/** Restore free-spin HUD when resuming an unfinished round. */
